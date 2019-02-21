@@ -16,7 +16,7 @@ router.post("/register",async (ctx)=>{
 router.post("/login",async (ctx)=>{
     const {account,password}=ctx.request.body;
     const res=await db.query("select * from user where account=? and password=?", [account,password]);
-    ctx.session.account=account;
+    ctx.session.userInfo=res[0];
     ctx.body=res[0];
 });
 

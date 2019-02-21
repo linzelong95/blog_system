@@ -18,8 +18,9 @@ const LOCK = { url: `/api/admin/article/lock`, desc: { zh_CN: "锁定", en_US: "
 const UNLOCK = { url: `/api/admin/article/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } };
 
 
-@connect(({ articleManagement, loading }) => ({
+@connect(({ articleManagement, global,loading }) => ({
   articleManagement,
+  currentUser:global.currentUser,
   loading: loading.models.articleManagement,
 }))
 class ArticleManagement extends React.Component {

@@ -46,9 +46,10 @@ export default class ModalForm extends PureComponent {
               fieldProps = {},
               fieldNode,
               style={},
-              colLayout
+              colLayout={}
             } = item;
-            const colHeightStyle=style.display==="none"?{}:{height:"56px"};
+            // const colHeightStyle=style.display==="none"?{}:{height:"56px"};
+            const colHeightStyle=colLayout.span===12 && style.display!=="none"?{height:"56px"}:{};
             const colConfig = { span: defaultSpan, offset: 0, key: fieldId, ...colLayout,style:colHeightStyle };
             const formItemConfig = { style, label, ...formItemLayout };
             // const initV = initialFormData[fieldId] || initialValue;// 会把0过滤

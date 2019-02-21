@@ -131,13 +131,13 @@ class ShowArticle extends React.Component {
                         </div>
                     </Col>
                     <Col span={7}>
-                    <div style={{marginBottom:"50px"}}>
+                    <div style={{marginBottom:"30px"}}>
                         <h2>回复区&nbsp;<Icon type={reviewBoxVisible?"down-circle":"up-circle"} style={{color:"#1890FF"}} onClick={this.toggleReviewBox} /></h2>
                         <Divider style={{marginTop:"-5px"}} />
                         {reviewBoxVisible&&
                             <Fragment>
                                 <CustomForm {...{ modalFormConfig, form,formProps:{hideRequiredMark:true}}} />
-                                <div style={{float:"right",marginTop:"30px"}}>
+                                <div style={{float:"right",marginTop:"10px"}}>
                                     <Button size="small" style={{marginRight:"10px"}} onClick={()=>this.handleComment("reset")}>重置</Button>
                                     <Button size="small" type="primary" onClick={this.handleComment}>发送</Button>
                                 </div>

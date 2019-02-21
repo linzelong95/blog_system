@@ -8,7 +8,6 @@ const db = require("../../components/db");
 
 
 router.post("/list", async (ctx) => {
-    console.log(ctx.session.account)
     const { conditionQuery: { title = "", category = {}, orderBy = {} }, index = 1, size = 10 } = ctx.request.body;
     const getWhereSql = (category) => {
         const { sort = [], child = [] } = category;
@@ -52,7 +51,8 @@ router.post("/listone", async (ctx) => {
 
 
 router.post("/insert", async (ctx) => {
-    const { title, label = "", abstract = "", content = "", author_id,category_id, is_top } = ctx.request.body;
+    const {id:author_id}=ctx.session.userInfo;
+    const { title, label = "", abstract = "", content = "",category_id, is_top } = ctx.request.body;
     const cateId=category_id[category_id.length - 1];
     const insertSql = "insert into article (category_id,title,is_top,abstract,label,author_id) values(?,?,?,?,?,?)";
     const insertParams = [cateId, title,is_top, abstract, label, author_id];
@@ -63,7 +63,8 @@ router.post("/insert", async (ctx) => {
 });
 
 router.post("/update", async (ctx) => {
-    const { title, label = "", abstract = "", content = "",author_id, category_id, is_top, id } = ctx.request.body;
+    const {id:author_id}=ctx.session.userInfo;
+    const { title, label = "", abstract = "", content = "", category_id, is_top, id } = ctx.request.body;
     const cateId=category_id[category_id.length - 1];
     const updateSql = "update article set category_id=?,title=?,is_top=?,abstract=?,label=?,author_id=? where id=?";
     const updateParams = [cateId, title, is_top, abstract, label, author_id, id];
