@@ -2,7 +2,6 @@ const router = require("koa-router")();
 const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
-    console.log(1)
     const { conditionQuery: { title = "", category = {}, orderBy = {} }, index = 1, size = 10 } = ctx.request.body;
     const getWhereSql = (category) => {
         const { sort = [], child = [] } = category;

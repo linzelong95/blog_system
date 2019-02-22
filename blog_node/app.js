@@ -9,6 +9,8 @@ const path=require("path");
 const bodyParser=require("koa-bodyparser");
 const session=require("koa-session");
 
+const passport=require("./components/passport");
+
 const admin=require("./routes/admin.js");
 const api=require("./routes/api.js");
 const index=require("./routes/index.js");
@@ -31,6 +33,30 @@ app.use(session({
   httpOnly:true,
   signed:true
 },app));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+
+
+//session拦截
+// app.use(async (ctx, next) => {
+//   const allowpage = ['/account/','/user/']
+//   let url = ctx.originalUrl
+//   console.log(url)
+//   if (allowpage.indexOf(url) > -1) {
+//       logger.info('当前地址可直接访问')
+//   }else {
+//       if (ctx.isAuthenticated()) {
+//           console.log('login status validate success')
+//       } else {
+//           console.log(ctx.url,'login status validate fail')
+//       }
+//   }
+//     await next()
+
+// })
+
 
 router.use("/index",index);
 router.use("/account",account);

@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Col, Row, Button, Tooltip, Tag, Icon, Drawer, Comment, Avatar, List, Divider, Form, Modal } from 'antd';
+import { Col, Row, Button, Tooltip, Tag, Icon, Drawer, Comment, Avatar, List, Divider, Form, Modal, message } from 'antd';
 import PageHeaderLayout from '@/components/PageHeaderWrapper';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
@@ -8,11 +8,11 @@ import CustomForm from '@/components/SeftForm';
 import Markdown from 'react-markdown/with-html';
 import { UrlEnum } from '@/assets/Enum';
 import { timeFormat } from '@/utils/utils';
-import styles from './index.less';
 import moment from 'moment';
 
-const { CommentAPI: { LIST, DELETE, INSERT } } = UrlEnum;
+const { UserCommentAPI: { LIST, DELETE, INSERT } } = UrlEnum;
 
+message.config({ top: 300, duration: 2 });
 
 @connect(({ global }) => ({
     currentUser: global.currentUser
@@ -42,7 +42,7 @@ class ShowArticle extends React.Component {
     onWindowResize = () => this.setState({ clientHeight: document.documentElement.clientHeight });
 
     handleWriteComment = (val) => {
-        const { request, form, item: { id: aid }, currentUser } = this.props;
+        const { request, form, item: { id: aid,author_id }, currentUser } = this.props;
         if (val === "reset") {
             form.resetFields();
             return;
@@ -60,8 +60,9 @@ class ShowArticle extends React.Component {
             const callback = (res) => {
                 this.toggleReviewBox();
                 this.getCommentList();
+                message.success('评论成功，审核通过后将得以展示！');
             }
-            request({ ...values, aid, from_id, to_id, netUrl }, callback);
+            request({ ...values, aid, from_id, to_id,author_id, netUrl }, callback);
             form.resetFields();
         });
     }
@@ -145,7 +146,7 @@ class ShowArticle extends React.Component {
                                             ]}
                                             author={listItem.from_name}
                                             avatar='https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png'
-                                            content={listItem.content}
+                                            content={listItem.is_show ? listItem.content : "（该评论待审核）"}
                                         >
                                             {listItem.children.map(i =>
                                                 <Comment
@@ -156,7 +157,7 @@ class ShowArticle extends React.Component {
                                                     ]}
                                                     author={`${i.from_name} 回复@ ${i.to_name}`}
                                                     avatar='https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png'
-                                                    content={i.content}
+                                                    content={i.is_show ? i.content : "（该评论待审核）"}
                                                 />
                                             )}
                                         </Comment>
@@ -166,7 +167,6 @@ class ShowArticle extends React.Component {
                         </div>
                     </Col>
                 </Row>
-
             </Drawer>
         );
     }

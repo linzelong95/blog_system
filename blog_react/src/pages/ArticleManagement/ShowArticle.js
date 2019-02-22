@@ -8,10 +8,9 @@ import CustomForm from '@/components/SeftForm';
 import Markdown from 'react-markdown/with-html';
 import { UrlEnum } from '@/assets/Enum';
 import { timeFormat } from '@/utils/utils';
-import styles from './index.less';
 import moment from 'moment';
 
-const { CommentAPI: { LIST, DELETE, INSERT,SHOW,UNSHOW } } = UrlEnum;
+const { AdminCommentAPI: { LIST, DELETE, INSERT,SHOW,UNSHOW } } = UrlEnum;
 
 
 @connect(({ global }) => ({
@@ -42,7 +41,7 @@ class ShowArticle extends React.Component {
     onWindowResize = () => this.setState({ clientHeight: document.documentElement.clientHeight });
 
     handleWriteComment = (val) => {
-        const { request, form, item: { id: aid }, currentUser } = this.props;
+        const { request, form, item: { id: aid,author_id }, currentUser } = this.props;
         if (val === "reset") {
             form.resetFields();
             return;
@@ -61,7 +60,7 @@ class ShowArticle extends React.Component {
                 this.toggleReviewBox();
                 this.getCommentList();
             }
-            request({ ...values, aid, from_id, to_id, netUrl }, callback);
+            request({ ...values, aid, from_id, to_id,author_id, netUrl }, callback);
             form.resetFields();
         });
     }
@@ -142,7 +141,7 @@ class ShowArticle extends React.Component {
                                                 <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(listItem.create_time)))}</span>,
                                                 <span><a onClick={() => this.handleDealWithComment(listItem)}>回复</a></span>,
                                                 <span><a onClick={() => this.handleDealWithComment(listItem,DELETE)} style={{ color: "red" }}>删除</a></span>,
-                                                listItem.is_show===0?<span><a onClick={() => this.handleDealWithComment(listItem, SHOW)} style={{ color: "red" }}>展示</a></span>:<span><a onClick={() => this.handleDealWithComment(listItem, UNSHOW)} style={{ color: "red" }}>隐藏</a></span>
+                                                listItem.is_show===0?<span><a onClick={() => this.handleDealWithComment(listItem, SHOW)} style={{ color: "#66CD00" }}>展示</a></span>:<span><a onClick={() => this.handleDealWithComment(listItem, UNSHOW)} style={{ color: "#BF3EFF" }}>隐藏</a></span>
                                             ]}
                                             author={listItem.from_name}
                                             avatar='https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png'
@@ -154,7 +153,7 @@ class ShowArticle extends React.Component {
                                                         <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(i.create_time)))}</span>,
                                                         <span><a onClick={() => this.handleDealWithComment({ ...i, pid: listItem.id })}>回复</a></span>,
                                                         <span><a onClick={() => this.handleDealWithComment(i, DELETE)} style={{ color: "red" }}>删除</a></span>,
-                                                        i.is_show===0?<span><a onClick={() => this.handleDealWithComment(i, SHOW)} style={{ color: "red" }}>展示</a></span>:<span><a onClick={() => this.handleDealWithComment(i, UNSHOW)} style={{ color: "red" }}>隐藏</a></span>
+                                                        i.is_show===0?<span><a onClick={() => this.handleDealWithComment(i, SHOW)} style={{ color: "#66CD00" }}>展示</a></span>:<span><a onClick={() => this.handleDealWithComment(i, UNSHOW)} style={{ color: "#BF3EFF" }}>隐藏</a></span>
                                                     ]}
                                                     author={`${i.from_name} 回复@ ${i.to_name}`}
                                                     avatar='https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png'

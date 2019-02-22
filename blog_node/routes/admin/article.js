@@ -36,17 +36,9 @@ router.post("/list", async (ctx) => {
     ctx.body = { "total": countArr[0].count, "list": res };
 });
 
-router.post("/listone", async (ctx) => {
+router.post("/content", async (ctx) => {
     const { id } = ctx.request.body;
-    const querySql = `
-        select 
-            *
-        from 
-            content
-        where 
-            id=${id}
-        `;
-    const res = await db.query(querySql, []);
+    const res = await db.query("select * from content where id=?", [id]);
     ctx.body = { "list": res };
 });
 

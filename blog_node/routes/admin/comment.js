@@ -2,7 +2,7 @@ const router = require("koa-router")();
 const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
-    const { aid,checkpass } = ctx.request.body;
+    const { aid} = ctx.request.body;
     const sql = `
         select 
             c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.create_time,a.account as from_name,b.account as to_name
@@ -15,7 +15,6 @@ router.post("/list", async (ctx) => {
         where 
             c.aid=${aid}
     `;
-    console.log(sql)
     const res = await db.query(sql, []);
     const parentArr = [];
     const sonArr = [];
@@ -37,9 +36,10 @@ router.post("/list", async (ctx) => {
 });
 
 router.post("/insert", async (ctx) => {
-    const { aid, from_id, to_id = 0, pid = 0, content } = ctx.request.body;
-    const insertSql = "insert into comment (aid,from_id,to_id,pid,content) values(?,?,?,?,?)";
-    const insertParams = [aid, from_id, to_id, pid, content];
+    const {userInfo:{id:currentUserId}}=ctx.session;
+    const { aid, from_id, to_id = 0, pid = 0, content,author_id } = ctx.request.body;
+    const insertSql = "insert into comment (aid,from_id,to_id,pid,content,is_show) values(?,?,?,?,?,?)";
+    const insertParams = [aid, from_id, to_id, pid, content,currentUserId===author_id?1:0];
     const res = await db.query(insertSql, insertParams);
     ctx.body = { "list": res };
 });
