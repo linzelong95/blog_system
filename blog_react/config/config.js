@@ -70,11 +70,11 @@ export default {
     //   changeOrigin: true,
     //   pathRewrite: { '^/server': '' },
     // },
-      '/api/': {
+    '/api/': {
       target: 'http://localhost:3000/',
       changeOrigin: true,
       pathRewrite: { '^/api': '' },
-    },
+    }
   },
   ignoreMomentLocale: true,
   lessLoaderOptions: {

@@ -8,6 +8,7 @@ const db = require("../../components/db");
 
 
 router.post("/list", async (ctx) => {
+    const {userInfo:{id:currentUserId}}=ctx.session;
     const { conditionQuery: { title = "", category = {}, orderBy = {} }, index = 1, size = 10 } = ctx.request.body;
     const getWhereSql = (category) => {
         const { sort = [], child = [] } = category;
@@ -28,7 +29,7 @@ router.post("/list", async (ctx) => {
         from 
             article as a,category as c,sort as s
         where 
-            a.category_id=c.id and c.sort=s.id and c.disabled=0 and s.disabled=0 and a.title like '%${title}%' ${getWhereSql(category)} ${orderAndlimitSql}
+            a.author_id=${currentUserId} and a.category_id=c.id and c.sort=s.id and c.disabled=0 and s.disabled=0 and a.title like '%${title}%' ${getWhereSql(category)} ${orderAndlimitSql}
         `;
     const res = await db.query(querySql, []);
     const countArr = await db.query(`select count(*) as count from article as a,category as c where a.category_id=c.id and a.title like '%${title}%' ${getWhereSql(category)}`, []);

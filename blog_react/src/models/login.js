@@ -27,7 +27,7 @@ export default {
       let accountObj = { ...store.get("account"),account, autoLogin, password };//以后要实现加密
       if (!autoLoginMark) accountObj = { ...accountObj, lastTime: new Date().getTime() };
       const response = yield call(handleArticles, { netUrl: LOGIN.url, account, password });
-      if (!response.status) return;
+      // if (!response.status) return;// 需要status字段
       store.set('account', {  ...accountObj,currentUser: response,language:lang });
       yield put({ type: 'save', payload: {loginStatus:true} });
       yield put({type: 'global/save',payload:{currentUser:response}});
@@ -49,7 +49,8 @@ export default {
           return;
         }
       }
-      yield put(routerRedux.replace(redirect || '/articlemanagement'));
+      // yield put(routerRedux.replace(redirect || '/articlemanagement'));
+      yield put(routerRedux.replace(redirect || '/index'));
     },
     // *login({ payload, autoLoginMark }, { call, put,select }) {
     //   const {lang}=yield select(models=>models.common);
@@ -89,20 +90,32 @@ export default {
     //   yield put(routerRedux.replace(redirect || '/commoditymanagement/insellinggoods'));
     // },
     *logout(_, { call, put,select }) {
-      const {lang}=yield select(models=>models.common);
-      yield call(common, { netUrl: LOGOUT.url });
+      const {lang}=yield select(models=>models.articleManagement);
+      yield call(handleArticles, { netUrl: LOGOUT.url });
       const admin=store.get("account")||{};
       const { autoLogin=false ,language=lang} = admin;
       store.set('account', { autoLogin,language});
+      setAuthority('user');
       reloadAuthorized();
       yield put({ type: 'save', payload: {loginStatus:false} });
-      const currentPageUrl=window.location.href;
-      if(currentPageUrl.includes("/exception")){
-        yield put(routerRedux.push('/user/login'));
-        return;
-      }
-      yield put(routerRedux.push({pathname:'/user/login',search:stringify({redirect:currentPageUrl.replace(`/${adminType}`,"")})}));
+      yield put({type: 'global/save',payload:{currentUser:{}}});
+      yield put(routerRedux.push('/index'));
     },
+    // *logout(_, { call, put,select }) {
+    //   const {lang}=yield select(models=>models.common);
+    //   yield call(common, { netUrl: LOGOUT.url });
+    //   const admin=store.get("account")||{};
+    //   const { autoLogin=false ,language=lang} = admin;
+    //   store.set('account', { autoLogin,language});
+    //   reloadAuthorized();
+    //   yield put({ type: 'save', payload: {loginStatus:false} });
+    //   // const currentPageUrl=window.location.href;
+    //   // if(currentPageUrl.includes("/exception")){
+    //   //   yield put(routerRedux.push('/user/login'));
+    //   //   return;
+    //   // }
+    //   // yield put(routerRedux.push({pathname:'/user/login',search:stringify({redirect:currentPageUrl.replace(`/${adminType}`,"")})}));
+    // },
     *getCaptcha({ payload }, { call, put }) {
       const { phone } = payload;
       const netUrl = phone ? GET_POHNE_CAPTCHA.url : GET_WEBPAGE_CAPTCHA.url;

@@ -13,6 +13,7 @@ const admin=require("./routes/admin.js");
 const api=require("./routes/api.js");
 const index=require("./routes/index.js");
 const account=require("./routes/account.js");
+const user=require("./routes/user.js");
 
 const app=new Koa();
 render(app,{
@@ -31,9 +32,10 @@ app.use(session({
   signed:true
 },app));
 
-router.use(index);
+router.use("/index",index);
 router.use("/account",account);
 router.use("/admin",admin);
+router.use("/user",user);
 router.use("/api",api);
 
 app.use(router.routes()).use(router.allowedMethods());

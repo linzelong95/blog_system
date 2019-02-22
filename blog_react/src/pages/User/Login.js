@@ -38,7 +38,6 @@ class LoginPage extends Component {
   handleSubmit = (err, values) => {
     if (err) return;
     const { autoLogin } = this.state;
-    console.log(values)
     this.props.dispatch({
       type: 'login/login',
       payload: { ...values, autoLogin }

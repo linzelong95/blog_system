@@ -323,8 +323,7 @@ export default {
   'menu.ShopManagement': '店铺管理',
   'menu.ShopManagement.ShowNav': '显示分类',
   'menu.ShopManagement.Module': '模板',
-  // 'menu.center': '管理中心',
-  // 'menu.center.management': '个人信息',
-  // 'menu.center.logout': '退出登录',
-  'menu.management': '个人信息',
+  'menu.center': '管理中心',
+  'menu.center.management': '个人信息',
+  'menu.center.logout': '退出登录',
 };

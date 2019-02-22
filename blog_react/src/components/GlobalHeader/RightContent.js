@@ -1,5 +1,6 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import { FormattedMessage, formatMessage ,getLocale} from 'umi/locale';
+import Link from 'umi/link';
 import { Spin, Tag, Menu, Icon, Dropdown, Avatar, Tooltip, Modal, Button, List, Rate ,Row,Col} from 'antd';
 import moment from 'moment';
 import groupBy from 'lodash/groupBy';
@@ -321,7 +322,7 @@ export default class GlobalHeaderRight extends PureComponent {
             emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
           />
         </NoticeIcon>
-        {currentUser.role_name ? (
+        {currentUser&&currentUser.role_name ? (
           <Dropdown overlay={menu}>
             <span className={`${styles.action} ${styles.account}`}>
               <Avatar
@@ -334,7 +335,11 @@ export default class GlobalHeaderRight extends PureComponent {
             </span>
           </Dropdown>
         ) : (
-          <Spin size="small" style={{ marginLeft: 8, marginRight: 8 }} />
+          // <Spin size="small" style={{ marginLeft: 8, marginRight: 8 }} />
+          <Fragment>
+            <Link to="/user/login">登录</Link>&nbsp;&nbsp;
+            <Link to="/user/register">注册</Link>
+          </Fragment>
           )}
         <SelectLang className={styles.action} />
         <Modal

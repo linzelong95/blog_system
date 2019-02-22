@@ -14,14 +14,17 @@ router.post("/register",async (ctx)=>{
 });
 
 router.post("/login",async (ctx)=>{
+    console.log(2)
     const {account,password}=ctx.request.body;
     const res=await db.query("select * from user where account=? and password=?", [account,password]);
+    console.log(res)
     ctx.session.userInfo=res[0];
     ctx.body=res[0];
 });
 
 router.post("/logout",async (ctx)=>{
     ctx.session=null;
+    ctx.body={msg:"ok"}
 });
 
 

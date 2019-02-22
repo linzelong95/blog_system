@@ -722,9 +722,9 @@ const ShowEnum = {
     undefined: { zh_CN: "", en_US: "" },
   },
   ShowNavType_POS: {
-    PRODUCT: { code: 1, zh_CN: "部分商品", en_US: "PRODUCT" },
-    BRAND: { code: 2, zh_CN: "部分品牌", en_US: "BRAND" },
-    CATEGORY: { code: 3, zh_CN: "部分分类", en_US: "CATEGORY" },
+    PRODUCT: {code:1, zh_CN: "部分商品", en_US: "PRODUCT" },
+    BRAND: { code:2,zh_CN: "部分品牌", en_US: "BRAND" },
+    CATEGORY: { code:3,zh_CN: "部分分类", en_US: "CATEGORY" },
   },
 };
 
@@ -766,19 +766,9 @@ const UrlEnum = {
 
   ShowNavAPI: generateUrls({ BASE_URL: "/shownav", zh_CN: "显示分类", en_US: "show nav" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK"]),
   ShowNavGroupAPI: generateUrls({ BASE_URL: "/shownavgroup", zh_CN: "显示分类组", en_US: "show nav group" }, ["LIST", "FORM", "INSERT", "UPDATE", "REMOVE", "LOCK", "UNLOCK", "ACT", "UNACT"]),
-  ModuleAPI: generateUrls({ BASE_URL: "/module", zh_CN: "模板", en_US: "module" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK", "SALEON", "SALEOFF", "CHECKPASS", "CHECKUNPASS"]),
+  ModuleAPI:generateUrls({ BASE_URL: "/module", zh_CN: "模板", en_US: "module" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK", "SALEON", "SALEOFF", "CHECKPASS", "CHECKUNPASS"]),
 
 
-
-  AccountAPI: {
-    BASE_URL: "/account",
-    // LOGIN: { url: "/account/login", desc: { zh_CN: "登录", en_US: "login" } },
-    // LOGOUT: { url: "/account/logout", desc: { zh_CN: "注销", en_US: "logout" } },
-    REGISTER: { url: "/api/account/register", desc: { zh_CN: "注册", en_US: "register" } },
-    LOGIN: { url: "/api/account/login", desc: { zh_CN: "登录", en_US: "login" } },
-    LOGOUT: { url: "/api/account/logout", desc: { zh_CN: "注销", en_US: "logout" } },
-
-  },
   MAccountAPI: {
     BASE_URL: "/user",
     GET_PUBLICK_KEY: { url: "/user/get_encrypt_with_pwd", desc: { zh_CN: "获取公钥", en_US: "get the public key" } },
@@ -787,9 +777,38 @@ const UrlEnum = {
     GET_POHNE_CAPTCHA: { url: "/user/get_code_by_phone", desc: { zh_CN: "获取手机验证码", en_US: "get captcha of webpage" } },
     GET_WEBPAGE_CAPTCHA: { url: "/user/get_code_by_page", desc: { zh_CN: "获取网页验证码", en_US: "get captcha of phone" } },
   },
+
+  AccountAPI: {
+    BASE_URL: "/account",
+    // LOGIN: { url: "/account/login", desc: { zh_CN: "登录", en_US: "login" } },
+    // LOGOUT: { url: "/account/logout", desc: { zh_CN: "注销", en_US: "logout" } },
+    REGISTER: { url: "/api/account/register", desc: { zh_CN: "注册", en_US: "register" } },
+    LOGIN: { url: "/api/account/login", desc: { zh_CN: "登录", en_US: "login" } },
+    LOGOUT: { url: "/api/account/logout", desc: { zh_CN: "注销", en_US: "logout" } },
+  },
+
+  
+  UserArticleAPI:{
+    BASE_URL: "/user/article",
+    LIST:{ url: "/api/user/article/list", desc: { zh_CN: "获取文章列表", en_US: "getList" } },
+    CONTENT:{ url: "/api/user/article/content", desc: { zh_CN: "获取内容", en_US: "getContent" } },
+  },
+  UserCateAPI:{
+    BASE_URL: "/user/cate",
+    LIST:{ url: "/api/user/cate/list", desc: { zh_CN: "获取分类列表", en_US: "getList" } },
+  },
+
+
+  CommentAPI:{
+    LIST: { url: "/api/admin/comment/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
+    DELETE: { url: "/api/admin/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    INSERT:{url: "/api/admin/comment/insert", desc: { zh_CN: "添加", en_US: "insert" }},
+    SHOW:{url: "/api/admin/comment/show",desc: { zh_CN: "显示", en_US: "show" }, actionTip: { zh_CN: "将被展示，展示后可重新隐藏！", en_US: "will be shown,and then can be hidden after being shown!" } },
+    UNSHOW:{url: "/api/admin/comment/unshow", desc: { zh_CN: "隐藏", en_US: "hide" }, actionTip: { zh_CN: "将被隐藏，隐藏后可重新设置显示！", en_US: "will be hidden,and then can be shown after being hidden!" }},
+  }
 }
 
 
 
 
-export { CommonEnum, MarketEnum, MemberEnum, MessageEnum, OrderEnum, ProductEnum, ShowEnum, SystemEnum, ViewEnum, UrlEnum };
+export { CommonEnum, MarketEnum, MemberEnum, MessageEnum, OrderEnum, ProductEnum,ShowEnum, SystemEnum, ViewEnum, UrlEnum };
