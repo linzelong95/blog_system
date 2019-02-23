@@ -8,14 +8,11 @@ const path=require("path");
 // const mysql=require("mysql");
 const bodyParser=require("koa-bodyparser");
 const session=require("koa-session");
-
+const cors=require("koa2-cors");
+const db=require("./components/db");
 const passport=require("./components/passport");
 
-const admin=require("./routes/admin.js");
-const api=require("./routes/api.js");
-const index=require("./routes/index.js");
-const account=require("./routes/account.js");
-const user=require("./routes/user.js");
+
 
 const app=new Koa();
 render(app,{
@@ -25,7 +22,8 @@ render(app,{
 });
 app.use(static(path.join(__dirname,"statics")));
 app.use(bodyParser());
-app.keys=["some secret hurr"];
+app.use(cors());
+app.keys=["linzelong"];
 app.use(session({
   key:"koa:sess",
   maxAge:7*24*60*60*1000,
@@ -37,7 +35,38 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
+const admin=require("./routes/admin.js");
+const api=require("./routes/api.js");
+const index=require("./routes/index.js");
+const account=require("./routes/account.js")(router,db,passport);
+const user=require("./routes/user.js");
 
+
+
+// test
+// router.post('/login', ctx => {
+//   console.log("body",ctx.request.body)
+//   // 会调用策略
+//   return passport.authenticate('local',
+//     function(err, user, info, status) {
+//       ctx.body = {user, err, info, status}
+//       // return ctx.login({id: 1, username: 'admin', password: '123456'})
+//       return ctx.login(user)//触发序列化函数，保存到session
+//     })(ctx)
+// })
+// router.get('/logout', ctx => {
+//   ctx.logout()
+//   ctx.body = {auth: ctx.isAuthenticated(), user: ctx.state.user}
+// })
+
+// router.get('/test', ctx => {
+//   ctx.body=ctx.state.user;
+  
+// })
+// router.get('/logout', ctx => {
+//   ctx.logout()
+//   ctx.body = {auth: ctx.isAuthenticated(), user: ctx.state.user}
+// })
 
 //session拦截
 // app.use(async (ctx, next) => {
@@ -55,6 +84,14 @@ app.use(passport.session());
 //   }
 //     await next()
 
+// })
+// router.use('/admin/*', (ctx, next) => {
+//   if(ctx.isAuthenticated()) {
+//     next();
+//   } else {
+//    ctx.status = 401;
+//    ctx.body = {msg: '用户未登录'};
+//  }
 // })
 
 

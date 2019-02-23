@@ -27,7 +27,11 @@ export default {
       let accountObj = { ...store.get("account"),account, autoLogin, password };//以后要实现加密
       if (!autoLoginMark) accountObj = { ...accountObj, lastTime: new Date().getTime() };
       const response = yield call(handleArticles, { netUrl: LOGIN.url, account, password });
-      // if (!response.status) return;// 需要status字段
+      if (!response.status) {
+        setAuthority('user');
+        reloadAuthorized();
+        return;
+      }
       store.set('account', {  ...accountObj,currentUser: response,language:lang });
       yield put({ type: 'save', payload: {loginStatus:true} });
       yield put({type: 'global/save',payload:{currentUser:response}});
