@@ -135,7 +135,6 @@ class CategoryManagement extends React.Component {
 
 
   render() {
-    console.log(this.props.articleManagement)
     const { articleManagement: { total = 10, list = [], size = 10, index = 1 }, loading } = this.props;
     const { allSelectedItem, selectedItems, editorialPanelVisible, drawerVisible, formItem, showSorter, clientHeight, filterModalVisible, categoryOptions, filters, conditionQuery, selectedRowKeys, tabKey } = this.state;
     const EditorialForm = tabKey === "sort" ? SortEditorialForm : CateEditorialForm;
@@ -183,7 +182,6 @@ class CategoryManagement extends React.Component {
     ];
 
     const expandRender = (record) => {
-      console.log(record)
       const expandColumn = [
         { title: "名称", dataIndex: 'name', width: "30%" },
         { title: "可用状态", dataIndex: 'disabled', width: "30%", render: (val) => <Tag color="blue">{val === 0 ? "可用" : "不可用"}</Tag> },

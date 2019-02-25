@@ -21,7 +21,8 @@ class ShowArticle extends React.Component {
     state = {
         reviewBoxVisible: false,
         clientHeight: document.documentElement.clientHeight,
-        commentObj: { total: 0, list: [] }
+        commentObj: { total: 0, list: [] },
+        conditionQuery:{}
     };
 
     componentDidMount = () => {
@@ -35,7 +36,14 @@ class ShowArticle extends React.Component {
 
     getCommentList = () => {
         const { request, item: { id: aid } } = this.props;
-        request({ netUrl: LIST.url, aid }, (commentObj) => this.setState({ commentObj }));
+        const {conditionQuery}=this.state;
+        request({ netUrl: LIST.url, aid,conditionQuery }, (commentObj) => this.setState({ commentObj }));
+    }
+
+    commentSort=(e)=>{
+        const { id: name } = e.currentTarget;
+        const { conditionQuery: { orderBy = {} } } = this.state;
+        this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: { name, by: orderBy.by === "asc" ? "desc" : "asc" } } }), () => this.getCommentList());
     }
 
     onWindowResize = () => this.setState({ clientHeight: document.documentElement.clientHeight });
@@ -87,7 +95,7 @@ class ShowArticle extends React.Component {
 
     render() {
         const { visible, item, onClose, form, currentUser,loading } = this.props;
-        const { clientHeight, commentObj, reviewBoxVisible } = this.state;
+        const { clientHeight, commentObj, reviewBoxVisible,conditionQuery } = this.state;
         const modalFormConfig = [
             { fieldId: 'to', label: "对象", fieldType: 'select', fieldProps: { options: [{ key: item.author_id, label: "楼主" }], labelInValue: true, onChange: (obj) => console.log(obj) }, initialValue: { key: item.author_id, label: "楼主" } },
             { fieldId: 'content', label: '内容', rules: [{ required: true, message: "内容不能为空" }], fieldType: 'textArea' },
@@ -129,8 +137,11 @@ class ShowArticle extends React.Component {
                             }
                         </div>
                         <div>
-                            <h2>{commentObj.total || 0}&nbsp;条评论&nbsp;&nbsp;<Icon type="reload" style={{ color: "#1890FF" }} onClick={this.getCommentList} /></h2>
-                            <Divider style={{ marginTop: "-5px" }} />
+                            <h2>
+                                {commentObj.total || 0}&nbsp;条评论&nbsp;
+                                <Icon type="reload" style={{ color: "#1890FF" }} onClick={this.getCommentList} />
+                                <Tag color="magenta" id="create_time" style={{ marginLeft: "10px" }} onClick={this.commentSort}>时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "create_time" && conditionQuery.orderBy.by === "asc" ? "up" : "down"} /></Tag>
+                            </h2>                            <Divider style={{ marginTop: "-5px" }} />
                             <div style={{ maxHeight: reviewBoxVisible ? (clientHeight - 460) : (clientHeight - 300), overflow: "auto" }}>
                                 <List
                                     loading={loading}

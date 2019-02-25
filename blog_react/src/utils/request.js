@@ -127,21 +127,19 @@ export default function request(url, options = { expirys: isAntdPro() }, hasUrlP
     .then(checkStatus)
     .then(response => cachedSave(response, hashcode))
     .then(response => {
-      // DELETE and 204 do not return data by default
-      // using .json will report an error.
-      if (newOptions.method === 'DELETE' || response.status === 204 || response.url.includes('.html')||response.url.includes('.css')) {
+      if (newOptions.method === 'DELETE' || response.status === 204 ||[".html",".css"].some(i=>response.url.includes(i))) {
         return response.text();
       }
       return response.json();
     })
     .then(response => {
       if (typeof response === 'string') return response;
-      response.status = true
-      if (response.Message||response.message) {
-        response.status = false
+      response.status = true;
+      if (response.errMsg) {
+        response.status = false;
         notification.error({
           message: '请求出错了，请反馈给管理员！',
-          description: response.Message,
+          description: response.errMsg,
         });
       }
       return response

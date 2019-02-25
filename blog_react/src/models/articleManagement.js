@@ -19,11 +19,13 @@ export default {
   },
   effects: {
     *handleArticles({ payload, callback}, { call, put, select }) {
+      console.log("model",payload)
       const { index: pageIndex, size: pageSize, lang } = yield select(models => models.articleManagement);
       const { netUrl, index = pageIndex, size = pageSize, conditionQuery } = payload;
       const position = netUrl.lastIndexOf("/") + 1;
       let action = netUrl.substring(position);
       let response = yield call(handleArticles, { ...payload, size, index,t: Date.now() });
+      if (!response||!response.status) return;
       if (callback) {
         callback(response);
         return;

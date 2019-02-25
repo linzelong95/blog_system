@@ -42,7 +42,7 @@ passport.use(new LocalStrategy({
   const decrypted = crypto.privateDecrypt({ key: privateKey, padding: crypto.constants.RSA_PKCS1_PADDING  }, rsaPwd );
   const md5Pwd=decrypted.toString("utf8");// 解密完成
   const rows=await db.query("select * from user where account=? and password=?", [username,md5Pwd]);
-  if(!rows.length) return done(null,false, {msg: '账号或密码错误'});
+  if(!rows.length) return done(null,false, {errMsg: '账号或密码错误'});
   done(null, rows[0], {msg: '校验通过'});// done(err, user, info)
 }))
 

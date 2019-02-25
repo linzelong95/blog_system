@@ -41,8 +41,6 @@ class ArticleManagement extends React.Component {
   }
 
   handleShowALL = () => {
-    console.log(this.inputSearch.input)
-    // this.inputSearch.input.value="1111";
     this.setState({ conditionQuery: {}, filterKeys: [] }, () => this.request({ index: 1 }));
   }
 

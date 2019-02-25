@@ -10,7 +10,7 @@ import { stringify } from 'querystring';
 import { adminType } from '@/defaultSettings';
 
 // const { AccountAPI: { LOGIN, LOGOUT }, MAccountAPI: { GET_PUBLICK_KEY, GET_POHNE_CAPTCHA, GET_WEBPAGE_CAPTCHA, VERIFY_POHNE_CAPTCHA, VERIFY_WEBPAGE_CAPTCHA } } = UrlEnum;
-const { AccountAPI: { LOGIN, LOGOUT,GET_PUBLICK_KEY } } = UrlEnum;
+const { AccountAPI: { LOGIN, LOGOUT,GET_PUBLICK_KEY,GET_WEBPAGE_CAPTCHA,VERIFY_WEBPAGE_CAPTCHA } } = UrlEnum;
 
 export default {
   namespace: 'login',
@@ -23,10 +23,14 @@ export default {
   effects: {
     *login({ payload, autoLoginMark }, { call, put,select }) {
       const {lang}=yield select(models=>models.articleManagement);
-      const { account, password, autoLogin } = payload;
+      const { account, password, autoLogin,captcha } = payload;
       const md5Pwd = autoLoginMark ? password : serialize(password);// 增加
       let accountObj = { ...store.get("account"),account, autoLogin, password:md5Pwd };
-      if (!autoLoginMark) accountObj = { ...accountObj, lastTime: new Date().getTime() };
+      if (!autoLoginMark) {
+        const verifyCaptchaResult = yield call(handleArticles, { netUrl:VERIFY_WEBPAGE_CAPTCHA.url,captcha });
+        if(!verifyCaptchaResult.status) return;
+        accountObj = { ...accountObj, lastTime: new Date().getTime() };
+      }
       const publicKey = yield call(handleArticles, { netUrl: GET_PUBLICK_KEY.url });
       const response = yield call(handleArticles, { netUrl: LOGIN.url, account, password : rsa(md5Pwd, publicKey.item) });
       if (!response.status) {
@@ -65,8 +69,8 @@ export default {
     //   const netUrl = phone ? VERIFY_POHNE_CAPTCHA.url : VERIFY_WEBPAGE_CAPTCHA.url;
     //   let accountObj = { ...store.get("account"),account, autoLogin, password: md5Pwd };
     //   if (!autoLoginMark) {
-    //     // const ensureCaptchaResult = yield call(beforeAccount, { netUrl, code, phone, code_type });
-    //     // if(!ensureCaptchaResult.status) return;
+    //     // const verifyCaptchaResult = yield call(beforeAccount, { netUrl, code, phone, code_type });
+    //     // if(!verifyCaptchaResult.status) return;
     //     accountObj = { ...accountObj, lastTime: new Date().getTime() };
     //   }
     //   const publicKey = yield call(beforeAccount, { netUrl: GET_PUBLICK_KEY.url });
@@ -125,7 +129,7 @@ export default {
     *getCaptcha({ payload }, { call, put }) {
       const { phone } = payload;
       const netUrl = phone ? GET_POHNE_CAPTCHA.url : GET_WEBPAGE_CAPTCHA.url;
-      const response = yield call(beforeAccount, { ...payload, netUrl, t: new Date().getTime() });
+      const response = yield call(handleArticles, { ...payload, netUrl, t: new Date().getTime() });
       if (!response.status) return;
       const captcha = response.item;
       yield put({ type: 'save', payload: {captcha} });

@@ -722,9 +722,9 @@ const ShowEnum = {
     undefined: { zh_CN: "", en_US: "" },
   },
   ShowNavType_POS: {
-    PRODUCT: {code:1, zh_CN: "部分商品", en_US: "PRODUCT" },
-    BRAND: { code:2,zh_CN: "部分品牌", en_US: "BRAND" },
-    CATEGORY: { code:3,zh_CN: "部分分类", en_US: "CATEGORY" },
+    PRODUCT: { code: 1, zh_CN: "部分商品", en_US: "PRODUCT" },
+    BRAND: { code: 2, zh_CN: "部分品牌", en_US: "BRAND" },
+    CATEGORY: { code: 3, zh_CN: "部分分类", en_US: "CATEGORY" },
   },
 };
 
@@ -766,17 +766,17 @@ const UrlEnum = {
 
   ShowNavAPI: generateUrls({ BASE_URL: "/shownav", zh_CN: "显示分类", en_US: "show nav" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK"]),
   ShowNavGroupAPI: generateUrls({ BASE_URL: "/shownavgroup", zh_CN: "显示分类组", en_US: "show nav group" }, ["LIST", "FORM", "INSERT", "UPDATE", "REMOVE", "LOCK", "UNLOCK", "ACT", "UNACT"]),
-  ModuleAPI:generateUrls({ BASE_URL: "/module", zh_CN: "模板", en_US: "module" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK", "SALEON", "SALEOFF", "CHECKPASS", "CHECKUNPASS"]),
+  ModuleAPI: generateUrls({ BASE_URL: "/module", zh_CN: "模板", en_US: "module" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK", "SALEON", "SALEOFF", "CHECKPASS", "CHECKUNPASS"]),
 
 
-  MAccountAPI: {
-    BASE_URL: "/user",
-    GET_PUBLICK_KEY: { url: "/user/get_encrypt_with_pwd", desc: { zh_CN: "获取公钥", en_US: "get the public key" } },
-    VERIFY_POHNE_CAPTCHA: { url: "/user/verify_code_by_phone", desc: { zh_CN: "验证手机验证码", en_US: "verify captcha of webpage" } },
-    VERIFY_WEBPAGE_CAPTCHA: { url: "/user/verify_code_by_page", desc: { zh_CN: "验证网页验证码", en_US: "verify captcha of phone" } },
-    GET_POHNE_CAPTCHA: { url: "/user/get_code_by_phone", desc: { zh_CN: "获取手机验证码", en_US: "get captcha of webpage" } },
-    GET_WEBPAGE_CAPTCHA: { url: "/user/get_code_by_page", desc: { zh_CN: "获取网页验证码", en_US: "get captcha of phone" } },
-  },
+  // MAccountAPI: {
+  //   BASE_URL: "/user",
+  //   GET_PUBLICK_KEY: { url: "/user/get_encrypt_with_pwd", desc: { zh_CN: "获取公钥", en_US: "get the public key" } },
+  //   VERIFY_POHNE_CAPTCHA: { url: "/user/verify_code_by_phone", desc: { zh_CN: "验证手机验证码", en_US: "verify captcha of webpage" } },
+  //   VERIFY_WEBPAGE_CAPTCHA: { url: "/user/verify_code_by_page", desc: { zh_CN: "验证网页验证码", en_US: "verify captcha of phone" } },
+  //   GET_POHNE_CAPTCHA: { url: "/user/get_code_by_phone", desc: { zh_CN: "获取手机验证码", en_US: "get captcha of webpage" } },
+  //   GET_WEBPAGE_CAPTCHA: { url: "/user/get_code_by_page", desc: { zh_CN: "获取网页验证码", en_US: "get captcha of phone" } },
+  // },
 
   AccountAPI: {
     BASE_URL: "/account",
@@ -786,51 +786,53 @@ const UrlEnum = {
     LOGIN: { url: "/api/account/login", desc: { zh_CN: "登录", en_US: "login" } },
     LOGOUT: { url: "/api/account/logout", desc: { zh_CN: "注销", en_US: "logout" } },
     GET_PUBLICK_KEY: { url: "/api/account/getpublickey", desc: { zh_CN: "获取公钥", en_US: "get the public key" } },
+    GET_WEBPAGE_CAPTCHA: { url: "/api/account/getcaptcha", desc: { zh_CN: "获取网页验证码", en_US: "get captcha of phone" } },
+    VERIFY_WEBPAGE_CAPTCHA: { url: "/api/account/verifycaptcha", desc: { zh_CN: "验证网页验证码", en_US: "verify captcha of phone" } },
 
   },
 
-  
-  UserArticleAPI:{
+
+  UserArticleAPI: {
     BASE_URL: "/user/article",
-    LIST:{ url: "/api/user/article/list", desc: { zh_CN: "获取文章列表", en_US: "getList" } },
-    CONTENT:{ url: "/api/user/article/content", desc: { zh_CN: "获取内容", en_US: "getContent" } },
+    LIST: { url: "/api/user/article/list", desc: { zh_CN: "获取文章列表", en_US: "getList" } },
+    CONTENT: { url: "/api/user/article/content", desc: { zh_CN: "获取内容", en_US: "getContent" } },
   },
-  UserCateAPI:{
+  UserCateAPI: {
     BASE_URL: "/user/cate",
-    LIST:{ url: "/api/user/cate/list", desc: { zh_CN: "获取分类列表", en_US: "getList" } },
+    LIST: { url: "/api/user/cate/list", desc: { zh_CN: "获取分类列表", en_US: "getList" } },
   },
-  UserCommentAPI:{
+  UserCommentAPI: {
     LIST: { url: "/api/user/comment/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
     DELETE: { url: "/api/user/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
-    INSERT:{url: "/api/user/comment/insert", desc: { zh_CN: "添加", en_US: "insert" }},
+    INSERT: { url: "/api/user/comment/insert", desc: { zh_CN: "添加", en_US: "insert" } },
   },
 
 
-  AdminArticleAPI:{
+  AdminArticleAPI: {
     BASE_URL: "/admin/article",
-    LIST:{ url: "/api/admin/article/list", desc: { zh_CN: "获取文章列表", en_US: "getList" } },
-    CONTENT:{ url: "/api/admin/article/content", desc: { zh_CN: "获取内容", en_US: "getContent" } },
-    DELETE : { url: "/api/admin/article/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
-    FORM : { url: `/api/admin/article/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
-    TOP :{ url: `/api/admin/article/top`, desc: { zh_CN: "置顶", en_US: "up" }, actionTip: { zh_CN: "将被置顶，置顶后，在评论显示的状态下可取消置顶！", en_US: "will be stuck,and then can be downed when being shown!" } },
-    UNTOP : { url: `/api/admin/article/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
-    LOCK :{ url: `/api/admin/article/lock`, desc: { zh_CN: "锁定", en_US: "lock" }, actionTip: { zh_CN: "将被锁定，锁定后可以解锁和删除，但不可编辑！", en_US: "will be lock,and then  can be released  or deleted, but can not be edited!" } },
-    UNLOCK :{ url: `/api/admin/article/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
+    LIST: { url: "/api/admin/article/list", desc: { zh_CN: "获取文章列表", en_US: "getList" } },
+    CONTENT: { url: "/api/admin/article/content", desc: { zh_CN: "获取内容", en_US: "getContent" } },
+    DELETE: { url: "/api/admin/article/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    FORM: { url: `/api/admin/article/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
+    TOP: { url: `/api/admin/article/top`, desc: { zh_CN: "置顶", en_US: "up" }, actionTip: { zh_CN: "将被置顶，置顶后，在评论显示的状态下可取消置顶！", en_US: "will be stuck,and then can be downed when being shown!" } },
+    UNTOP: { url: `/api/admin/article/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
+    LOCK: { url: `/api/admin/article/lock`, desc: { zh_CN: "锁定", en_US: "lock" }, actionTip: { zh_CN: "将被锁定，锁定后可以解锁和删除，但不可编辑！", en_US: "will be lock,and then  can be released  or deleted, but can not be edited!" } },
+    UNLOCK: { url: `/api/admin/article/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
   },
-  AdminCommentAPI:{
+  AdminCommentAPI: {
     LIST: { url: "/api/admin/comment/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
     DELETE: { url: "/api/admin/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
-    INSERT:{url: "/api/admin/comment/insert", desc: { zh_CN: "添加", en_US: "insert" }},
-    SHOW:{url: "/api/admin/comment/show",desc: { zh_CN: "显示", en_US: "show" }, actionTip: { zh_CN: "将被展示，展示后可重新隐藏！", en_US: "will be shown,and then can be hidden after being shown!" } },
-    UNSHOW:{url: "/api/admin/comment/unshow", desc: { zh_CN: "隐藏", en_US: "hide" }, actionTip: { zh_CN: "将被隐藏，隐藏后可重新设置显示！", en_US: "will be hidden,and then can be shown after being hidden!" }},
+    INSERT: { url: "/api/admin/comment/insert", desc: { zh_CN: "添加", en_US: "insert" } },
+    SHOW: { url: "/api/admin/comment/show", desc: { zh_CN: "显示", en_US: "show" }, actionTip: { zh_CN: "将被展示，展示后可重新隐藏！", en_US: "will be shown,and then can be hidden after being shown!" } },
+    UNSHOW: { url: "/api/admin/comment/unshow", desc: { zh_CN: "隐藏", en_US: "hide" }, actionTip: { zh_CN: "将被隐藏，隐藏后可重新设置显示！", en_US: "will be hidden,and then can be shown after being hidden!" } },
   },
-  AdminCateAPI:{
+  AdminCateAPI: {
     BASE_URL: "/admin/cate",
-    LIST:{ url: "/api/admin/cate/list", desc: { zh_CN: "获取分类列表", en_US: "getList" } },
+    LIST: { url: "/api/admin/cate/list", desc: { zh_CN: "获取分类列表", en_US: "getList" } },
   },
 }
 
 
 
 
-export { CommonEnum, MarketEnum, MemberEnum, MessageEnum, OrderEnum, ProductEnum,ShowEnum, SystemEnum, ViewEnum, UrlEnum };
+export { CommonEnum, MarketEnum, MemberEnum, MessageEnum, OrderEnum, ProductEnum, ShowEnum, SystemEnum, ViewEnum, UrlEnum };

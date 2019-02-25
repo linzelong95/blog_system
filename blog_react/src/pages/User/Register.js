@@ -49,15 +49,13 @@ class Register extends Component {
   };
 
   componentDidUpdate() {
-    const { form, register } = this.props;
+    const { form, register,dispatch } = this.props;
     const account = form.getFieldValue('mail');
-    // if (register.status === 'ok') {
     if (register.status) {
+      dispatch({type:"register/registerHandle",payload:{state:{}}});
       router.push({
         pathname: '/user/register-result',
-        state: {
-          account,
-        },
+        state: {account,},
       });
     }
   }

@@ -44,6 +44,13 @@ export default [
         component: './ArticleManagement/ArticleManagement',
       },
       {
+        path: '/commentmanagement',
+        icon: 'idcard',
+        name: 'CommentManagement',
+        authority: ['admin'],
+        component: './CommentManagement/CommentManagement',
+      },
+      {
         path: '/categorymanagement',
         icon: 'idcard',
         name: 'CategoryManagement',

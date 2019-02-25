@@ -2,7 +2,12 @@ const router = require("koa-router")();
 const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
-    const { aid } = ctx.request.body;
+    const { aid,conditionQuery: {orderBy = {} } } = ctx.request.body;
+    const getOrderBySql = (orderBy) => {
+        const {name="create_time",by="desc"}=orderBy;
+        if(!["create_time"].includes(name)) return "";
+        return `order by ${name} ${by}`;
+    };
     const sql = `
         select 
             c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.create_time,a.account as from_name,b.account as to_name
@@ -13,7 +18,7 @@ router.post("/list", async (ctx) => {
         inner join 
             user b on c.to_id=b.id
         where 
-            c.aid=${aid}
+            c.aid=${aid} ${getOrderBySql(orderBy)}
     `;
     const res = await db.query(sql, []);
     const parentArr = [];

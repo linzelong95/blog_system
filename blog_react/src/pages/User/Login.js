@@ -25,7 +25,7 @@ class LoginPage extends Component {
     const d7 = 7 * 24 * 60 * 60 * 1000;
     const validTimeFlag = new Date().getTime() - lastTime < d7;
     if (!autoLogin || !validTimeFlag || !account || !password) {
-      // this.onGetCaptcha();
+      this.onGetCaptcha();
       return;
     }
     this.props.dispatch({
@@ -53,7 +53,7 @@ class LoginPage extends Component {
 
   onTabChange = type => {
     this.setState({ type });
-    // if (type === "account") this.onGetCaptcha();
+    if (type === "account") this.onGetCaptcha();
   };
 
   changeAutoLogin = e => this.setState({ autoLogin: e.target.checked, });

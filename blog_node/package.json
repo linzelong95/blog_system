@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "art-template": "^4.13.2",
+    "captchapng": "^0.0.1",
     "crypto": "^1.0.1",
     "ejs": "^2.6.1",
     "koa": "^2.6.2",

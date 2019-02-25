@@ -4,7 +4,6 @@ import { Switch, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input,
 import PageHeaderLayout from '@/components/PageHeaderWrapper';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
-import ShowArticle from './ShowArticle';
 import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
@@ -21,7 +20,6 @@ class HomePage extends React.Component {
     conditionQuery: { title: "", category: {}, orderBy: {} },
     showSorter: false,// 是否显示排序按钮
     formItem: {},
-    drawerVisible: false,
     filterModalVisible: false,
     categoryOptions: [],
     filterKeys: [],
@@ -200,7 +198,6 @@ class HomePage extends React.Component {
               )}
             </Tree>
           </Modal>
-          {drawerVisible&&<ShowArticle loading={loading} visible={drawerVisible} item={formItem} onClose={this.onCloseDrawer} request={this.request}  />}
         </Card>
       </GridContent>
     );
