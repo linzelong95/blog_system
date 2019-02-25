@@ -12,7 +12,11 @@ const cors=require("koa2-cors");
 const db=require("./components/db");
 const passport=require("./components/passport");
 
-
+const admin=require("./routes/admin.js");
+const api=require("./routes/api.js");
+const index=require("./routes/index.js");
+const account=require("./routes/account.js")(router,db,passport);
+const user=require("./routes/user.js");
 
 const app=new Koa();
 render(app,{
@@ -35,64 +39,20 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-const admin=require("./routes/admin.js");
-const api=require("./routes/api.js");
-const index=require("./routes/index.js");
-const account=require("./routes/account.js")(router,db,passport);
-const user=require("./routes/user.js");
-
-
-
-// test
-// router.post('/login', ctx => {
-//   console.log("body",ctx.request.body)
-//   // 会调用策略
-//   return passport.authenticate('local',
-//     function(err, user, info, status) {
-//       ctx.body = {user, err, info, status}
-//       // return ctx.login({id: 1, username: 'admin', password: '123456'})
-//       return ctx.login(user)//触发序列化函数，保存到session
-//     })(ctx)
-// })
-// router.get('/logout', ctx => {
-//   ctx.logout()
-//   ctx.body = {auth: ctx.isAuthenticated(), user: ctx.state.user}
-// })
-
-// router.get('/test', ctx => {
-//   ctx.body=ctx.state.user;
-  
-// })
-// router.get('/logout', ctx => {
-//   ctx.logout()
-//   ctx.body = {auth: ctx.isAuthenticated(), user: ctx.state.user}
-// })
-
-//session拦截
-// app.use(async (ctx, next) => {
-//   const allowpage = ['/account/','/user/']
-//   let url = ctx.originalUrl
-//   console.log(url)
-//   if (allowpage.indexOf(url) > -1) {
-//       logger.info('当前地址可直接访问')
-//   }else {
-//       if (ctx.isAuthenticated()) {
-//           console.log('login status validate success')
-//       } else {
-//           console.log(ctx.url,'login status validate fail')
-//       }
-//   }
-//     await next()
-
-// })
-// router.use('/admin/*', (ctx, next) => {
-//   if(ctx.isAuthenticated()) {
-//     next();
-//   } else {
-//    ctx.status = 401;
-//    ctx.body = {msg: '用户未登录'};
-//  }
-// })
+app.use(async (ctx, next) => {
+  const limitedUrls = ['/admin/','/user/comment'];
+// /account/getpublickey
+// /admin/article/list
+// /account/getpublickey
+// /admin/sort/list
+  if(limitedUrls.some(i=>ctx.originalUrl.includes(i))){
+    if(!ctx.isAuthenticated()) {
+      ctx.throw(401);
+      ctx.body = {msg: '用户未登录'};
+    }
+  }
+  await next();
+});
 
 
 router.use("/index",index);

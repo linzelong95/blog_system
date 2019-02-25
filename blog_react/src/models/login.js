@@ -10,7 +10,7 @@ import { stringify } from 'querystring';
 import { adminType } from '@/defaultSettings';
 
 // const { AccountAPI: { LOGIN, LOGOUT }, MAccountAPI: { GET_PUBLICK_KEY, GET_POHNE_CAPTCHA, GET_WEBPAGE_CAPTCHA, VERIFY_POHNE_CAPTCHA, VERIFY_WEBPAGE_CAPTCHA } } = UrlEnum;
-const { AccountAPI: { LOGIN, LOGOUT } } = UrlEnum;
+const { AccountAPI: { LOGIN, LOGOUT,GET_PUBLICK_KEY } } = UrlEnum;
 
 export default {
   namespace: 'login',
@@ -24,9 +24,11 @@ export default {
     *login({ payload, autoLoginMark }, { call, put,select }) {
       const {lang}=yield select(models=>models.articleManagement);
       const { account, password, autoLogin } = payload;
-      let accountObj = { ...store.get("account"),account, autoLogin, password };//以后要实现加密
+      const md5Pwd = autoLoginMark ? password : serialize(password);// 增加
+      let accountObj = { ...store.get("account"),account, autoLogin, password:md5Pwd };
       if (!autoLoginMark) accountObj = { ...accountObj, lastTime: new Date().getTime() };
-      const response = yield call(handleArticles, { netUrl: LOGIN.url, account, password });
+      const publicKey = yield call(handleArticles, { netUrl: GET_PUBLICK_KEY.url });
+      const response = yield call(handleArticles, { netUrl: LOGIN.url, account, password : rsa(md5Pwd, publicKey.item) });
       if (!response.status) {
         setAuthority('user');
         reloadAuthorized();

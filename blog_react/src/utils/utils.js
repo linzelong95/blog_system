@@ -201,6 +201,13 @@ export function rsa(value, publicKey) {
   return Encrypt.encrypt(value);
 }
 
+// RSA解密
+// export function rsa_back(value, publicKey) {
+//   const Encrypt = new JSEncrypt();
+//   Encrypt.setPrivateKey(PrivateKey);
+//   return Encrypt.decrypt(value);
+// }
+
 
 /**
  * 导出数据

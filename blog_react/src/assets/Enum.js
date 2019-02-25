@@ -785,6 +785,8 @@ const UrlEnum = {
     REGISTER: { url: "/api/account/register", desc: { zh_CN: "注册", en_US: "register" } },
     LOGIN: { url: "/api/account/login", desc: { zh_CN: "登录", en_US: "login" } },
     LOGOUT: { url: "/api/account/logout", desc: { zh_CN: "注销", en_US: "logout" } },
+    GET_PUBLICK_KEY: { url: "/api/account/getpublickey", desc: { zh_CN: "获取公钥", en_US: "get the public key" } },
+
   },
 
   

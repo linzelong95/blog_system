@@ -298,7 +298,7 @@ class ArticleManagement extends React.Component {
               )}
             </Tree>
           </Modal>
-          {drawerVisible&&<ShowArticle visible={drawerVisible} item={formItem} onClose={this.onCloseDrawer} request={this.request}  />}
+          {drawerVisible&&<ShowArticle loading={loading} visible={drawerVisible} item={formItem} onClose={this.onCloseDrawer} request={this.request}  />}
           {editorialPanelVisible &&
             <EditorialForm
               editorialPanelVisible={editorialPanelVisible}

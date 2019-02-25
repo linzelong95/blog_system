@@ -74,10 +74,10 @@ class ShowArticle extends React.Component {
             return;
         }
         const { from_id: to_id, from_name: to_name, children, id, pid: p, content } = commentitem;
-        if (action === "delete") {
-            const items = [{ id, pid: p, name: content, currentUserId }];
+        if (action&&[DELETE.url].includes(action.url)) {
+            const items = [{ id, pid: p, name: content}];
             const callback = (res) => this.getCommentList();
-            request({ netUrl: DELETE.url, items }, callback);
+            request({ netUrl: action.url, items }, callback);
             return;
         }
         const pid = p ? p : id;
@@ -88,7 +88,7 @@ class ShowArticle extends React.Component {
 
 
     render() {
-        const { visible, item, onClose, form, currentUser } = this.props;
+        const { visible, item, onClose, form, currentUser,loading } = this.props;
         const { clientHeight, commentObj, reviewBoxVisible } = this.state;
         const modalFormConfig = [
             { fieldId: 'to', label: "对象", fieldType: 'select', fieldProps: { options: [{ key: item.author_id, label: "楼主" }], labelInValue: true, onChange: (obj) => console.log(obj) }, initialValue: { key: item.author_id, label: "楼主" } },
@@ -135,6 +135,7 @@ class ShowArticle extends React.Component {
                             <Divider style={{ marginTop: "-5px" }} />
                             <div style={{ maxHeight: reviewBoxVisible ? (clientHeight - 460) : (clientHeight - 300), overflow: "auto" }}>
                                 <List
+                                    loading={loading}
                                     itemLayout="horizontal"
                                     dataSource={commentObj.list || []}
                                     renderItem={listItem => (
@@ -142,7 +143,7 @@ class ShowArticle extends React.Component {
                                             actions={[
                                                 <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(listItem.create_time)))}</span>,
                                                 <span><a onClick={() => this.handleDealWithComment(listItem)}>回复</a></span>,
-                                                currentUser.id === listItem.from_id && <span><a onClick={() => this.handleDealWithComment(listItem, "delete")} style={{ color: "red" }}>删除</a></span>,
+                                                currentUser.id === listItem.from_id && <span><a onClick={() => this.handleDealWithComment(listItem, DELETE)} style={{ color: "red" }}>删除</a></span>,
                                             ]}
                                             author={listItem.from_name}
                                             avatar='https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png'
@@ -153,7 +154,7 @@ class ShowArticle extends React.Component {
                                                     actions={[
                                                         <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(i.create_time)))}</span>,
                                                         <span><a onClick={() => this.handleDealWithComment({ ...i, pid: listItem.id })}>回复</a></span>,
-                                                        currentUser.id === i.from_id && <span><a onClick={() => this.handleDealWithComment(i, "delete")} style={{ color: "red" }}>删除</a></span>,
+                                                        currentUser.id === i.from_id && <span><a onClick={() => this.handleDealWithComment(i, DELETE)} style={{ color: "red" }}>删除</a></span>,
                                                     ]}
                                                     author={`${i.from_name} 回复@ ${i.to_name}`}
                                                     avatar='https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png'

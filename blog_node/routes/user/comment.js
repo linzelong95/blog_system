@@ -36,7 +36,7 @@ router.post("/list", async (ctx) => {
 });
 
 router.post("/insert", async (ctx) => {
-    const {userInfo:{id:currentUserId}}=ctx.session;
+    const {id:currentUserId}=ctx.state.user;
     const { aid, from_id, to_id = 0, pid = 0, content,author_id } = ctx.request.body;
     const insertSql = "insert into comment (aid,from_id,to_id,pid,content,is_show) values(?,?,?,?,?,?)";
     const insertParams = [aid, from_id, to_id, pid, content,currentUserId===author_id?1:0];
@@ -46,8 +46,6 @@ router.post("/insert", async (ctx) => {
 
 
 router.post("/delete", async (ctx) => {
-    // 如有可能，需再一次做账户核对
-    // const {userInfo:{id}}=ctx.session;
     const { items } = ctx.request.body;
     const condition = items.map(i => i.id).join(",");
     const rootIds=[];

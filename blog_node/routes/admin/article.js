@@ -8,7 +8,7 @@ const db = require("../../components/db");
 
 
 router.post("/list", async (ctx) => {
-    const {userInfo:{id:currentUserId}}=ctx.session;
+    const {id:currentUserId}=ctx.state.user;
     const { conditionQuery: { title = "", category = {}, orderBy = {} }, index = 1, size = 10 } = ctx.request.body;
     const getWhereSql = (category) => {
         const { sort = [], child = [] } = category;
@@ -44,7 +44,7 @@ router.post("/content", async (ctx) => {
 
 
 router.post("/insert", async (ctx) => {
-    const {id:author_id}=ctx.session.userInfo;
+    const {id:author_id}=ctx.state.user;
     const { title, label = "", abstract = "", content = "",category_id, is_top } = ctx.request.body;
     const cateId=category_id[category_id.length - 1];
     const insertSql = "insert into article (category_id,title,is_top,abstract,label,author_id) values(?,?,?,?,?,?)";
@@ -56,11 +56,10 @@ router.post("/insert", async (ctx) => {
 });
 
 router.post("/update", async (ctx) => {
-    const {id:author_id}=ctx.session.userInfo;
     const { title, label = "", abstract = "", content = "", category_id, is_top, id } = ctx.request.body;
     const cateId=category_id[category_id.length - 1];
-    const updateSql = "update article set category_id=?,title=?,is_top=?,abstract=?,label=?,author_id=? where id=?";
-    const updateParams = [cateId, title, is_top, abstract, label, author_id, id];
+    const updateSql = "update article set category_id=?,title=?,is_top=?,abstract=?,label=? where id=?";
+    const updateParams = [cateId, title, is_top, abstract, label,id];
     const res = await db.query(updateSql, updateParams);
     const resCate=await db.query(`update category set is_use=1 where id=${cateId}`, []);
     const resContent = await db.query("update content set content=? where id=?", [content,id]);
