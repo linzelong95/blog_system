@@ -136,7 +136,7 @@ class CategoryManagement extends React.Component {
 
   render() {
     const { articleManagement: { total = 10, list = [], size = 10, index = 1 }, loading } = this.props;
-    const { allSelectedItem, selectedItems, editorialPanelVisible, drawerVisible, formItem, showSorter, clientHeight, filterModalVisible, categoryOptions, filters, conditionQuery, selectedRowKeys, tabKey } = this.state;
+    const { selectedItems, editorialPanelVisible, drawerVisible, formItem, showSorter, clientHeight, filterModalVisible, categoryOptions, filters, conditionQuery, selectedRowKeys, tabKey } = this.state;
     const EditorialForm = tabKey === "sort" ? SortEditorialForm : CateEditorialForm;
     const tabList = [
       { key: "sort", tab: "一级分类" },

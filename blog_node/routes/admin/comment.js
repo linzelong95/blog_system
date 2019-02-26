@@ -2,7 +2,12 @@ const router = require("koa-router")();
 const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
-    const { aid,conditionQuery: {orderBy = {} } } = ctx.request.body;
+    const {id:currentUserId}=ctx.state.user;
+    const { conditionQuery: {content="",orderBy = {},aids=[] },prettyFormat=false } = ctx.request.body;
+    const getWhereSql = (aids) => {
+        if (!aids.length) return "";
+        return `and c.aid in (${aids.join(",")})`;
+    };
     const getOrderBySql = (orderBy) => {
         const {name="create_time",by="desc"}=orderBy;
         if(!["create_time"].includes(name)) return "";
@@ -10,34 +15,52 @@ router.post("/list", async (ctx) => {
     };
     const sql = `
         select 
-            c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.create_time,a.account as from_name,b.account as to_name
+            c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.is_top,c.create_time,a.account as from_name,b.account as to_name,e.title
         from 
             comment c
         inner join 
             user a on c.from_id=a.id
         inner join 
             user b on c.to_id=b.id
+        inner join
+            article e on c.aid=e.id
         where 
-            c.aid=${aid} ${getOrderBySql(orderBy)}
+            c.content like '%${content}%' and e.author_id=${currentUserId} ${getWhereSql(aids)} ${getOrderBySql(orderBy)}
     `;
-    const res = await db.query(sql, []);
-    const parentArr = [];
-    const sonArr = [];
-    res.forEach(i => {
-        if (!i.pid) {
-            parentArr.push({ ...i, children: [] });
-        } else {
-            sonArr.push(i);
-        }
-    });
-    const commentList = parentArr.map(i => {
-        sonArr.forEach(v => {
-            if (v.pid === i.id) i.children = [...i.children, v];
-        })
-        return i;
-    })
-    const countArr = await db.query(`select count(*) as count from comment where aid=${aid}`, []);
-    ctx.body = { "total": countArr[0].count, "list": commentList };
+    let res = await db.query(sql, []);
+    if(prettyFormat){
+        const parentArr = [];
+        const sonArr = [];
+        res.forEach(i => {
+            if (!i.pid) {
+                parentArr.push({ ...i, children: [] });
+            } else {
+                sonArr.push(i);
+            }
+        });
+        res = parentArr.map(i => {
+            sonArr.forEach(v => {
+                if (v.pid === i.id) i.children = [...i.children, v];
+            });
+            return i;
+        });
+    }
+    const countSql = `
+        select 
+            count(*) as count
+        from 
+            comment c
+        inner join 
+            user a on c.from_id=a.id
+        inner join 
+            user b on c.to_id=b.id
+        inner join
+            article e on c.aid=e.id
+        where 
+            c.content like '%${content}%' and e.author_id=${currentUserId} ${getWhereSql(aids)}
+    `;
+    const countArr = await db.query(countSql, []);
+    ctx.body = { "total": countArr[0].count, "list": res };
 });
 
 router.post("/insert", async (ctx) => {

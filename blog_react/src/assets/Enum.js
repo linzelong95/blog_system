@@ -810,6 +810,8 @@ const UrlEnum = {
   AdminArticleAPI: {
     BASE_URL: "/admin/article",
     LIST: { url: "/api/admin/article/list", desc: { zh_CN: "获取文章列表", en_US: "getList" } },
+    NSERT:{url: "/api/admin/article/insert", desc: { zh_CN: "添加", en_US: "insert" }},
+    UPDATE:{url: "/api/admin/article/update", desc: { zh_CN: "更新", en_US: "update" }},
     CONTENT: { url: "/api/admin/article/content", desc: { zh_CN: "获取内容", en_US: "getContent" } },
     DELETE: { url: "/api/admin/article/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
     FORM: { url: `/api/admin/article/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
@@ -822,6 +824,8 @@ const UrlEnum = {
     LIST: { url: "/api/admin/comment/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
     DELETE: { url: "/api/admin/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
     INSERT: { url: "/api/admin/comment/insert", desc: { zh_CN: "添加", en_US: "insert" } },
+    TOP: { url: `/api/admin/comment/top`, desc: { zh_CN: "置顶", en_US: "up" }, actionTip: { zh_CN: "将被置顶，置顶后，在评论显示的状态下可取消置顶！", en_US: "will be stuck,and then can be downed when being shown!" } },
+    UNTOP: { url: `/api/admin/comment/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
     SHOW: { url: "/api/admin/comment/show", desc: { zh_CN: "显示", en_US: "show" }, actionTip: { zh_CN: "将被展示，展示后可重新隐藏！", en_US: "will be shown,and then can be hidden after being shown!" } },
     UNSHOW: { url: "/api/admin/comment/unshow", desc: { zh_CN: "隐藏", en_US: "hide" }, actionTip: { zh_CN: "将被隐藏，隐藏后可重新设置显示！", en_US: "will be hidden,and then can be shown after being hidden!" } },
   },

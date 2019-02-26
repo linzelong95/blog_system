@@ -2,10 +2,14 @@ const router = require("koa-router")();
 const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
-    const { aid,conditionQuery: {orderBy = {} } } = ctx.request.body;
+    const { conditionQuery: { orderBy = {}, aids = [] },prettyFormat=false } = ctx.request.body;
+    const getWhereSql = (aids) => {
+        if (!aids.length) return "";
+        return `c.aid in (${aids.join(",")})`;
+    };
     const getOrderBySql = (orderBy) => {
-        const {name="create_time",by="desc"}=orderBy;
-        if(!["create_time"].includes(name)) return "";
+        const { name = "create_time", by = "desc" } = orderBy;
+        if (!["create_time"].includes(name)) return "";
         return `order by ${name} ${by}`;
     };
     const sql = `
@@ -18,33 +22,47 @@ router.post("/list", async (ctx) => {
         inner join 
             user b on c.to_id=b.id
         where 
-            c.aid=${aid} ${getOrderBySql(orderBy)}
+            ${getWhereSql(aids)} ${getOrderBySql(orderBy)}
     `;
-    const res = await db.query(sql, []);
-    const parentArr = [];
-    const sonArr = [];
-    res.forEach(i => {
-        if (!i.pid) {
-            parentArr.push({ ...i, children: [] });
-        } else {
-            sonArr.push(i);
-        }
-    });
-    const commentList = parentArr.map(i => {
-        sonArr.forEach(v => {
-            if (v.pid === i.id) i.children = [...i.children, v];
-        })
-        return i;
-    })
-    const countArr = await db.query(`select count(*) as count from comment where aid=${aid}`, []);
-    ctx.body = { "total": countArr[0].count, "list": commentList };
+    let res = await db.query(sql, []);
+    if(prettyFormat){
+        const parentArr = [];
+        const sonArr = [];
+        res.forEach(i => {
+            if (!i.pid) {
+                parentArr.push({ ...i, children: [] });
+            } else {
+                sonArr.push(i);
+            }
+        });
+        res = parentArr.map(i => {
+            sonArr.forEach(v => {
+                if (v.pid === i.id) i.children = [...i.children, v];
+            });
+            return i;
+        });
+    }
+    const countSql = `
+        select 
+            count(*) as count
+        from 
+            comment c
+        inner join 
+            user a on c.from_id=a.id
+        inner join 
+            user b on c.to_id=b.id
+        where 
+            ${getWhereSql(aids)}
+    `;
+    const countArr = await db.query(countSql, []);
+    ctx.body = { "total": countArr[0].count, "list": res };
 });
 
 router.post("/insert", async (ctx) => {
-    const {id:currentUserId}=ctx.state.user;
-    const { aid, from_id, to_id = 0, pid = 0, content,author_id } = ctx.request.body;
+    const { id: currentUserId } = ctx.state.user;
+    const { aid, from_id, to_id = 0, pid = 0, content, author_id } = ctx.request.body;
     const insertSql = "insert into comment (aid,from_id,to_id,pid,content,is_show) values(?,?,?,?,?,?)";
-    const insertParams = [aid, from_id, to_id, pid, content,currentUserId===author_id?1:0];
+    const insertParams = [aid, from_id, to_id, pid, content, currentUserId === author_id ? 1 : 0];
     const res = await db.query(insertSql, insertParams);
     ctx.body = { "list": res };
 });
@@ -53,11 +71,11 @@ router.post("/insert", async (ctx) => {
 router.post("/delete", async (ctx) => {
     const { items } = ctx.request.body;
     const condition = items.map(i => i.id).join(",");
-    const rootIds=[];
-    items.forEach(i=>{
-        if(i.pid===0) rootIds.push(i.id);
+    const rootIds = [];
+    items.forEach(i => {
+        if (i.pid === 0) rootIds.push(i.id);
     });
-    const deleteSql = `delete from comment where id in (${condition}) ${rootIds.length>0?`or pid in (${rootIds.join(",")})`:""}`;
+    const deleteSql = `delete from comment where id in (${condition}) ${rootIds.length > 0 ? `or pid in (${rootIds.join(",")})` : ""}`;
     const res = await db.query(deleteSql, []);
     ctx.body = { "list": res };
 });

@@ -12,9 +12,8 @@ import styles from './index.less';
 
 const { AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT }, AdminCateAPI } = UrlEnum;
 
-@connect(({ articleManagement, global, loading }) => ({
+@connect(({ articleManagement,loading }) => ({
   articleManagement,
-  currentUser: global.currentUser,
   loading: loading.models.articleManagement,
 }))
 class ArticleManagement extends React.Component {
@@ -22,7 +21,7 @@ class ArticleManagement extends React.Component {
     conditionQuery: { title: "", category: {}, orderBy: {} },
     showSorter: false,// 是否显示排序按钮
     selectedItems: [],
-    allSelectedItem: false,
+    allSelectedFlag: false,
     editorialPanelVisible: false,
     formItem: {},
     drawerVisible: false,
@@ -50,7 +49,7 @@ class ArticleManagement extends React.Component {
 
   toggleEditorialPanel = () => this.setState((oldState) => ({ editorialPanelVisible: !oldState.editorialPanelVisible }));
 
-  cleanSelectedItem = () => this.setState({ selectedItems: [], allSelectedItem: false });
+  cleanSelectedItem = () => this.setState({ selectedItems: [], allSelectedFlag: false });
 
   cleanFormItem = () => {
     this.cleanSelectedItem();
@@ -107,15 +106,15 @@ class ArticleManagement extends React.Component {
     const { selectedItems } = this.state;
     const { articleManagement: { list = [] } } = this.props;
     const newSelectedItems = selectedItems.some(i => i.id === item.id) ? selectedItems.filter(i => i.id !== item.id) : [...selectedItems, item];
-    const allSelectedItem = list.every(listItem => newSelectedItems.some(i => i.id === listItem.id));
-    this.setState({ selectedItems: newSelectedItems, allSelectedItem });
+    const allSelectedFlag = list.every(listItem => newSelectedItems.some(i => i.id === listItem.id));
+    this.setState({ selectedItems: newSelectedItems, allSelectedFlag });
   }
 
   selectAllOrPart = () => {
-    const { allSelectedItem } = this.state;
+    const { allSelectedFlag } = this.state;
     const { articleManagement: { list = [] } } = this.props;
-    const newSelectedItems = allSelectedItem ? [] : list;
-    this.setState({ allSelectedItem: !allSelectedItem, selectedItems: newSelectedItems });
+    const newSelectedItems = allSelectedFlag ? [] : list;
+    this.setState({ allSelectedFlag: !allSelectedFlag, selectedItems: newSelectedItems });
   }
 
   readArticle = (item) => {
@@ -169,7 +168,7 @@ class ArticleManagement extends React.Component {
 
   render() {
     const { articleManagement: { total = 10, list = [], size = 12, index = 1 }, loading, dispatch } = this.props;
-    const { allSelectedItem, selectedItems, editorialPanelVisible, drawerVisible, formItem, showSorter, filterModalVisible, categoryOptions, filterKeys, conditionQuery } = this.state;
+    const { allSelectedFlag, selectedItems, editorialPanelVisible, drawerVisible, formItem, showSorter, filterModalVisible, categoryOptions, filterKeys, conditionQuery } = this.state;
     return (
       <GridContent>
         <Card>
@@ -177,7 +176,7 @@ class ArticleManagement extends React.Component {
             <Col xs={12} sm={13} md={15} lg={16} xl={17}>
               <Button icon="plus" type="primary" size="small" onClick={this.toggleEditorialPanel}>新增&nbsp;</Button>
               <Button icon="filter" type={conditionQuery.category && Object.keys(conditionQuery.category).length > 0 ? "danger" : "primary"} size="small" onClick={this.showFilterModal} style={{ marginLeft: "20px" }}>筛选&nbsp;</Button>
-              <Button icon="star" type={allSelectedItem ? "danger" : "primary"} size="small" onClick={this.selectAllOrPart} style={{ marginLeft: "20px" }}>{allSelectedItem ? "反选" : "全选"}&nbsp;</Button>
+              <Button icon="star" type={allSelectedFlag ? "danger" : "primary"} size="small" onClick={this.selectAllOrPart} style={{ marginLeft: "20px" }}>{allSelectedFlag ? "反选" : "全选"}&nbsp;</Button>
               <Button icon={showSorter ? "right-circle-o" : "left-circle-o"} type="primary" size="small" onClick={this.showSorter} style={{ marginLeft: "20px" }}>排序&nbsp;</Button>
               {showSorter &&
                 <Fragment>
@@ -221,7 +220,6 @@ class ArticleManagement extends React.Component {
           </Row>
           <List
             loading={loading}
-            size="large"
             grid={{ gutter: 16, sm: 2, md: 3, xl: 3, xxl: 3 }}
             dataSource={list}
             pagination={{

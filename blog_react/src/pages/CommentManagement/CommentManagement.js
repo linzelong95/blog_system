@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Switch, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Drawer, Tree, Collapse } from 'antd';
+import { Select, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Drawer, Tree, Avatar } from 'antd';
 import PageHeaderLayout from '@/components/PageHeaderWrapper';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
@@ -8,27 +8,37 @@ import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
-const { AdminArticleAPI: { LIST, DELETE, FORM,TOP,UNTOP,LOCK,UNLOCK,CONTENT },AdminCateAPI } = UrlEnum;
 
-@connect(({ articleManagement, global,loading }) => ({
+const { AdminCommentAPI: { LIST, DELETE, SHOW,UNSHOW,TOP,UNTOP },AdminCateAPI,AdminArticleAPI } = UrlEnum;
+
+
+@connect(({ articleManagement, loading }) => ({
   articleManagement,
-  currentUser:global.currentUser,
   loading: loading.models.articleManagement,
 }))
-class ArticleManagement extends React.Component {
+class CommentManagement extends React.Component {
   state = {
     conditionQuery: { title: "", category: {}, orderBy: {} },
     showSorter: false,// 是否显示排序按钮
     selectedItems: [],
-    allSelectedItem: false,
+    allSelectedFlag: false,
     editorialPanelVisible: false,
     formItem: {},
     filterModalVisible: false,
     categoryOptions: [],
-    filterKeys: []
+    filterKeys: [],
+    articlecontainer :{
+      netUrl: AdminArticleAPI.LIST.url,
+      list: [],
+      total: 0,
+      index: 1,
+      size: 6,
+      query: "",
+      selectedItems: []
+    }
   };
 
-  componentDidMount = () => this.request({ index: 1, size: 12 });
+  componentDidMount = () => this.request({ index: 1, size: 10 });
 
   request = (params, callback) => {
     const { conditionQuery } = this.state;
@@ -49,7 +59,7 @@ class ArticleManagement extends React.Component {
 
   toggleEditorialPanel = () => this.setState((oldState) => ({ editorialPanelVisible: !oldState.editorialPanelVisible }));
 
-  cleanSelectedItem = () => this.setState({ selectedItems: [], allSelectedItem: false });
+  cleanSelectedItem = () => this.setState({ selectedItems: [], allSelectedFlag: false });
 
   cleanFormItem = () => {
     this.cleanSelectedItem();
@@ -106,15 +116,15 @@ class ArticleManagement extends React.Component {
     const { selectedItems } = this.state;
     const { articleManagement: { list = [] } } = this.props;
     const newSelectedItems = selectedItems.some(i => i.id === item.id) ? selectedItems.filter(i => i.id !== item.id) : [...selectedItems, item];
-    const allSelectedItem = list.every(listItem => newSelectedItems.some(i => i.id === listItem.id));
-    this.setState({ selectedItems: newSelectedItems, allSelectedItem });
+    const allSelectedFlag = list.every(listItem => newSelectedItems.some(i => i.id === listItem.id));
+    this.setState({ selectedItems: newSelectedItems, allSelectedFlag });
   }
 
   selectAllOrPart = () => {
-    const { allSelectedItem } = this.state;
+    const { allSelectedFlag } = this.state;
     const { articleManagement: { list = [] } } = this.props;
-    const newSelectedItems = allSelectedItem ? [] : list;
-    this.setState({ allSelectedItem: !allSelectedItem, selectedItems: newSelectedItems });
+    const newSelectedItems = allSelectedFlag ? [] : list;
+    this.setState({ allSelectedFlag: !allSelectedFlag, selectedItems: newSelectedItems });
   }
 
 
@@ -143,8 +153,8 @@ class ArticleManagement extends React.Component {
       const arr = item.split("-");
       if (arr.length === 1) {
         category.sort.push(parseInt(arr.pop(), 10));
-      } else {
-        if (!category.sort.includes(parseInt(arr[0], 10))) category.child.push(parseInt(arr.pop(), 10));
+      } else if (!category.sort.includes(parseInt(arr[0], 10))) {
+        category.child.push(parseInt(arr.pop(), 10));
       }
     });
     this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category } }), () => this.request({ index: 1 }));
@@ -155,7 +165,7 @@ class ArticleManagement extends React.Component {
 
   render() {
     const { articleManagement: { total = 10, list = [], size = 12, index = 1 }, loading, dispatch } = this.props;
-    const { allSelectedItem, selectedItems, editorialPanelVisible,formItem, showSorter, filterModalVisible, categoryOptions, filterKeys, conditionQuery } = this.state;
+    const { articlecontainer,allSelectedFlag, selectedItems, editorialPanelVisible,formItem, showSorter, filterModalVisible, categoryOptions, filterKeys, conditionQuery } = this.state;
     return (
       // <PageHeaderLayout>
       <GridContent>
@@ -164,7 +174,7 @@ class ArticleManagement extends React.Component {
             <Col xs={12} sm={13} md={15} lg={16} xl={17}>
               <Button icon="plus" type="primary" size="small" onClick={this.toggleEditorialPanel}>新增&nbsp;</Button>
               <Button icon="filter" type={conditionQuery.category && Object.keys(conditionQuery.category).length > 0 ? "danger" : "primary"} size="small" onClick={this.showFilterModal} style={{ marginLeft: "20px" }}>筛选&nbsp;</Button>
-              <Button icon="star" type={allSelectedItem ? "danger" : "primary"} size="small" onClick={this.selectAllOrPart} style={{ marginLeft: "20px" }}>{allSelectedItem ? "反选" : "全选"}&nbsp;</Button>
+              <Button icon="star" type={allSelectedFlag ? "danger" : "primary"} size="small" onClick={this.selectAllOrPart} style={{ marginLeft: "20px" }}>{allSelectedFlag ? "反选" : "全选"}&nbsp;</Button>
               <Button icon={showSorter ? "right-circle-o" : "left-circle-o"} type="primary" size="small" onClick={this.showSorter} style={{ marginLeft: "20px" }}>排序&nbsp;</Button>
               {showSorter &&
                 <Fragment>
@@ -203,61 +213,58 @@ class ArticleManagement extends React.Component {
               </Tooltip>
             </Col>
             <Col xs={10} sm={9} md={8} lg={7} xl={6}>
-              <Input.Search placeholder="请输入标题" onSearch={this.handleOnSearch} enterButton ref={inputSearch => this.inputSearch = inputSearch} />
+              <Input.Search placeholder="请输入回复内容" onSearch={this.handleOnSearch} enterButton ref={inputSearch => this.inputSearch = inputSearch} />
             </Col>
           </Row>
           <List
             loading={loading}
-            size="large"
-            grid={{ gutter: 16, sm: 2, md: 3, xl: 3, xxl: 3 }}
             dataSource={list}
             pagination={{
               showQuickJumper: true,
               showSizeChanger: true,
               onChange: this.handlePageChange,
               onShowSizeChange: this.handlePageChange,
-              pageSizeOptions: ["12", "24", "36", "48"],
+              // pageSizeOptions: ["10", "20", "30", "40"],
               pageSize: size,
-              defaultPageSize: 12,
+              // defaultPageSize: 10,
               total,
               current: index
             }}
             renderItem={item => (
-              <List.Item>
-                <Card
-                  title={<Tooltip title={item.title}><span>{item.title}</span></Tooltip>}
-                  extra={<Tag color="purple"><Icon type="tag" />&nbsp;{item.sort_name},{item.category_name}</Tag>}
-                  actions={[
-                    <Icon type="form" style={{ color: "green", width: "60px" }} onClick={() => this.handleItems(FORM, item)} />,
-                    <Icon type="delete" style={{ color: "red", width: "60px" }} onClick={() => this.handleItems(DELETE, item)} />,
-                    item.is_top === 0 ? <Icon type="arrow-up" style={{ color: "#4169E1", width: "60px" }} onClick={() => this.handleItems(TOP, item)} /> : <Icon type="arrow-down" style={{ color: "black", width: "60px" }} onClick={() => this.handleItems(UNTOP, item)} />,
-                    item.disabled === 0 ? <Icon type="lock" style={{ color: "#4169E1", width: "60px" }} onClick={() => this.handleItems(LOCK, item)} /> : <Icon type="unlock" style={{ color: "black", width: "60px" }} onClick={() => this.handleItems(UNLOCK, item)} />,
-                    <Icon type="eye" style={{ color: "#A52A2A", width: "60px" }} onClick={() => this.readArticle(item)} />,
-                  ]}
-                  className={styles.eachChild}
-                  style={{ position: "relative", overflow: "hidden", background: selectedItems.some(i => i.id === item.id) && "#FFFFE0" }}
-                  onClick={() => this.toggleItem(item)}
-                >
-                  <div style={{ marginBottom: "5px", fontSize: "12px" }}>
-                    <Ellipsis lines={1}>
-                      标签：{item.label ? item.label.split("&&").map(i => <Tag color="volcano">{i}</Tag>) : <Tag color="volcano">无</Tag>}
-                    </Ellipsis>
-                  </div>
-                  <div style={{ height: "45px" }}>
-                    <Ellipsis lines={2}>
-                      摘要：{item.abstract ? item.abstract : "无"}
-                    </Ellipsis>
-                  </div>
-                  <div style={{ marginTop: "5px", fontSize: "12px" }}>
-                    <div style={{ float: "left" }}><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(item.create_time)))}</div>
-                    <div style={{ float: "right" }}><Icon type="edit" />&nbsp;{timeFormat(Number(new Date(item.modified_time)))}</div>
-                  </div>
-                  {item.is_top &&
-                    <div style={{ position: "absolute", background: "gray", top: "5px", right: "-55px", width: "150px", textAlign: "center", overflow: "hidden", transform: "rotate(40deg)" }}>
-                      <span style={{ color: "yellow" }}>置顶</span>
-                    </div>
+              <List.Item
+                style={{ background: selectedItems.map(i=>i.id).includes(item.id) && "#FFFFE0" }}
+                className={styles.eachChild}
+                key={item.id}
+                actions={[
+                  <span>{timeFormat(Number(new Date(item.create_time)))}</span>,
+                  <Button size="small" type="danger" onClick={() => this.handleItems(DELETE,item)}>删除</Button>,
+                  <Button size="small" type="primary" onClick={() => this.handleItems(item.is_show ?UNSHOW : SHOW, item)}>{item.is_show ? "隐藏" : "显示"}</Button>,
+                  <Button size="small" type="primary" onClick={() => this.handleItems(item.is_top ?UNTOP : TOP, item)}>{item.is_top ?  "取置":"置顶"}</Button>
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={
+                    <Fragment>
+                      <Checkbox checked={allSelectedFlag ? true : selectedItems.map(i=>i.id).includes(item.id)} onChange={()=>this.toggleItem(item)} style={{marginLeft:"20px",marginTop:"10px"}} />
+                      <Badge>&nbsp;&nbsp;</Badge>
+                      <Avatar src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png" />
+                    </Fragment>
                   }
-                </Card>
+                  title={
+                    <a onClick={() => this.showContentDetail(item)}>《{item.title}》&nbsp;&nbsp;
+                      {item.is_top === 1 && <Tag color="magenta">已置顶</Tag>}&nbsp;&nbsp;
+                      {item.is_show === 1 && <Tag color="orange">已显示</Tag>}
+                    </a>
+                  }
+                  description={
+                    <span style={{ overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", display: "inline-block", width: "500px" }}>
+                      <span style={{ color: "green",fontWeight:"bold" }}><i>{item.from_name}&nbsp;</i></span>
+                      <span>回复&nbsp;</span>
+                      <span style={{ color: "#A0522D" ,fontWeight:"bold"}}><i>@{item.to_name?item.to_name:"文章"}&nbsp;</i>:</span>&nbsp;
+                      <a onClick={() => this.showContentDetail(item)}><i>{item.content}</i></a>
+                    </span>
+                  }
+                />
               </List.Item>
             )}
           />
@@ -279,6 +286,12 @@ class ArticleManagement extends React.Component {
                 </Tree.TreeNode>
               )}
             </Tree>
+            <Select
+              labelInValue
+              mode="multiple"
+            >
+                {articlecontainer.list.map(i=><Select.Option key={i.id}>{i.title}</Select.Option>)}
+            </Select>
           </Modal>
         </Card>
         {/* // </PageHeaderLayout> */}
@@ -286,7 +299,7 @@ class ArticleManagement extends React.Component {
     );
   }
 }
-export default ArticleManagement;
+export default CommentManagement;
 
 
 

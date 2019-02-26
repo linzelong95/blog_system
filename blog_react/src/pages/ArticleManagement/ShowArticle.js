@@ -35,9 +35,10 @@ class ShowArticle extends React.Component {
     }
 
     getCommentList = () => {
-        const { request, item: { id: aid } } = this.props;
-        const {conditionQuery}=this.state;
-        request({ netUrl: LIST.url, aid,conditionQuery }, (commentObj) => this.setState({ commentObj }));
+        const { request, item: { id } } = this.props;
+        const {conditionQuery:con}=this.state;
+        const conditionQuery={...con,aids:[id]};
+        request({ netUrl: LIST.url, conditionQuery ,prettyFormat: true }, (commentObj) => this.setState({ commentObj,conditionQuery }));
     }
 
     commentSort=(e)=>{
