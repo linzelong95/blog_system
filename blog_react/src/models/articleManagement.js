@@ -19,7 +19,6 @@ export default {
   },
   effects: {
     *handleArticles({ payload, callback}, { call, put, select }) {
-      console.log("model",payload)
       const { index: pageIndex, size: pageSize, lang } = yield select(models => models.articleManagement);
       const { netUrl, index = pageIndex, size = pageSize, conditionQuery } = payload;
       const position = netUrl.lastIndexOf("/") + 1;

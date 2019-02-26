@@ -9,7 +9,7 @@ import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
-const { UserArticleAPI: { LIST,CONTENT },UserCateAPI } = UrlEnum;
+const { UserArticleAPI: { LIST, CONTENT }, UserCateAPI } = UrlEnum;
 
 
 @connect(({ articleManagement, loading }) => ({
@@ -35,11 +35,7 @@ class HomePage extends React.Component {
     this.props.dispatch({ type: "articleManagement/handleArticles", payload, callback });
   }
 
-  handleShowALL = () => {
-    console.log(this.inputSearch.input)
-    // this.inputSearch.input.value="1111";
-    this.setState({ conditionQuery: {}, filterKeys: [] }, () => this.request({ index: 1 }));
-  }
+  handleShowALL = () => this.setState({ conditionQuery: {}, filterKeys: [] }, () => this.request({ index: 1 }));
 
   handlePageChange = (index, size) => this.request({ index, size });
 
@@ -95,8 +91,8 @@ class HomePage extends React.Component {
       const arr = item.split("-");
       if (arr.length === 1) {
         category.sort.push(parseInt(arr.pop(), 10));
-      } else {
-        if (!category.sort.includes(parseInt(arr[0], 10))) category.child.push(parseInt(arr.pop(), 10));
+      } else if (!category.sort.includes(parseInt(arr[0], 10))) {
+        category.child.push(parseInt(arr.pop(), 10));
       }
     });
     this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category } }), () => this.request({ index: 1 }));
@@ -155,7 +151,7 @@ class HomePage extends React.Component {
                   title={<Tooltip title={item.title}><span>{item.title}</span></Tooltip>}
                   extra={<Tag color="purple"><Icon type="tag" />&nbsp;{item.sort_name},{item.category_name}</Tag>}
                   className={styles.eachChild}
-                  style={{ position: "relative", overflow: "hidden"}}
+                  style={{ position: "relative", overflow: "hidden" }}
                   onClick={() => this.readArticle(item)}
                 >
                   <div style={{ marginBottom: "5px", fontSize: "12px" }}>
@@ -200,7 +196,7 @@ class HomePage extends React.Component {
               )}
             </Tree>
           </Modal>
-          {drawerVisible&&<ShowArticle loading={loading} visible={drawerVisible} item={formItem} onClose={this.onCloseDrawer} request={this.request}  />}
+          {drawerVisible && <ShowArticle loading={loading} visible={drawerVisible} item={formItem} onClose={this.onCloseDrawer} request={this.request} />}
         </Card>
       </GridContent>
     );

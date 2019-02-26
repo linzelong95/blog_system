@@ -5,24 +5,9 @@ import PageHeaderLayout from '@/components/PageHeaderWrapper';
 import CateEditorialForm from './CateEditorialForm';
 import SortEditorialForm from './SortEditorialForm';
 import { timeFormat } from '@/utils/utils';
+import { UrlEnum } from '@/assets/Enum';
 
-const SortAPI = {
-  LIST: { url: "/api/admin/sort/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
-  DELETE: { url: "/api/admin/sort/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
-  FORM: { url: `/api/admin/sort/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
-  LOCK: { url: `/api/admin/sort/lock`, desc: { zh_CN: "锁定", en_US: "lock" }, actionTip: { zh_CN: "将被锁定，锁定后可以解锁和删除，但不可编辑！", en_US: "will be lock,and then  can be released  or deleted, but can not be edited!" } },
-  UNLOCK: { url: `/api/admin/sort/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
-}
-
-const CateAPI = {
-  LIST: { url: "/api/admin/cate/list", desc: { zh_CN: "获取二级分类列表", en_US: "getList" } },
-  DELETE: { url: "/api/admin/cate/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
-  FORM: { url: `/api/admin/cate/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
-  LOCK: { url: `/api/admin/cate/lock`, desc: { zh_CN: "锁定", en_US: "lock" }, actionTip: { zh_CN: "将被锁定，锁定后可以解锁和删除，但不可编辑！", en_US: "will be lock,and then  can be released  or deleted, but can not be edited!" } },
-  UNLOCK: { url: `/api/admin/cate/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
-}
-
-
+const { AdminSortAPI, AdminCateAPI } = UrlEnum;
 
 @connect(({ articleManagement, loading }) => ({
   articleManagement,
@@ -44,7 +29,7 @@ class CategoryManagement extends React.Component {
 
   request = (params, callback) => {
     const { conditionQuery, tabKey } = this.state;
-    const netUrl = tabKey === "sort" ? SortAPI.LIST.url : CateAPI.LIST.url;
+    const netUrl = tabKey === "sort" ? AdminSortAPI.LIST.url : AdminCateAPI.LIST.url;
     const payload = { netUrl, conditionQuery, ...params };
     this.props.dispatch({ type: "articleManagement/handleArticles", payload, callback });
     if (payload.netUrl !== netUrl) this.cleanSelectedItem();
@@ -85,17 +70,17 @@ class CategoryManagement extends React.Component {
   }
 
   handleChangeTabs = (tabKey) => {
+    this.props.dispatch({ type: "articleManagement/save", payload: { list: [] } });
     this.setState({ tabKey, selectedRowKeys: [], selectedItems: [], conditionQuery: {}, filters: {} });
     if (tabKey === "sort") {
-      this.request({ netUrl: SortAPI.LIST.url, index: 1 });
+      this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 10 });
     } else if (tabKey === "cate") {
-      this.request({ netUrl: CateAPI.LIST.url, index: 1 });
-      const callback = (res) => this.setState({ categoryOptions: res.list });
-      this.request({ netUrl: CateAPI.LIST.url, index: 1, size: 100, prettyFormat: true }, callback);
+      this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 10 });
+      this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true }, (res) => this.setState({ categoryOptions: res.list }));
     } else if (tabKey === "all") {
-      this.request({ netUrl: CateAPI.LIST.url, index: 1, size: 100, allCateAndSort: true });
+      this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 100, allCateAndSort: true });
     } else {
-      this.request({ netUrl: CateAPI.LIST.url, index: 1, size: 100, prettyFormat: true });
+      this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true });
     }
   }
 
@@ -133,6 +118,21 @@ class CategoryManagement extends React.Component {
 
   handleOnSearch = (val) => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, name: val.replace(/(^\s*)|(\s*$)/g, "") } }), () => this.request({ index: 1 }));
 
+  getDataSource = (data) => {
+    const { tabKey } = this.state;
+    const dataSource = [];
+    data.forEach(i => {
+      const { children } = i;
+      const item = { ...i };
+      delete item.children;
+      if (children && children.length > 0) {
+        const childs = i.children ? i.children.map(c => ({ ...c, id: `${i.id}-${c.id}` })) : [];
+        item.children = tabKey === "using" ? childs.filter(cc => cc.is_use) : childs;
+      }
+      dataSource.push(item);
+    });
+    return dataSource;
+  }
 
   render() {
     const { articleManagement: { total = 10, list = [], size = 10, index = 1 }, loading } = this.props;
@@ -152,10 +152,10 @@ class CategoryManagement extends React.Component {
       {
         title: "操作", dataIndex: 'action', width: "20%", render: (_, item) =>
           <Fragment>
-            <Button icon="form" size="small" shape="circle" onClick={() => this.handleItems(SortAPI.FORM, item)} style={{ color: "#8B3A3A" }} />
-            <Button icon="delete" size="small" shape="circle" onClick={() => this.handleItems(SortAPI.DELETE, item)} style={{ color: "red", marginLeft: "10px" }} />
-            {item.disabled === 0&&<Button icon="lock" size="small" shape="circle" onClick={() => this.handleItems(SortAPI.LOCK, item)} style={{ color: "#A020F0", marginLeft: "10px" }} />}
-            {item.disabled === 1&&<Button icon="unlock" size="small" shape="circle" onClick={() => this.handleItems(SortAPI.UNLOCK, item)} style={{ color: "green", marginLeft: "10px" }} />}
+            <Button icon="form" size="small" shape="circle" onClick={() => this.handleItems(AdminSortAPI.FORM, item)} style={{ color: "#8B3A3A" }} />
+            <Button icon="delete" size="small" shape="circle" onClick={() => this.handleItems(AdminSortAPI.DELETE, item)} style={{ color: "red", marginLeft: "10px" }} />
+            {item.disabled === 0 && <Button icon="lock" size="small" shape="circle" onClick={() => this.handleItems(AdminSortAPI.LOCK, item)} style={{ color: "#A020F0", marginLeft: "10px" }} />}
+            {item.disabled === 1 && <Button icon="unlock" size="small" shape="circle" onClick={() => this.handleItems(AdminSortAPI.UNLOCK, item)} style={{ color: "green", marginLeft: "10px" }} />}
           </Fragment>
       },
     ];
@@ -168,10 +168,10 @@ class CategoryManagement extends React.Component {
       {
         title: "操作", dataIndex: 'action', width: "20%", render: (_, item) =>
           <Fragment>
-            <Button icon="form" size="small" shape="circle" onClick={() => this.handleItems(CateAPI.FORM, item)} style={{ color: "#8B3A3A" }} />
-            <Button icon="delete" size="small" shape="circle" onClick={() => this.handleItems(CateAPI.DELETE, item)} style={{ color: "red", marginLeft: "10px" }} />
-            {item.disabled === 0&&<Button icon="lock" size="small" shape="circle" onClick={() => this.handleItems(CateAPI.LOCK, item)} style={{ color: "#A020F0", marginLeft: "10px" }} />}
-            {item.disabled === 1&&<Button icon="unlock" size="small" shape="circle" onClick={() => this.handleItems(CateAPI.UNLOCK, item)} style={{ color: "green", marginLeft: "10px" }} />}
+            <Button icon="form" size="small" shape="circle" onClick={() => this.handleItems(AdminCateAPI.FORM, item)} style={{ color: "#8B3A3A" }} />
+            <Button icon="delete" size="small" shape="circle" onClick={() => this.handleItems(AdminCateAPI.DELETE, item)} style={{ color: "red", marginLeft: "10px" }} />
+            {item.disabled === 0 && <Button icon="lock" size="small" shape="circle" onClick={() => this.handleItems(AdminCateAPI.LOCK, item)} style={{ color: "#A020F0", marginLeft: "10px" }} />}
+            {item.disabled === 1 && <Button icon="unlock" size="small" shape="circle" onClick={() => this.handleItems(AdminCateAPI.UNLOCK, item)} style={{ color: "green", marginLeft: "10px" }} />}
           </Fragment>
       },
     ];
@@ -181,23 +181,6 @@ class CategoryManagement extends React.Component {
       { title: "使用状态", dataIndex: 'is_use', width: "30%", filteredValue: filters.disabled || null, render: (val) => <Tag color="blue">{val === 0 ? "暂未使用" : "正在使用"}</Tag> },
     ];
 
-    const expandRender = (record) => {
-      const expandColumn = [
-        { title: "名称", dataIndex: 'name', width: "30%" },
-        { title: "可用状态", dataIndex: 'disabled', width: "30%", render: (val) => <Tag color="blue">{val === 0 ? "可用" : "不可用"}</Tag> },
-        { title: "使用状态", dataIndex: 'is_use', width: "30%", render: (val) => <Tag color="blue">{val === 0 ? "暂未使用" : "正在使用"}</Tag> },
-      ];
-      return (
-        <Table
-          showHeader={false}
-          dataSource={record.children}
-          columns={expandColumn}
-          rowKey={row => row.id}
-          pagination={false}
-        />
-      )
-    }
-
     return (
       <PageHeaderLayout tabList={tabList} onTabChange={this.handleChangeTabs}>
         <Card>
@@ -205,20 +188,19 @@ class CategoryManagement extends React.Component {
             <Row type="flex" align="middle" style={{ marginBottom: "15px" }}>
               <Col xs={12} sm={13} md={15} lg={16} xl={17}>
                 <Button icon="plus" type="primary" size="small" onClick={this.toggleEditorialPanel}>新增&nbsp;</Button>
-                {/* <Button icon="filter" type={conditionQuery.category&&Object.keys(conditionQuery.category).length>0 ? "danger" : "primary"} size="small" onClick={this.showFilterModal} style={{ marginLeft: "20px" }}>筛选&nbsp;</Button> */}
                 {selectedItems.length > 0 &&
                   <Fragment>
                     <Badge count={selectedItems.length} title="已选项数">&nbsp;
                     <Button icon="reload" type="primary" size="small" onClick={this.cleanSelectedItem} style={{ marginLeft: "16px" }}>清空&nbsp;</Button>
                     </Badge>
                     <Tooltip title="一键删除">
-                      <Button icon="delete" size="small" shape="circle" onClick={() => this.handleItems(tabKey === "sort" ? SortAPI.DELETE : CateAPI.DELETE)} style={{ color: "red", marginLeft: "20px" }} />
+                      <Button icon="delete" size="small" shape="circle" onClick={() => this.handleItems(tabKey === "sort" ? AdminSortAPI.DELETE : AdminCateAPI.DELETE)} style={{ color: "red", marginLeft: "20px" }} />
                     </Tooltip>
                     <Tooltip title="一键解锁">
-                      <Button icon="unlock" size="small" shape="circle" onClick={() => this.handleItems(tabKey === "sort" ? SortAPI.UNLOCK : CateAPI.UNLOCK)} style={{ color: "green", marginLeft: "10px" }} />
+                      <Button icon="unlock" size="small" shape="circle" onClick={() => this.handleItems(tabKey === "sort" ? AdminSortAPI.UNLOCK : AdminCateAPI.UNLOCK)} style={{ color: "green", marginLeft: "10px" }} />
                     </Tooltip>
                     <Tooltip title="一键锁定">
-                      <Button icon="lock" size="small" shape="circle" onClick={() => this.handleItems(tabKey === "sort" ? SortAPI.LOCK : CateAPI.LOCK)} style={{ color: "#A020F0", marginLeft: "10px" }} />
+                      <Button icon="lock" size="small" shape="circle" onClick={() => this.handleItems(tabKey === "sort" ? AdminSortAPI.LOCK : AdminCateAPI.LOCK)} style={{ color: "#A020F0", marginLeft: "10px" }} />
                     </Tooltip>
                   </Fragment>
                 }
@@ -239,9 +221,8 @@ class CategoryManagement extends React.Component {
             onChange={this.handleTableChange}
             rowSelection={tabKey === "all" || tabKey === "using" ? undefined : { selectedRowKeys, onChange: this.handleSelectRows }}
             loading={loading}
-            dataSource={tabKey === "using" ? list.filter(i => { if (i.is_use && i.children) return i.children = i.children.filter(v => v.is_use); }) : list}
+            dataSource={this.getDataSource(list)}
             pagination={{ showQuickJumper: true, showSizeChanger: true, current: index, total, pageSize: size }}
-            expandedRowRender={(tabKey === "all" || tabKey === "using") ? expandRender : undefined}
           />
           {editorialPanelVisible &&
             <EditorialForm

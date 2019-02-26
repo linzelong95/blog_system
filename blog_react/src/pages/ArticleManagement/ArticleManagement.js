@@ -10,11 +10,11 @@ import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
-const { AdminArticleAPI: { LIST, DELETE, FORM,TOP,UNTOP,LOCK,UNLOCK,CONTENT },AdminCateAPI } = UrlEnum;
+const { AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT }, AdminCateAPI } = UrlEnum;
 
-@connect(({ articleManagement, global,loading }) => ({
+@connect(({ articleManagement, global, loading }) => ({
   articleManagement,
-  currentUser:global.currentUser,
+  currentUser: global.currentUser,
   loading: loading.models.articleManagement,
 }))
 class ArticleManagement extends React.Component {
@@ -40,9 +40,7 @@ class ArticleManagement extends React.Component {
     if (payload.netUrl !== LIST.url) this.cleanSelectedItem();
   }
 
-  handleShowALL = () => {
-    this.setState({ conditionQuery: {}, filterKeys: [] }, () => this.request({ index: 1 }));
-  }
+  handleShowALL = () => this.setState({ conditionQuery: {}, filterKeys: [] }, () => this.request({ index: 1 }));
 
   handlePageChange = (index, size) => this.request({ index, size });
 
@@ -159,8 +157,8 @@ class ArticleManagement extends React.Component {
       const arr = item.split("-");
       if (arr.length === 1) {
         category.sort.push(parseInt(arr.pop(), 10));
-      } else {
-        if (!category.sort.includes(parseInt(arr[0], 10))) category.child.push(parseInt(arr.pop(), 10));
+      } else if (!category.sort.includes(parseInt(arr[0], 10))) {
+        category.child.push(parseInt(arr.pop(), 10));
       }
     });
     this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category } }), () => this.request({ index: 1 }));
@@ -173,7 +171,6 @@ class ArticleManagement extends React.Component {
     const { articleManagement: { total = 10, list = [], size = 12, index = 1 }, loading, dispatch } = this.props;
     const { allSelectedItem, selectedItems, editorialPanelVisible, drawerVisible, formItem, showSorter, filterModalVisible, categoryOptions, filterKeys, conditionQuery } = this.state;
     return (
-      // <PageHeaderLayout>
       <GridContent>
         <Card>
           <Row type="flex" align="middle" style={{ marginBottom: "15px" }}>
@@ -296,7 +293,7 @@ class ArticleManagement extends React.Component {
               )}
             </Tree>
           </Modal>
-          {drawerVisible&&<ShowArticle loading={loading} visible={drawerVisible} item={formItem} onClose={this.onCloseDrawer} request={this.request}  />}
+          {drawerVisible && <ShowArticle loading={loading} visible={drawerVisible} item={formItem} onClose={this.onCloseDrawer} request={this.request} />}
           {editorialPanelVisible &&
             <EditorialForm
               editorialPanelVisible={editorialPanelVisible}
@@ -307,7 +304,6 @@ class ArticleManagement extends React.Component {
             />
           }
         </Card>
-        {/* // </PageHeaderLayout> */}
       </GridContent>
     );
   }
