@@ -24,18 +24,23 @@ class HomePage extends React.Component {
     drawerVisible: false,
     filterModalVisible: false,
     categoryOptions: [],
-    filterKeys: [],
+    temporaryCondition: {},
   };
 
   componentDidMount = () => this.request({ index: 1, size: 12 });
 
   request = (params, callback) => {
-    const { conditionQuery } = this.state;
+    const { conditionQuery: con } = this.state;
+    const conditionQuery = { ...con };
+    delete conditionQuery.filteredSortArr;
     const payload = { netUrl: LIST.url, conditionQuery, ...params };
     this.props.dispatch({ type: "articleManagement/handleArticles", payload, callback });
   }
 
-  handleShowALL = () => this.setState({ conditionQuery: {}, filterKeys: [] }, () => this.request({ index: 1 }));
+  handleShowALL = () => this.setState({ conditionQuery: {}, temporaryCondition: {} }, () => {
+    this.request({ index: 1 });
+    this.inputSearch.input.state.value = "";
+  });
 
   handlePageChange = (index, size) => this.request({ index, size });
 
@@ -77,17 +82,18 @@ class HomePage extends React.Component {
 
   filterRequest = (method) => {
     if (method === "clear") {
-      this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category: {} }, filterKeys: [] }), () => this.request({ index: 1 }));
-      this.toggleFilterModal();
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr: [] } }));
       return;
     }
+    this.toggleFilterModal();
     if (method === "exit") {
-      this.toggleFilterModal();
+      const { conditionQuery: { filteredSortArr = [] } } = this.state;
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
       return;
     }
-    const { filterKeys } = this.state;
+    const { temporaryCondition: { filteredSortArr = [] } } = this.state;
     const category = { sort: [], child: [] };
-    filterKeys.forEach(item => {
+    filteredSortArr.forEach(item => {
       const arr = item.split("-");
       if (arr.length === 1) {
         category.sort.push(parseInt(arr.pop(), 10));
@@ -95,28 +101,27 @@ class HomePage extends React.Component {
         category.child.push(parseInt(arr.pop(), 10));
       }
     });
-    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category } }), () => this.request({ index: 1 }));
-    this.toggleFilterModal();
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr } }), () => this.request({ index: 1 }));
   }
 
-  conditionTreeSelect = (filterKeys) => this.setState({ filterKeys });
+  conditionTreeSelect = (filteredSortArr) => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
 
   render() {
     const { articleManagement: { total = 10, list = [], size = 12, index = 1 }, loading, dispatch } = this.props;
-    const { drawerVisible, formItem, showSorter, filterModalVisible, categoryOptions, filterKeys, conditionQuery } = this.state;
+    const { drawerVisible, formItem, showSorter, filterModalVisible, categoryOptions, conditionQuery, temporaryCondition } = this.state;
     return (
       <GridContent>
         <Card>
           <Row type="flex" align="middle" style={{ marginBottom: "15px" }}>
             <Col xs={12} sm={13} md={15} lg={16} xl={17}>
-              <Button icon="filter" type={conditionQuery.category && Object.keys(conditionQuery.category).length > 0 ? "danger" : "primary"} size="small" onClick={this.showFilterModal}>筛选&nbsp;</Button>
+              <Button icon="filter" type={conditionQuery.filteredSortArr && conditionQuery.filteredSortArr.length > 0 ? "danger" : "primary"} size="small" onClick={this.showFilterModal}>筛选&nbsp;</Button>
               <Button icon={showSorter ? "right-circle-o" : "left-circle-o"} type="primary" size="small" onClick={this.showSorter} style={{ marginLeft: "20px" }}>排序&nbsp;</Button>
               {showSorter &&
                 <Fragment>
                   <Tag color="magenta" style={{ marginLeft: "10px" }} onClick={() => this.sort("default")}>默认</Tag>
-                  <Tag color="magenta" id="title" style={{ marginLeft: "5px" }} onClick={this.sort}>标题<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "title" && conditionQuery.orderBy.by === "asc" ? "up" : "down"} /></Tag>
-                  <Tag color="magenta" id="create_time" style={{ marginLeft: "5px" }} onClick={this.sort}>创建时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "create_time" && conditionQuery.orderBy.by === "asc" ? "up" : "down"} /></Tag>
-                  <Tag color="magenta" id="modified_time" style={{ marginLeft: "5px" }} onClick={this.sort}>修改时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "modified_time" && conditionQuery.orderBy.by === "asc" ? "up" : "down"} /></Tag>
+                  <Tag color="magenta" id="title" style={{ marginLeft: "5px" }} onClick={this.sort}>标题<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "title" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
+                  <Tag color="magenta" id="create_time" style={{ marginLeft: "5px" }} onClick={this.sort}>创建时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "create_time" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
+                  <Tag color="magenta" id="modified_time" style={{ marginLeft: "5px" }} onClick={this.sort}>修改时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "modified_time" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
                 </Fragment>
               }
             </Col>
@@ -126,7 +131,7 @@ class HomePage extends React.Component {
               </Tooltip>
             </Col>
             <Col xs={10} sm={9} md={8} lg={7} xl={6}>
-              <Input.Search placeholder="请输入标题" onSearch={this.handleOnSearch} enterButton ref={inputSearch => this.inputSearch = inputSearch} />
+              <Input.Search placeholder="请输入标题" onSearch={this.handleOnSearch} enterButton allowClear ref={inputSearch => this.inputSearch = inputSearch} />
             </Col>
           </Row>
           <List
@@ -183,12 +188,12 @@ class HomePage extends React.Component {
             title="请选择筛选条件"
             onCancel={() => this.filterRequest("exit")}
             footer={[
-              <Button onClick={() => this.filterRequest("exit")}>退出</Button>,
+              <Button onClick={() => this.filterRequest("exit")}>不更改并退出</Button>,
               <Button type="danger" onClick={() => this.filterRequest("clear")}>清空</Button>,
-              <Button type="primary" onClick={this.filterRequest}>筛选</Button>,
+              <Button type="primary" onClick={this.filterRequest}>确定</Button>,
             ]}
           >
-            <Tree checkable showLine onCheck={this.conditionTreeSelect} defaultExpandedKeys={filterKeys} checkedKeys={filterKeys}>
+            <Tree checkable showLine onCheck={this.conditionTreeSelect} defaultExpandedKeys={temporaryCondition.filteredSortArr || []} checkedKeys={temporaryCondition.filteredSortArr || []}>
               {categoryOptions.map(item =>
                 <Tree.TreeNode title={item.name} key={`${item.id}`} selectable={false} disabled={item.disabled}>
                   {item.children.map(i => <Tree.TreeNode title={i.name} key={`${item.id}-${i.id}`} selectable={false} disabled={item.disabled === 0 ? i.disabled : true} />)}

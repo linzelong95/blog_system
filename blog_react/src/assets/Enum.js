@@ -821,6 +821,7 @@ const UrlEnum = {
     UNLOCK: { url: `/api/admin/article/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
   },
   AdminCommentAPI: {
+    BASE_URL: "/admin/comment",
     LIST: { url: "/api/admin/comment/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
     DELETE: { url: "/api/admin/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
     INSERT: { url: "/api/admin/comment/insert", desc: { zh_CN: "添加", en_US: "insert" } },

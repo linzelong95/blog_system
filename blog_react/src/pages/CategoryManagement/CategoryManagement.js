@@ -35,7 +35,10 @@ class CategoryManagement extends React.Component {
     if (payload.netUrl !== netUrl) this.cleanSelectedItem();
   }
 
-  handleShowALL = () => this.setState({ conditionQuery: {}, filters: {} }, () => this.request({ index: 1 }));
+  handleShowALL = () => this.setState({ conditionQuery: {}, filters: {} }, () => {
+    this.request({ index: 1 });
+    this.inputSearch.input.state.value = "";
+  });
 
   cleanSelectedItem = () => this.setState({ selectedRowKeys: [], selectedItems: [] });
 
@@ -71,6 +74,7 @@ class CategoryManagement extends React.Component {
 
   handleChangeTabs = (tabKey) => {
     this.props.dispatch({ type: "articleManagement/save", payload: { list: [] } });
+    this.inputSearch.input.state.value="";
     this.setState({ tabKey, selectedRowKeys: [], selectedItems: [], conditionQuery: {}, filters: {} });
     if (tabKey === "sort") {
       this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 10 });
@@ -211,7 +215,7 @@ class CategoryManagement extends React.Component {
                 </Tooltip>
               </Col>
               <Col xs={10} sm={9} md={8} lg={7} xl={6}>
-                <Input.Search placeholder="请输入名称" onSearch={this.handleOnSearch} enterButton ref={inputSearch => this.inputSearch = inputSearch} />
+                <Input.Search placeholder="请输入名称" onSearch={this.handleOnSearch} enterButton allowClear ref={inputSearch => this.inputSearch = inputSearch} />
               </Col>
             </Row>
           }

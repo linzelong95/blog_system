@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Select, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Pagination, Tree, Avatar, Radio } from 'antd';
+import { Select, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Pagination, Tree, Avatar, Radio, Alert } from 'antd';
 import PageHeaderLayout from '@/components/PageHeaderWrapper';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
@@ -9,7 +9,7 @@ import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
 
-const { AdminCommentAPI: { LIST, DELETE, SHOW, UNSHOW, TOP, UNTOP }, AdminCateAPI, AdminArticleAPI } = UrlEnum;
+const { AdminCommentAPI: { BASE_URL, LIST, DELETE, SHOW, UNSHOW, TOP, UNTOP }, AdminCateAPI, AdminArticleAPI } = UrlEnum;
 
 
 @connect(({ articleManagement, loading }) => ({
@@ -35,40 +35,30 @@ class CommentManagement extends React.Component {
       query: "",
       selectedItems: []
     },
-    filterSort: "selectedByCate"
+    filterSort: "selectedByCate",
+    temporaryCondition: {},
   };
 
   componentDidMount = () => this.request({ index: 1, size: 10 });
 
   request = (params, callback) => {
-    const { conditionQuery:con } = this.state;
-    const {filterKeys}=con;
-    const category = { sort: [], child: [] };
-    if(filterKeys&&filterKeys.length){
-      filterKeys.forEach(item => {
-        const arr = item.split("-");
-        if (arr.length === 1) {
-          category.sort.push(parseInt(arr.pop(), 10));
-        } else if (!category.sort.includes(parseInt(arr[0], 10))) {
-          category.child.push(parseInt(arr.pop(), 10));
-        }
-      });
-    }
-    const conditionQuery={...con};
-    delete conditionQuery.filterKeys;
-    conditionQuery.category=category;
+    const { conditionQuery: con } = this.state;
+    const conditionQuery = { ...con };
+    delete conditionQuery.filteredSortArr;
+    delete conditionQuery.articleArr;
     const payload = { netUrl: LIST.url, conditionQuery, ...params };
     this.props.dispatch({ type: "articleManagement/handleArticles", payload, callback });
     if (payload.netUrl !== LIST.url) this.cleanSelectedItem();
   }
 
-  handleShowALL = () => this.setState({ conditionQuery: {} }, () => this.request({ index: 1 }));
+  handleShowALL = () => this.setState({ conditionQuery: {}, temporaryCondition: {} }, () => {
+    this.request({ index: 1 });
+    this.inputSearch.input.state.value = "";
+  });
 
   handlePageChange = (index, size) => this.request({ index, size });
 
-
   handleOnSearch = (val) => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, content: val.replace(/(^\s*)|(\s*$)/g, "") } }), () => this.request({ index: 1 }));
-
 
   toggleEditorialPanel = () => this.setState((oldState) => ({ editorialPanelVisible: !oldState.editorialPanelVisible }));
 
@@ -86,13 +76,11 @@ class CommentManagement extends React.Component {
     let content = "";
     let items = [];
     if (item) {
-      const { id, name, title } = item;
-      items = [{ id, name }];
-      if (netUrl.includes("/article")) items = [{ id, name: title }];
+      const { id, name, content, pid } = item;
+      items = [{ id, name: content, pid }];
       content = `【${items[0].name}】${actionTip[lang]}`;
     } else {
-      items = selectedItems.map(v => ({ id: v.id, name: v.name }));
-      if (netUrl.includes("/article")) items = selectedItems.map(v => ({ id: v.id, name: v.title }));;
+      items = selectedItems.map(v => ({ id: v.id, name: v.content, pid: v.pid }));
       content = lang === "zh_CN" ? `注意：【${items[0].name}......】等多个所选项${actionTip[lang]}` : `warnning：Such as【${items[0].name}......】,they ${actionTip[lang]}`;
     }
     const title = lang === "zh_CN" ? `确定${desc[lang]}吗？` : `Do you want to ${desc[lang]} what you have selected?`;
@@ -140,8 +128,6 @@ class CommentManagement extends React.Component {
     this.setState({ allSelectedFlag: !allSelectedFlag, selectedItems: newSelectedItems });
   }
 
-
-
   toggleFilterModal = () => this.setState((oldState) => ({ filterModalVisible: !oldState.filterModalVisible }));
 
   showFilterModal = () => {
@@ -152,23 +138,37 @@ class CommentManagement extends React.Component {
 
   filterRequest = (method) => {
     if (method === "clear") {
-      this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, filterKeys: [] } }), () => this.request({ index: 1 }));
-      this.toggleFilterModal();
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr: [], articleArr: [] } }));
       return;
     }
-    if (method === "exit") {
-      this.toggleFilterModal();
-      return;
-    }
-    this.request({ index: 1 });
     this.toggleFilterModal();
+    if (method === "exit") {
+      const { conditionQuery: { filteredSortArr = [], articleArr } } = this.state;
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, articleArr } }));
+      return;
+    }
+    const { temporaryCondition: { filteredSortArr = [], articleArr = [] } } = this.state;
+    const category = { sort: [], child: [] };
+    filteredSortArr.forEach(item => {
+      const arr = item.split("-");
+      if (arr.length === 1) {
+        category.sort.push(parseInt(arr.pop(), 10));
+      } else if (!category.sort.includes(parseInt(arr[0], 10))) {
+        category.child.push(parseInt(arr.pop(), 10));
+      }
+    });
+    const aids = articleArr.map(i => i.key);
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, aids, filteredSortArr, articleArr } }), () => this.request({ index: 1 }));
   }
 
-  conditionTreeSelect = (filterKeys) => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, filterKeys } }));
+  conditionTreeSelect = (filteredSortArr) => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
 
-  filterSort = (e) => this.setState(oldState => ({ filterSort: e.target.value,conditionQuery: { ...oldState.conditionQuery,filterKeys:[], aids:[] } }));
+  filterSort = (e) => {
+    const { target: { value: filterSort } } = e;
+    this.setState({ filterSort });
+  }
 
-  articleSelet=(aid)=>this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, aids:[aid] } }));
+  articleSelet = (articleArr) => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, articleArr } }));
 
   searchItem = ({ query, container, pageIndex, pageSize }) => {
     const { index: preIndex, size: preSize, netUrl } = container;
@@ -179,11 +179,9 @@ class CommentManagement extends React.Component {
     );
   }
 
-
-
   render() {
     const { articleManagement: { total = 10, list = [], size = 12, index = 1 }, loading, dispatch } = this.props;
-    const { filterSort, articlecontainer, allSelectedFlag, selectedItems, editorialPanelVisible, formItem, showSorter, filterModalVisible, categoryOptions, conditionQuery } = this.state;
+    const { filterSort, articlecontainer, allSelectedFlag, selectedItems, editorialPanelVisible, formItem, showSorter, filterModalVisible, categoryOptions, conditionQuery, temporaryCondition } = this.state;
     return (
       // <PageHeaderLayout>
       <GridContent>
@@ -197,9 +195,9 @@ class CommentManagement extends React.Component {
               {showSorter &&
                 <Fragment>
                   <Tag color="magenta" style={{ marginLeft: "10px" }} onClick={() => this.sort("default")}>默认</Tag>
-                  <Tag color="magenta" id="title" style={{ marginLeft: "5px" }} onClick={this.sort}>标题<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "title" && conditionQuery.orderBy.by === "asc" ? "up" : "down"} /></Tag>
-                  <Tag color="magenta" id="create_time" style={{ marginLeft: "5px" }} onClick={this.sort}>创建时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "create_time" && conditionQuery.orderBy.by === "asc" ? "up" : "down"} /></Tag>
-                  <Tag color="magenta" id="modified_time" style={{ marginLeft: "5px" }} onClick={this.sort}>修改时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "modified_time" && conditionQuery.orderBy.by === "asc" ? "up" : "down"} /></Tag>
+                  <Tag color="magenta" id="title" style={{ marginLeft: "5px" }} onClick={this.sort}>标题<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "title" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
+                  <Tag color="magenta" id="create_time" style={{ marginLeft: "5px" }} onClick={this.sort}>创建时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "create_time" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
+                  <Tag color="magenta" id="modified_time" style={{ marginLeft: "5px" }} onClick={this.sort}>修改时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "modified_time" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
                 </Fragment>
               }
               {selectedItems.length > 0 &&
@@ -216,11 +214,11 @@ class CommentManagement extends React.Component {
                   <Tooltip title="一键取置">
                     <Button icon="arrow-down" size="small" shape="circle" onClick={() => this.handleItems(UNTOP)} style={{ color: "#A020F0", marginLeft: "10px" }} />
                   </Tooltip>
-                  <Tooltip title="一键解锁">
-                    <Button icon="unlock" size="small" shape="circle" onClick={() => this.handleItems(UNLOCK)} style={{ color: "green", marginLeft: "10px" }} />
+                  <Tooltip title="一键隐藏">
+                    <Button icon="eye-invisible" size="small" shape="circle" onClick={() => this.handleItems(UNSHOW)} style={{ color: "green", marginLeft: "10px" }} />
                   </Tooltip>
-                  <Tooltip title="一键锁定">
-                    <Button icon="lock" size="small" shape="circle" onClick={() => this.handleItems(LOCK)} style={{ color: "#A020F0", marginLeft: "10px" }} />
+                  <Tooltip title="一键展示">
+                    <Button icon="eye" size="small" shape="circle" onClick={() => this.handleItems(SHOW)} style={{ color: "#A020F0", marginLeft: "10px" }} />
                   </Tooltip>
                 </Fragment>
               }
@@ -231,7 +229,7 @@ class CommentManagement extends React.Component {
               </Tooltip>
             </Col>
             <Col xs={10} sm={9} md={8} lg={7} xl={6}>
-              <Input.Search placeholder="请输入回复内容" onSearch={this.handleOnSearch} enterButton ref={inputSearch => this.inputSearch = inputSearch} />
+              <Input.Search placeholder="请输入回复内容" onSearch={this.handleOnSearch} enterButton allowClear ref={inputSearch => this.inputSearch = inputSearch} />
             </Col>
           </Row>
           <List
@@ -269,17 +267,17 @@ class CommentManagement extends React.Component {
                     </Fragment>
                   }
                   title={
-                    <a onClick={() => this.showContentDetail(item)}>《{item.title}》&nbsp;&nbsp;
+                    <span>《{item.title}》&nbsp;&nbsp;
                       {item.is_top === 1 && <Tag color="magenta">已置顶</Tag>}&nbsp;&nbsp;
                       {item.is_show === 1 && <Tag color="orange">已显示</Tag>}
-                    </a>
+                    </span>
                   }
                   description={
-                    <span style={{ overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", display: "inline-block", width: "600px" }}>
+                    <span>
                       <span style={{ color: "green", fontWeight: "bold" }}><i>{item.from_name}&nbsp;</i></span>
-                      <span>回复&nbsp;</span>
-                      <span style={{ color: "#A0522D", fontWeight: "bold" }}><i>@{item.to_name ? item.to_name : "文章"}&nbsp;</i>:</span>&nbsp;
-                      <a onClick={() => this.showContentDetail(item)}><i>{item.content}</i></a>
+                      <span style={{ color: "black", fontWeight: "bold" }}>回复&nbsp;</span>
+                      <span style={{ color: "#A0522D", fontWeight: "bold" }}><i>{item.pid === 0 ? "该文" : `@${item.to_name}`}&nbsp;</i>:</span>&nbsp;
+                      {item.content}
                     </span>
                   }
                 />
@@ -292,24 +290,32 @@ class CommentManagement extends React.Component {
             title="请选择筛选条件"
             onCancel={() => this.filterRequest("exit")}
             footer={[
-              <Button onClick={() => this.filterRequest("exit")}>退出</Button>,
-              <Button type="danger" onClick={() => this.filterRequest("clear")}>清空</Button>,
-              <Button type="primary" onClick={this.filterRequest}>筛选</Button>,
+              <Button onClick={() => this.filterRequest("exit")}>不更改并退出</Button>,
+              <Button type="danger" onClick={() => this.filterRequest("clear")}>全部清空</Button>,
+              <Button type="primary" onClick={this.filterRequest}>确定</Button>,
             ]}
           >
-            <div style={{ marginBottom: "15px", textAlign: "center" }}>
+            <div style={{ textAlign: "center" }}>
               <Radio.Group
                 value={filterSort}
                 buttonStyle="solid"
                 onChange={this.filterSort}
               >
-                <Radio.Button value="selectedByCate">按分类</Radio.Button>
-                <Radio.Button value="selectedByArticle">按文章</Radio.Button>
+                <Radio.Button value="selectedByCate">
+                  <Badge dot={temporaryCondition.filteredSortArr && temporaryCondition.filteredSortArr.length > 0 ? true : false} >
+                    &nbsp;按分类&nbsp;&nbsp;
+                  </Badge>
+                </Radio.Button>
+                <Radio.Button value="selectedByArticle">
+                  <Badge dot={temporaryCondition.articleArr && temporaryCondition.articleArr.length > 0 ? true : false}>
+                    &nbsp;按文章&nbsp;&nbsp;
+                  </Badge>
+                </Radio.Button>
               </Radio.Group>
             </div>
-
+            <Alert message="筛选分两种类别，请注意您是否需要同时进行两种类别的筛选！" type="warning" showIcon style={{ margin: "15px 0px" }} />
             {filterSort === "selectedByCate" &&
-              <Tree checkable showLine onCheck={this.conditionTreeSelect} defaultExpandedKeys={conditionQuery.filterKeys||[]} checkedKeys={conditionQuery.filterKeys||[]}>
+              <Tree checkable showLine onCheck={this.conditionTreeSelect} defaultExpandedKeys={temporaryCondition.filteredSortArr || []} checkedKeys={temporaryCondition.filteredSortArr || []}>
                 {categoryOptions.map(item =>
                   <Tree.TreeNode title={item.name} key={`${item.id}`} selectable={false} disabled={item.disabled}>
                     {item.children.map(i => <Tree.TreeNode title={i.name} key={`${item.id}-${i.id}`} selectable={false} disabled={item.disabled === 0 ? i.disabled : true} />)}
@@ -321,12 +327,13 @@ class CommentManagement extends React.Component {
               <div style={{ textAlign: "center" }}>
                 <span>文章：</span>
                 <Select
+                  labelInValue
                   mode="multiple"
                   onChange={this.articleSelet}
                   onSearch={(query) => this.searchItem({ query, container: articlecontainer })}
                   onMouseEnter={() => this.searchItem({ query: "", container: articlecontainer })}
                   style={{ width: "70%" }}
-
+                  value={temporaryCondition.articleArr}
                 >
                   {articlecontainer.list.map(i => <Select.Option value={i.id} key={i.id}>{i.title}</Select.Option>)}
                   {articlecontainer.total > 6 &&

@@ -31,7 +31,6 @@ router.post("/list", async (ctx) => {
             ${sort.length > 0 ? `and f.sort in (${sort.join(",")})` : ""} 
             ${getOrderBySql()}
     `;
-    console.log(sql)
     let res = await db.query(sql, []);
     if (prettyFormat) {
         const parentArr = [];
@@ -123,14 +122,31 @@ router.post("/unshow", async (ctx) => {
     ctx.body = { "list": res };
 });
 
+// 置顶只需要对父评论有效，待修改
+router.post("/top", async (ctx) => {
+    const { items } = ctx.request.body;
+    const condition = items.map(i => i.id).join(",");
+    const rootIds = [];
+    items.forEach(i => {
+        if (i.pid === 0) rootIds.push(i.id);
+    });
+    const updateSql = `update comment set is_top=1 where id in (${condition}) ${rootIds.length > 0 ? `or pid in (${rootIds.join(",")})` : ""}`;
+    const updateParams = [];
+    const res = await db.query(updateSql, updateParams);
+    ctx.body = { "list": res };
+});
 
-// router.get("/edit",async (ctx)=>{
-//     // ctx.body="编辑轮播图";
-//     await ctx.render("admin/focus/edit");
-// });
-
-// router.get("/delete",async (ctx)=>{
-//     ctx.body="删除轮播图";
-// });
+router.post("/untop", async (ctx) => {
+    const { items } = ctx.request.body;
+    const condition = items.map(i => i.id).join(",");
+    const rootIds = [];
+    items.forEach(i => {
+        if (i.pid === 0) rootIds.push(i.id);
+    });
+    const updateSql = `update comment set is_top=0 where id in (${condition}) ${rootIds.length > 0 ? `or pid in (${rootIds.join(",")})` : ""}`;
+    const updateParams = [];
+    const res = await db.query(updateSql, updateParams);
+    ctx.body = { "list": res };
+});
 
 module.exports = router.routes();
