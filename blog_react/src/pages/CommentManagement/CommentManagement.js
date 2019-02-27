@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Select, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Drawer, Tree, Avatar } from 'antd';
+import { Select, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Pagination, Tree, Avatar, Radio } from 'antd';
 import PageHeaderLayout from '@/components/PageHeaderWrapper';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
@@ -9,7 +9,7 @@ import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
 
-const { AdminCommentAPI: { LIST, DELETE, SHOW,UNSHOW,TOP,UNTOP },AdminCateAPI,AdminArticleAPI } = UrlEnum;
+const { AdminCommentAPI: { LIST, DELETE, SHOW, UNSHOW, TOP, UNTOP }, AdminCateAPI, AdminArticleAPI } = UrlEnum;
 
 
 @connect(({ articleManagement, loading }) => ({
@@ -26,8 +26,7 @@ class CommentManagement extends React.Component {
     formItem: {},
     filterModalVisible: false,
     categoryOptions: [],
-    filterKeys: [],
-    articlecontainer :{
+    articlecontainer: {
       netUrl: AdminArticleAPI.LIST.url,
       list: [],
       total: 0,
@@ -35,26 +34,40 @@ class CommentManagement extends React.Component {
       size: 6,
       query: "",
       selectedItems: []
-    }
+    },
+    filterSort: "selectedByCate"
   };
 
   componentDidMount = () => this.request({ index: 1, size: 10 });
 
   request = (params, callback) => {
-    const { conditionQuery } = this.state;
+    const { conditionQuery:con } = this.state;
+    const {filterKeys}=con;
+    const category = { sort: [], child: [] };
+    if(filterKeys&&filterKeys.length){
+      filterKeys.forEach(item => {
+        const arr = item.split("-");
+        if (arr.length === 1) {
+          category.sort.push(parseInt(arr.pop(), 10));
+        } else if (!category.sort.includes(parseInt(arr[0], 10))) {
+          category.child.push(parseInt(arr.pop(), 10));
+        }
+      });
+    }
+    const conditionQuery={...con};
+    delete conditionQuery.filterKeys;
+    conditionQuery.category=category;
     const payload = { netUrl: LIST.url, conditionQuery, ...params };
     this.props.dispatch({ type: "articleManagement/handleArticles", payload, callback });
     if (payload.netUrl !== LIST.url) this.cleanSelectedItem();
   }
 
-  handleShowALL = () => {
-    this.setState({ conditionQuery: {}, filterKeys: [] }, () => this.request({ index: 1 }));
-  }
+  handleShowALL = () => this.setState({ conditionQuery: {} }, () => this.request({ index: 1 }));
 
   handlePageChange = (index, size) => this.request({ index, size });
 
 
-  handleOnSearch = (val) => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, title: val.replace(/(^\s*)|(\s*$)/g, "") } }), () => this.request({ index: 1 }));
+  handleOnSearch = (val) => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, content: val.replace(/(^\s*)|(\s*$)/g, "") } }), () => this.request({ index: 1 }));
 
 
   toggleEditorialPanel = () => this.setState((oldState) => ({ editorialPanelVisible: !oldState.editorialPanelVisible }));
@@ -139,7 +152,7 @@ class CommentManagement extends React.Component {
 
   filterRequest = (method) => {
     if (method === "clear") {
-      this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category: {} }, filterKeys: [] }), () => this.request({ index: 1 }));
+      this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, filterKeys: [] } }), () => this.request({ index: 1 }));
       this.toggleFilterModal();
       return;
     }
@@ -147,25 +160,30 @@ class CommentManagement extends React.Component {
       this.toggleFilterModal();
       return;
     }
-    const { filterKeys } = this.state;
-    const category = { sort: [], child: [] };
-    filterKeys.forEach(item => {
-      const arr = item.split("-");
-      if (arr.length === 1) {
-        category.sort.push(parseInt(arr.pop(), 10));
-      } else if (!category.sort.includes(parseInt(arr[0], 10))) {
-        category.child.push(parseInt(arr.pop(), 10));
-      }
-    });
-    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category } }), () => this.request({ index: 1 }));
+    this.request({ index: 1 });
     this.toggleFilterModal();
   }
 
-  conditionTreeSelect = (filterKeys) => this.setState({ filterKeys });
+  conditionTreeSelect = (filterKeys) => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, filterKeys } }));
+
+  filterSort = (e) => this.setState(oldState => ({ filterSort: e.target.value,conditionQuery: { ...oldState.conditionQuery,filterKeys:[], aids:[] } }));
+
+  articleSelet=(aid)=>this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, aids:[aid] } }));
+
+  searchItem = ({ query, container, pageIndex, pageSize }) => {
+    const { index: preIndex, size: preSize, netUrl } = container;
+    const index = pageIndex || preIndex;
+    const size = pageSize || preSize;
+    this.request({ netUrl, index, size, conditionQuery: { title: query } }, (res) =>
+      this.setState(oldState => ({ articlecontainer: { ...oldState.articlecontainer, ...res, index, size, query } }))
+    );
+  }
+
+
 
   render() {
     const { articleManagement: { total = 10, list = [], size = 12, index = 1 }, loading, dispatch } = this.props;
-    const { articlecontainer,allSelectedFlag, selectedItems, editorialPanelVisible,formItem, showSorter, filterModalVisible, categoryOptions, filterKeys, conditionQuery } = this.state;
+    const { filterSort, articlecontainer, allSelectedFlag, selectedItems, editorialPanelVisible, formItem, showSorter, filterModalVisible, categoryOptions, conditionQuery } = this.state;
     return (
       // <PageHeaderLayout>
       <GridContent>
@@ -232,20 +250,20 @@ class CommentManagement extends React.Component {
             }}
             renderItem={item => (
               <List.Item
-                style={{ background: selectedItems.map(i=>i.id).includes(item.id) && "#FFFFE0" }}
+                style={{ background: selectedItems.map(i => i.id).includes(item.id) && "#FFFFE0" }}
                 className={styles.eachChild}
                 key={item.id}
                 actions={[
                   <span>{timeFormat(Number(new Date(item.create_time)))}</span>,
-                  <Button size="small" type="danger" onClick={() => this.handleItems(DELETE,item)}>删除</Button>,
-                  <Button size="small" type="primary" onClick={() => this.handleItems(item.is_show ?UNSHOW : SHOW, item)}>{item.is_show ? "隐藏" : "显示"}</Button>,
-                  <Button size="small" type="primary" onClick={() => this.handleItems(item.is_top ?UNTOP : TOP, item)}>{item.is_top ?  "取置":"置顶"}</Button>
+                  <Button size="small" type="danger" onClick={() => this.handleItems(DELETE, item)}>删除</Button>,
+                  <Button size="small" type="primary" onClick={() => this.handleItems(item.is_show ? UNSHOW : SHOW, item)}>{item.is_show ? "隐藏" : "显示"}</Button>,
+                  <Button size="small" type="primary" onClick={() => this.handleItems(item.is_top ? UNTOP : TOP, item)}>{item.is_top ? "取置" : "置顶"}</Button>
                 ]}
               >
                 <List.Item.Meta
                   avatar={
                     <Fragment>
-                      <Checkbox checked={allSelectedFlag ? true : selectedItems.map(i=>i.id).includes(item.id)} onChange={()=>this.toggleItem(item)} style={{marginLeft:"20px",marginTop:"10px"}} />
+                      <Checkbox checked={allSelectedFlag ? true : selectedItems.map(i => i.id).includes(item.id)} onChange={() => this.toggleItem(item)} style={{ marginLeft: "20px", marginTop: "10px" }} />
                       <Badge>&nbsp;&nbsp;</Badge>
                       <Avatar src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png" />
                     </Fragment>
@@ -257,10 +275,10 @@ class CommentManagement extends React.Component {
                     </a>
                   }
                   description={
-                    <span style={{ overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", display: "inline-block", width: "500px" }}>
-                      <span style={{ color: "green",fontWeight:"bold" }}><i>{item.from_name}&nbsp;</i></span>
+                    <span style={{ overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", display: "inline-block", width: "600px" }}>
+                      <span style={{ color: "green", fontWeight: "bold" }}><i>{item.from_name}&nbsp;</i></span>
                       <span>回复&nbsp;</span>
-                      <span style={{ color: "#A0522D" ,fontWeight:"bold"}}><i>@{item.to_name?item.to_name:"文章"}&nbsp;</i>:</span>&nbsp;
+                      <span style={{ color: "#A0522D", fontWeight: "bold" }}><i>@{item.to_name ? item.to_name : "文章"}&nbsp;</i>:</span>&nbsp;
                       <a onClick={() => this.showContentDetail(item)}><i>{item.content}</i></a>
                     </span>
                   }
@@ -279,19 +297,56 @@ class CommentManagement extends React.Component {
               <Button type="primary" onClick={this.filterRequest}>筛选</Button>,
             ]}
           >
-            <Tree checkable showLine onCheck={this.conditionTreeSelect} defaultExpandedKeys={filterKeys} checkedKeys={filterKeys}>
-              {categoryOptions.map(item =>
-                <Tree.TreeNode title={item.name} key={`${item.id}`} selectable={false} disabled={item.disabled}>
-                  {item.children.map(i => <Tree.TreeNode title={i.name} key={`${item.id}-${i.id}`} selectable={false} disabled={item.disabled === 0 ? i.disabled : true} />)}
-                </Tree.TreeNode>
-              )}
-            </Tree>
-            <Select
-              labelInValue
-              mode="multiple"
-            >
-                {articlecontainer.list.map(i=><Select.Option key={i.id}>{i.title}</Select.Option>)}
-            </Select>
+            <div style={{ marginBottom: "15px", textAlign: "center" }}>
+              <Radio.Group
+                value={filterSort}
+                buttonStyle="solid"
+                onChange={this.filterSort}
+              >
+                <Radio.Button value="selectedByCate">按分类</Radio.Button>
+                <Radio.Button value="selectedByArticle">按文章</Radio.Button>
+              </Radio.Group>
+            </div>
+
+            {filterSort === "selectedByCate" &&
+              <Tree checkable showLine onCheck={this.conditionTreeSelect} defaultExpandedKeys={conditionQuery.filterKeys||[]} checkedKeys={conditionQuery.filterKeys||[]}>
+                {categoryOptions.map(item =>
+                  <Tree.TreeNode title={item.name} key={`${item.id}`} selectable={false} disabled={item.disabled}>
+                    {item.children.map(i => <Tree.TreeNode title={i.name} key={`${item.id}-${i.id}`} selectable={false} disabled={item.disabled === 0 ? i.disabled : true} />)}
+                  </Tree.TreeNode>
+                )}
+              </Tree>
+            }
+            {filterSort === "selectedByArticle" &&
+              <div style={{ textAlign: "center" }}>
+                <span>文章：</span>
+                <Select
+                  mode="multiple"
+                  onChange={this.articleSelet}
+                  onSearch={(query) => this.searchItem({ query, container: articlecontainer })}
+                  onMouseEnter={() => this.searchItem({ query: "", container: articlecontainer })}
+                  style={{ width: "70%" }}
+
+                >
+                  {articlecontainer.list.map(i => <Select.Option value={i.id} key={i.id}>{i.title}</Select.Option>)}
+                  {articlecontainer.total > 6 &&
+                    <Select.Option key={-1} disabled>
+                      <Pagination {...{
+                        size: "small",
+                        style: { textAlign: "center" },
+                        pagination: {
+                          total: articlecontainer.total,
+                          current: articlecontainer.index,
+                          pageSize: articlecontainer.size,
+                          defaultPageSize: 6,
+                          onChange: (i, s) => this.searchItem({ query: articlecontainer.query, container: articlecontainer, pageIndex: i, pageSize: s })
+                        }
+                      }} />
+                    </Select.Option>
+                  }
+                </Select>
+              </div>
+            }
           </Modal>
         </Card>
         {/* // </PageHeaderLayout> */}
