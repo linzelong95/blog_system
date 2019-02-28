@@ -28,7 +28,7 @@ const FooterView = () => (
       ]}
       copyright={
         <Fragment>
-          Copyright <Icon type="copyright" /> 2018 广东新安怀电子商务有限公司技术部出品
+          Copyright <Icon type="copyright" /> 2019 个人出品
         </Fragment>
       }
     />

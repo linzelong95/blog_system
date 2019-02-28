@@ -6,8 +6,8 @@ router.post("/list", async (ctx) => {
     const { conditionQuery: { content = "", orderBy = {}, aids = [], category = {} }, prettyFormat = false } = ctx.request.body;
     const { sort = [], child = [] } = category;
     const getOrderBySql = () => {
-        const { name = "create_time", by = "asc" } = orderBy;
-        if (!["create_time"].includes(name)) return "";
+        const {name="is_top",by="desc"}=orderBy;
+        if (!["create_time","is_top","is_show"].includes(name)) return "";
         return `order by c.${name} ${by}`;
     };
     const sql = `
@@ -76,9 +76,9 @@ router.post("/list", async (ctx) => {
 
 router.post("/insert", async (ctx) => {
     const { id: currentUserId } = ctx.state.user;
-    const { aid, from_id, to_id = 0, pid = 0, content, author_id } = ctx.request.body;
-    const insertSql = "insert into comment (aid,from_id,to_id,pid,content,is_show) values(?,?,?,?,?,?)";
-    const insertParams = [aid, from_id, to_id, pid, content, currentUserId === author_id ? 1 : 0];
+    const { aid, from_id=currentUserId, to_id = currentUserId, pid = 0, content, author_id=currentUserId,is_top=0 } = ctx.request.body;
+    const insertSql = "insert into comment (aid,from_id,to_id,pid,content,is_top,is_show) values(?,?,?,?,?,?,?)";
+    const insertParams = [aid, from_id, to_id, pid, content,is_top, currentUserId === author_id ? 1 : 0];
     const res = await db.query(insertSql, insertParams);
     ctx.body = { "list": res };
 });

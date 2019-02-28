@@ -1,19 +1,12 @@
 import React from 'react';
-import { Form ,Cascader} from 'antd';
-import Editor from 'for-editor';
-import Region from '@/assets/region.json';
-import { UrlEnum, ProductEnum } from '@/assets/Enum';
+import { Form } from 'antd';
+import { UrlEnum } from '@/assets/Enum';
 import LangConfig from '@/assets/LangConfig';
 import EditorialFormConfig from '@/pages/EditorialFormConfig';
 
 const { getModalForm } = EditorialFormConfig;
+const {AdminCateAPI:{INSERT,UPDATE},AdminSortAPI}=UrlEnum;
 
-
-const INSERT={url: "/api/admin/cate/insert", desc: { zh_CN: "添加", en_US: "insert" }};
-const UPDATE={url: "/api/admin/cate/update", desc: { zh_CN: "更新", en_US: "update" }};
-const SortAPI={
-  LIST:{url: "/api/admin/sort/list", desc: { zh_CN: "获取一级分类列表", en_US: "getList" }},
-}
 
 @Form.create()
 class EditorialForm extends React.PureComponent {
@@ -25,7 +18,7 @@ class EditorialForm extends React.PureComponent {
   componentDidMount=()=>{
     const {formItem={},request}=this.props;
     const callback=(res)=>this.setState({categoryOptions:res.list});
-    request({netUrl:SortAPI.LIST.url,index:1,size:100,prettyFormat:true},callback);
+    request({netUrl:AdminSortAPI.LIST.url,index:1,size:100,prettyFormat:true},callback);
     if(formItem.id) this.formatInitialFormData(formItem);
 
   }

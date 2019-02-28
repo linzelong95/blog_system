@@ -20,7 +20,7 @@ router.post("/list", async (ctx) => {
     const getOrderBySql = (orderBy) => {
         const {name="is_top",by="desc"}=orderBy;
         if(!["title","create_time","modified_time","is_top"].includes(name)) return "";
-        return `order by ${name} ${by}`;
+        return `order by a.${name} ${by}`;
     };
     const orderAndlimitSql = `${getOrderBySql(orderBy)} limit ${(index - 1) * size},${size}`;
     const querySql = `
@@ -34,6 +34,7 @@ router.post("/list", async (ctx) => {
     const res = await db.query(querySql, []);
     const countArr = await db.query(`select count(*) as count from article as a,category as c where a.category_id=c.id and a.title like '%${title}%' ${getWhereSql(category)}`, []);
     ctx.body = { "total": countArr[0].count, "list": res };
+    
 });
 
 router.post("/content", async (ctx) => {

@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import { Select, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Pagination, Tree, Avatar, Radio, Alert } from 'antd';
 import PageHeaderLayout from '@/components/PageHeaderWrapper';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
+import EditorialForm from './EditorialForm';
 import Ellipsis from '@/components/Ellipsis';
 import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
@@ -11,6 +12,15 @@ import styles from './index.less';
 
 const { AdminCommentAPI: { BASE_URL, LIST, DELETE, SHOW, UNSHOW, TOP, UNTOP }, AdminCateAPI, AdminArticleAPI } = UrlEnum;
 
+const initArticleContainer= {
+  netUrl: AdminArticleAPI.LIST.url,
+  list: [],
+  total: 0,
+  index: 1,
+  size: 6,
+  query: "",
+  selectedItems: []
+};
 
 @connect(({ articleManagement, loading }) => ({
   articleManagement,
@@ -26,15 +36,7 @@ class CommentManagement extends React.Component {
     formItem: {},
     filterModalVisible: false,
     categoryOptions: [],
-    articlecontainer: {
-      netUrl: AdminArticleAPI.LIST.url,
-      list: [],
-      total: 0,
-      index: 1,
-      size: 6,
-      query: "",
-      selectedItems: []
-    },
+    articlecontainer: initArticleContainer,
     filterSort: "selectedByCate",
     temporaryCondition: {},
   };
@@ -76,8 +78,8 @@ class CommentManagement extends React.Component {
     let content = "";
     let items = [];
     if (item) {
-      const { id, name, content, pid } = item;
-      items = [{ id, name: content, pid }];
+      const { id, name, content:con, pid } = item;
+      items = [{ id, name: con, pid }];
       content = `【${items[0].name}】${actionTip[lang]}`;
     } else {
       items = selectedItems.map(v => ({ id: v.id, name: v.content, pid: v.pid }));
@@ -195,9 +197,10 @@ class CommentManagement extends React.Component {
               {showSorter &&
                 <Fragment>
                   <Tag color="magenta" style={{ marginLeft: "10px" }} onClick={() => this.sort("default")}>默认</Tag>
-                  <Tag color="magenta" id="title" style={{ marginLeft: "5px" }} onClick={this.sort}>标题<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "title" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
-                  <Tag color="magenta" id="create_time" style={{ marginLeft: "5px" }} onClick={this.sort}>创建时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "create_time" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
-                  <Tag color="magenta" id="modified_time" style={{ marginLeft: "5px" }} onClick={this.sort}>修改时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "modified_time" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
+                  <Tag color="magenta" id="create_time" style={{ marginLeft: "5px" }} onClick={this.sort}>时间<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "create_time" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
+                  <Tag color="magenta" id="is_show" style={{ marginLeft: "5px" }} onClick={this.sort}>显示<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "is_show" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
+                  <Tag color="magenta" id="is_top" style={{ marginLeft: "5px" }} onClick={this.sort}>置顶<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "is_top" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
+
                 </Fragment>
               }
               {selectedItems.length > 0 &&
@@ -314,6 +317,9 @@ class CommentManagement extends React.Component {
               </Radio.Group>
             </div>
             <Alert message="筛选分两种类别，请注意您是否需要同时进行两种类别的筛选！" type="warning" showIcon style={{ margin: "15px 0px" }} />
+            <div style={{marginBottom:"15px",textAlign:"center"}}>
+              <Checkbox.Group options={[{label:"置顶",value:"is_top"},{label:"显示",value:"is_show"}]} onChange={this.topAndShowChange} />
+            </div>
             {filterSort === "selectedByCate" &&
               <Tree checkable showLine onCheck={this.conditionTreeSelect} defaultExpandedKeys={temporaryCondition.filteredSortArr || []} checkedKeys={temporaryCondition.filteredSortArr || []}>
                 {categoryOptions.map(item =>
@@ -329,19 +335,22 @@ class CommentManagement extends React.Component {
                 <Select
                   labelInValue
                   mode="multiple"
+                  filterOption={false}
                   onChange={this.articleSelet}
                   onSearch={(query) => this.searchItem({ query, container: articlecontainer })}
                   onMouseEnter={() => this.searchItem({ query: "", container: articlecontainer })}
                   style={{ width: "70%" }}
                   value={temporaryCondition.articleArr}
                 >
-                  {articlecontainer.list.map(i => <Select.Option value={i.id} key={i.id}>{i.title}</Select.Option>)}
+                  {articlecontainer.list.map(i => 
+                    <Select.Option value={i.id} key={i.id}>{i.title}</Select.Option>
+                  )}
                   {articlecontainer.total > 6 &&
                     <Select.Option key={-1} disabled>
                       <Pagination {...{
                         size: "small",
                         style: { textAlign: "center" },
-                        pagination: {
+                        ... {
                           total: articlecontainer.total,
                           current: articlecontainer.index,
                           pageSize: articlecontainer.size,
@@ -355,6 +364,15 @@ class CommentManagement extends React.Component {
               </div>
             }
           </Modal>
+          {editorialPanelVisible &&
+            <EditorialForm
+              editorialPanelVisible={editorialPanelVisible}
+              toggleEditorialPanel={this.toggleEditorialPanel}
+              cleanFormItem={this.cleanFormItem}
+              formItem={formItem}
+              request={this.request}
+            />
+          }
         </Card>
         {/* // </PageHeaderLayout> */}
       </GridContent>

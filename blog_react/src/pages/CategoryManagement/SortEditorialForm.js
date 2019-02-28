@@ -1,15 +1,11 @@
 import React from 'react';
-import { Form ,Cascader} from 'antd';
-import Editor from 'for-editor';
-import Region from '@/assets/region.json';
-import { UrlEnum, ProductEnum } from '@/assets/Enum';
+import { Form} from 'antd';
+import { UrlEnum } from '@/assets/Enum';
 import LangConfig from '@/assets/LangConfig';
 import EditorialFormConfig from '@/pages/EditorialFormConfig';
 
 const { getModalForm } = EditorialFormConfig;
-
-const INSERT={url: "/api/admin/sort/insert", desc: { zh_CN: "添加", en_US: "insert" }};
-const UPDATE={url: "/api/admin/sort/update", desc: { zh_CN: "更新", en_US: "update" }};
+const { AdminSortAPI:{INSERT,UPDATE}}=UrlEnum;
 
 @Form.create()
 class EditorialForm extends React.PureComponent {
