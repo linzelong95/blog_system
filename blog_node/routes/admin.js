@@ -1,8 +1,5 @@
 const router=require("koa-router")();
 
-const user=require("./admin/user.js");
-const focus=require("./admin/focus.js");
-const newscate=require("./admin/newscate.js");
 const article=require("./admin/article.js");
 const cate=require("./admin/cate.js");
 const sort=require("./admin/sort.js");
@@ -13,9 +10,7 @@ router.get("/",(ctx)=>{
 });
 
 
-router.use("/user",user);
-router.use("/focus",focus);
-router.use("/newscate",newscate);
+
 router.use("/article",article);
 router.use("/cate",cate);
 router.use("/sort",sort);

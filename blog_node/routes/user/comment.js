@@ -60,7 +60,7 @@ router.post("/list", async (ctx) => {
 
 router.post("/insert", async (ctx) => {
     const { id: currentUserId } = ctx.state.user;
-    const { aid, from_id, to_id = 0, pid = 0, content, author_id } = ctx.request.body;
+    const { aid, from_id, to_id, pid = 0, content, author_id } = ctx.request.body;
     const insertSql = "insert into comment (aid,from_id,to_id,pid,content,is_show) values(?,?,?,?,?,?)";
     const insertParams = [aid, from_id, to_id, pid, content, currentUserId === author_id ? 1 : 0];
     const res = await db.query(insertSql, insertParams);

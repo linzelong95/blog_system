@@ -74,8 +74,8 @@ class CategoryManagement extends React.Component {
 
   handleChangeTabs = (tabKey) => {
     this.props.dispatch({ type: "articleManagement/save", payload: { list: [] } });
-    this.inputSearch.input.state.value="";
     this.setState({ tabKey, selectedRowKeys: [], selectedItems: [], conditionQuery: {}, filters: {} });
+    if (this.inputSearch && this.inputSearch.input) this.inputSearch.input.state.value = "";
     if (tabKey === "sort") {
       this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 10 });
     } else if (tabKey === "cate") {

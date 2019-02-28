@@ -21,7 +21,7 @@ export default [
       {
         path: '/index',
         icon: 'idcard',
-        name: 'Index',
+        name: 'HomePage',
         component: './HomePage/HomePage',
       },
       // {

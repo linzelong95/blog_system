@@ -1,40 +1,38 @@
 const router = require("koa-router")();
 const db = require("../../components/db");
 
-// router.get("/",async (ctx)=>{
-//     // ctx.body="轮播图首页";
-//     await ctx.render("admin/focus/index");
-// });
-
-
 router.post("/list", async (ctx) => {
-    const {id:currentUserId}=ctx.state.user;
+    const { id: currentUserId } = ctx.state.user;
     const { conditionQuery: { title = "", category = {}, orderBy = {} }, index = 1, size = 10 } = ctx.request.body;
-    const getWhereSql = (category) => {
-        const { sort = [], child = [] } = category;
-        if (!sort.length && !child.length) return "";
-        if (sort.length && !child.length) return `and c.sort in (${sort.join(",")})`;
-        if (!sort.length && child.length) return `and c.id in (${child.join(",")})`;
-        if (sort.length && child.length) return `and (c.sort in (${sort.join(",")}) or c.id in (${child.join(",")}))`;
-    };
-    const getOrderBySql = (orderBy) => {
-        const {name="is_top",by="desc"}=orderBy;
-        if(!["title","create_time","modified_time","is_top"].includes(name)) return "";
-        return `order by a.${name} ${by}`;
-    };
-    const orderAndlimitSql = `${getOrderBySql(orderBy)} limit ${(index - 1) * size},${size}`;
+    const { sort = [], child = [] } = category;
     const querySql = `
-        select 
+        select sql_calc_found_rows
             a.id,a.author_id,a.disabled,a.category_id,a.title,a.is_top,a.abstract,a.label,a.create_time,a.modified_time,c.name as category_name,c.sort,s.name as sort_name
         from 
             article as a,category as c,sort as s
         where 
-            a.author_id=${currentUserId} and a.category_id=c.id and c.sort=s.id and c.disabled=0 and s.disabled=0 and a.title like '%${title}%' ${getWhereSql(category)} ${orderAndlimitSql}
-        `;
+            a.author_id=${currentUserId} 
+            and a.category_id=c.id 
+            and c.sort=s.id 
+            and c.disabled=0 
+            and s.disabled=0 
+            and a.title like '%${title}%'
+            ${sort.length && !child.length ? `and c.sort in (${sort.join(",")})` : ""}
+            ${!sort.length && child.length ? `and c.id in (${child.join(",")})` : ""}
+            ${sort.length && child.length ? `and (c.sort in (${sort.join(",")}) or c.id in (${child.join(",")}))` : ""}
+        order by
+            ${(() => {
+                const { name = "is_top", by = "desc" } = orderBy;
+                if (!["title", "create_time", "modified_time", "is_top"].includes(name)) return "";
+                return `a.${name} ${by}`;
+            })()}
+        limit 
+            ${(index - 1) * size},${size}
+    `;
     const res = await db.query(querySql, []);
-    const countArr = await db.query(`select count(*) as count from article as a,category as c where a.category_id=c.id and a.title like '%${title}%' ${getWhereSql(category)}`, []);
+    const countArr = await db.query("select found_rows() as count", []);
     ctx.body = { "total": countArr[0].count, "list": res };
-    
+
 });
 
 router.post("/content", async (ctx) => {
@@ -45,25 +43,25 @@ router.post("/content", async (ctx) => {
 
 
 router.post("/insert", async (ctx) => {
-    const {id:author_id}=ctx.state.user;
-    const { title, label = "", abstract = "", content = "",category_id, is_top } = ctx.request.body;
-    const cateId=category_id[category_id.length - 1];
+    const { id: author_id } = ctx.state.user;
+    const { title, label = "", abstract = "", content = "", category_id, is_top } = ctx.request.body;
+    const cateId = category_id[category_id.length - 1];
     const insertSql = "insert into article (category_id,title,is_top,abstract,label,author_id) values(?,?,?,?,?,?)";
-    const insertParams = [cateId, title,is_top, abstract, label, author_id];
+    const insertParams = [cateId, title, is_top, abstract, label, author_id];
     const res = await db.query(insertSql, insertParams);
-    const resCate=await db.query(`update category set is_use=1 where id=${cateId}`, []);
-    const resContent=await db.query("insert into content (content) values(?)", [content]);
+    const resCate = await db.query(`update category set is_use=1 where id=${cateId}`, []);
+    const resContent = await db.query("insert into content (content) values(?)", [content]);
     ctx.body = { "list": res };
 });
 
 router.post("/update", async (ctx) => {
     const { title, label = "", abstract = "", content = "", category_id, is_top, id } = ctx.request.body;
-    const cateId=category_id[category_id.length - 1];
+    const cateId = category_id[category_id.length - 1];
     const updateSql = "update article set category_id=?,title=?,is_top=?,abstract=?,label=? where id=?";
-    const updateParams = [cateId, title, is_top, abstract, label,id];
+    const updateParams = [cateId, title, is_top, abstract, label, id];
     const res = await db.query(updateSql, updateParams);
-    const resCate=await db.query(`update category set is_use=1 where id=${cateId}`, []);
-    const resContent = await db.query("update content set content=? where id=?", [content,id]);
+    const resCate = await db.query(`update category set is_use=1 where id=${cateId}`, []);
+    const resContent = await db.query("update content set content=? where id=?", [content, id]);
     ctx.body = { "list": res };
 });
 
