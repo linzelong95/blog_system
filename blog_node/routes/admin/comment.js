@@ -22,8 +22,9 @@ router.post("/list", async (ctx) => {
             c.content like '%${content}%' 
             and e.author_id=${currentUserId} 
             ${aids.length > 0 ? `and c.aid in (${aids.join(",")})` : ""} 
-            ${child.length > 0 ? `and e.category_id in (${child.join(",")})` : ""} 
-            ${sort.length > 0 ? `and f.sort in (${sort.join(",")})` : ""} 
+            ${sort.length && !child.length ? `and f.sort in (${sort.join(",")})` : ""}
+            ${!sort.length && child.length ? `and e.category_id in (${child.join(",")})` : ""}
+            ${sort.length && child.length ? `and (f.sort in (${sort.join(",")}) or e.category_id in (${child.join(",")}))` : ""}
             ${is_show!==undefined? `and c.is_show=${is_show}` : ""} 
             ${is_top!==undefined? `and c.is_top=${is_top}` : ""} 
             ${pid_field===0?"and c.pid=0":pid_field===1?"and c.pid>1":""}

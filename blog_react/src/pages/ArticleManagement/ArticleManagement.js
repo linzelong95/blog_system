@@ -19,7 +19,7 @@ const { AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT
 class ArticleManagement extends React.Component {
   state = {
     conditionQuery: { title: "", category: {}, orderBy: {} },
-    showSorter: false,// 是否显示排序按钮
+    showSorterFlag: false,// 是否显示排序按钮
     selectedItems: [],
     allSelectedFlag: false,
     editorialPanelVisible: false,
@@ -31,6 +31,13 @@ class ArticleManagement extends React.Component {
   };
 
   componentDidMount = () => this.request({ index: 1, size: 12 });
+
+  componentWillReceiveProps = (nextProps) => {
+    const { selectedItems } = this.state;
+    const { articleManagement: { list = [] } } = nextProps;
+    const allSelectedFlag = !list.length ? false : list.every(listItem => selectedItems.some(i => i.id === listItem.id));
+    this.setState({ allSelectedFlag });
+  }
 
   request = (params, callback) => {
     const { conditionQuery: con } = this.state;
@@ -92,12 +99,16 @@ class ArticleManagement extends React.Component {
     Modal.confirm({ title, content, okText, cancelText, onCancel, onOk });
   }
 
-  showSorter = () => this.setState((oldState) => ({ showSorter: !oldState.showSorter }));
+  toggleShowSorter = () => {
+    const { articleManagement: { list = [] } } = this.props;
+    if (!list.length) return;
+    this.setState((oldState) => ({ showSorterFlag: !oldState.showSorterFlag }));
+  }
 
   sort = (e) => {
     if (e === "default") {
       this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: {} } }), () => this.request({ index: 1 }));
-      this.showSorter();
+      this.showSorterFlag();
       return;
     }
     const { id: name } = e.currentTarget;
@@ -105,18 +116,21 @@ class ArticleManagement extends React.Component {
     this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: { name, by: orderBy.by === "asc" ? "desc" : "asc" } } }), () => this.request({ index: 1 }));
   }
 
-  toggleItem = (item) => {
+  toggleSelectOne = (item) => {
     const { selectedItems } = this.state;
     const { articleManagement: { list = [] } } = this.props;
     const newSelectedItems = selectedItems.some(i => i.id === item.id) ? selectedItems.filter(i => i.id !== item.id) : [...selectedItems, item];
-    const allSelectedFlag = list.every(listItem => newSelectedItems.some(i => i.id === listItem.id));
+    const allSelectedFlag = !list.length ? false : list.every(listItem => newSelectedItems.some(i => i.id === listItem.id));
     this.setState({ selectedItems: newSelectedItems, allSelectedFlag });
   }
 
-  selectAllOrPart = () => {
-    const { allSelectedFlag } = this.state;
+  toggleSelectAll = () => {
     const { articleManagement: { list = [] } } = this.props;
-    const newSelectedItems = allSelectedFlag ? [] : list;
+    if (!list.length) return;
+    const { allSelectedFlag } = this.state;
+    const { selectedItems } = this.state;
+    const uniqueSeletedItems = list.filter(i => !selectedItems.some(v => v.id === i.id));
+    const newSelectedItems = allSelectedFlag ? selectedItems.filter(i => !list.some(v => v.id === i.id)) : [...selectedItems, ...uniqueSeletedItems];
     this.setState({ allSelectedFlag: !allSelectedFlag, selectedItems: newSelectedItems });
   }
 
@@ -145,16 +159,19 @@ class ArticleManagement extends React.Component {
 
   filterRequest = (method) => {
     if (method === "clear") {
-      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr: [] } }));
+      this.setState({ temporaryCondition: {} });
       return;
     }
     this.toggleFilterModal();
+    let filterflag = false;
     if (method === "exit") {
       const { conditionQuery: { filteredSortArr = [] } } = this.state;
-      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
+      filterflag = filteredSortArr.length > 0;
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, filterflag } }));
       return;
     }
     const { temporaryCondition: { filteredSortArr = [] } } = this.state;
+    filterflag = filteredSortArr.length > 0;
     const category = { sort: [], child: [] };
     filteredSortArr.forEach(item => {
       const arr = item.split("-");
@@ -164,24 +181,27 @@ class ArticleManagement extends React.Component {
         category.child.push(parseInt(arr.pop(), 10));
       }
     });
-    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr } }), () => this.request({ index: 1 }));
+    this.setState(oldState => ({
+      conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr },
+      temporaryCondition: { ...oldState.temporaryCondition, filterflag }
+    }), () => this.request({ index: 1 }));
   }
 
   conditionTreeSelect = (filteredSortArr) => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
 
   render() {
     const { articleManagement: { total = 10, list = [], size = 12, index = 1 }, loading, dispatch } = this.props;
-    const { allSelectedFlag, selectedItems, editorialPanelVisible, drawerVisible, formItem, showSorter, filterModalVisible, categoryOptions, conditionQuery, temporaryCondition } = this.state;
+    const { allSelectedFlag, selectedItems, editorialPanelVisible, drawerVisible, formItem, showSorterFlag, filterModalVisible, categoryOptions, conditionQuery, temporaryCondition } = this.state;
     return (
       <GridContent>
         <Card>
           <Row type="flex" align="middle" style={{ marginBottom: "15px" }}>
             <Col xs={12} sm={13} md={15} lg={16} xl={17}>
               <Button icon="plus" type="primary" size="small" onClick={this.toggleEditorialPanel}>新增&nbsp;</Button>
-              <Button icon="filter" type={conditionQuery.filteredSortArr && conditionQuery.filteredSortArr.length > 0 ? "danger" : "primary"} size="small" onClick={this.showFilterModal} style={{ marginLeft: "20px" }}>筛选&nbsp;</Button>
-              <Button icon="star" type={allSelectedFlag ? "danger" : "primary"} size="small" onClick={this.selectAllOrPart} style={{ marginLeft: "20px" }}>{allSelectedFlag ? "反选" : "全选"}&nbsp;</Button>
-              <Button icon={showSorter ? "right-circle-o" : "left-circle-o"} type="primary" size="small" onClick={this.showSorter} style={{ marginLeft: "20px" }}>排序&nbsp;</Button>
-              {showSorter &&
+              <Button icon="filter" type={temporaryCondition.filterflag ? "danger" : "primary"} size="small" onClick={this.showFilterModal} style={{ marginLeft: "20px" }}>筛选&nbsp;</Button>
+              <Button icon="star" type={allSelectedFlag ? "danger" : "primary"} size="small" onClick={this.toggleSelectAll} style={{ marginLeft: "20px" }}>{allSelectedFlag ? "反选" : "全选"}&nbsp;</Button>
+              <Button icon={showSorterFlag ? "right-circle-o" : "left-circle-o"} type="primary" size="small" onClick={this.toggleShowSorter} style={{ marginLeft: "20px" }}>排序&nbsp;</Button>
+              {showSorterFlag &&
                 <Fragment>
                   <Tag color="magenta" style={{ marginLeft: "10px" }} onClick={() => this.sort("default")}>默认</Tag>
                   <Tag color="magenta" id="title" style={{ marginLeft: "5px" }} onClick={this.sort}>标题<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "title" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>
@@ -250,7 +270,7 @@ class ArticleManagement extends React.Component {
                   ]}
                   className={styles.eachChild}
                   style={{ position: "relative", overflow: "hidden", background: selectedItems.some(i => i.id === item.id) && "#FFFFE0" }}
-                  onClick={() => this.toggleItem(item)}
+                  onClick={() => this.toggleSelectOne(item)}
                 >
                   <div style={{ marginBottom: "5px", fontSize: "12px" }}>
                     <Ellipsis lines={1}>

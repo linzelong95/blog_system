@@ -2,18 +2,9 @@ const router = require("koa-router")();
 const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
-    const { conditionQuery: { orderBy = {}, aids = [] },prettyFormat=false } = ctx.request.body;
-    const getWhereSql = (aids) => {
-        if (!aids.length) return "";
-        return `c.aid in (${aids.join(",")})`;
-    };
-    const getOrderBySql = (orderBy) => {
-        const { name = "create_time", by = "desc" } = orderBy;
-        if (!["create_time"].includes(name)) return "";
-        return `order by ${name} ${by}`;
-    };
+    const { conditionQuery: { orderBy = {}, aids = [] }, prettyFormat = false } = ctx.request.body;
     const sql = `
-        select 
+        select sql_calc_found_rows
             c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.create_time,a.account as from_name,b.account as to_name
         from 
             comment c
@@ -22,10 +13,16 @@ router.post("/list", async (ctx) => {
         inner join 
             user b on c.to_id=b.id
         where 
-            ${getWhereSql(aids)} ${getOrderBySql(orderBy)}
+            ${aids.length > 0 ? `c.aid in (${aids.join(",")})` : ""}
+        order by
+            ${(() => {
+            const { name = "is_top", by = "desc" } = orderBy;
+            if (!["create_time", "is_top"].includes(name)) return "";
+            return `c.${name} ${by}`;
+        })()}
     `;
     let res = await db.query(sql, []);
-    if(prettyFormat){
+    if (prettyFormat) {
         const parentArr = [];
         const sonArr = [];
         res.forEach(i => {
@@ -42,19 +39,7 @@ router.post("/list", async (ctx) => {
             return i;
         });
     }
-    const countSql = `
-        select 
-            count(*) as count
-        from 
-            comment c
-        inner join 
-            user a on c.from_id=a.id
-        inner join 
-            user b on c.to_id=b.id
-        where 
-            ${getWhereSql(aids)}
-    `;
-    const countArr = await db.query(countSql, []);
+    const countArr = await db.query("select found_rows() as count", []);
     ctx.body = { "total": countArr[0].count, "list": res };
 });
 

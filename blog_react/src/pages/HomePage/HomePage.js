@@ -19,7 +19,7 @@ const { UserArticleAPI: { LIST, CONTENT }, UserCateAPI } = UrlEnum;
 class HomePage extends React.Component {
   state = {
     conditionQuery: { title: "", category: {}, orderBy: {} },
-    showSorter: false,// 是否显示排序按钮
+    showSorterFlag: false,// 是否显示排序按钮
     formItem: {},
     drawerVisible: false,
     filterModalVisible: false,
@@ -47,12 +47,15 @@ class HomePage extends React.Component {
 
   handleOnSearch = (val) => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, title: val.replace(/(^\s*)|(\s*$)/g, "") } }), () => this.request({ index: 1 }));
 
-  showSorter = () => this.setState((oldState) => ({ showSorter: !oldState.showSorter }));
-
+  toggleShowSorter = () => {
+    const { articleManagement: { list = [] } } = this.props;
+    if (!list.length) return;
+    this.setState((oldState) => ({ showSorterFlag: !oldState.showSorterFlag }));
+  }
   sort = (e) => {
     if (e === "default") {
       this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: {} } }), () => this.request({ index: 1 }));
-      this.showSorter();
+      this.showSorterFlag();
       return;
     }
     const { id: name } = e.currentTarget;
@@ -82,16 +85,19 @@ class HomePage extends React.Component {
 
   filterRequest = (method) => {
     if (method === "clear") {
-      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr: [] } }));
+      this.setState({ temporaryCondition: {} });
       return;
     }
     this.toggleFilterModal();
+    let filterflag = false;
     if (method === "exit") {
       const { conditionQuery: { filteredSortArr = [] } } = this.state;
-      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
+      filterflag = filteredSortArr.length > 0;
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, filterflag } }));
       return;
     }
     const { temporaryCondition: { filteredSortArr = [] } } = this.state;
+    filterflag = filteredSortArr.length > 0;
     const category = { sort: [], child: [] };
     filteredSortArr.forEach(item => {
       const arr = item.split("-");
@@ -101,22 +107,25 @@ class HomePage extends React.Component {
         category.child.push(parseInt(arr.pop(), 10));
       }
     });
-    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr } }), () => this.request({ index: 1 }));
+    this.setState(oldState => ({
+      conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr },
+      temporaryCondition: { ...oldState.temporaryCondition, filterflag }
+    }), () => this.request({ index: 1 }));
   }
 
   conditionTreeSelect = (filteredSortArr) => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
 
   render() {
     const { articleManagement: { total = 10, list = [], size = 12, index = 1 }, loading, dispatch } = this.props;
-    const { drawerVisible, formItem, showSorter, filterModalVisible, categoryOptions, conditionQuery, temporaryCondition } = this.state;
+    const { drawerVisible, formItem, showSorterFlag, filterModalVisible, categoryOptions, conditionQuery, temporaryCondition } = this.state;
     return (
       <GridContent>
         <Card>
           <Row type="flex" align="middle" style={{ marginBottom: "15px" }}>
             <Col xs={12} sm={13} md={15} lg={16} xl={17}>
-              <Button icon="filter" type={conditionQuery.filteredSortArr && conditionQuery.filteredSortArr.length > 0 ? "danger" : "primary"} size="small" onClick={this.showFilterModal}>筛选&nbsp;</Button>
-              <Button icon={showSorter ? "right-circle-o" : "left-circle-o"} type="primary" size="small" onClick={this.showSorter} style={{ marginLeft: "20px" }}>排序&nbsp;</Button>
-              {showSorter &&
+              <Button icon="filter" type={temporaryCondition.filterflag ? "danger" : "primary"} size="small" onClick={this.showFilterModal}>筛选&nbsp;</Button>
+              <Button icon={showSorterFlag ? "right-circle-o" : "left-circle-o"} type="primary" size="small" onClick={this.toggleShowSorter} style={{ marginLeft: "20px" }}>排序&nbsp;</Button>
+              {showSorterFlag &&
                 <Fragment>
                   <Tag color="magenta" style={{ marginLeft: "10px" }} onClick={() => this.sort("default")}>默认</Tag>
                   <Tag color="magenta" id="title" style={{ marginLeft: "5px" }} onClick={this.sort}>标题<Icon type={conditionQuery.orderBy && conditionQuery.orderBy.name === "title" && conditionQuery.orderBy.by === "desc" ? "down" : "up"} /></Tag>

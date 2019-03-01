@@ -1,5 +1,5 @@
 import React from 'react';
-import { common,handleArticles} from '@/services/api';
+import { common, handleArticles } from '@/services/api';
 import { message, Modal } from 'antd';
 import { SystemEnum, UrlEnum } from '@/assets/Enum';
 import LangConfig from '@/assets/LangConfig';
@@ -18,20 +18,18 @@ export default {
     formItem: {},
   },
   effects: {
-    *handleArticles({ payload, callback}, { call, put, select }) {
+    *handleArticles({ payload, callback }, { call, put, select }) {
       const { index: pageIndex, size: pageSize, lang } = yield select(models => models.articleManagement);
       const { netUrl, index = pageIndex, size = pageSize, conditionQuery } = payload;
       const position = netUrl.lastIndexOf("/") + 1;
       let action = netUrl.substring(position);
-      let response = yield call(handleArticles, { ...payload, size, index,t: Date.now() });
-      if (!response||!response.status) return;
-      if (callback) {
-        callback(response);
-        return;
-      }
+      let response = yield call(handleArticles, { ...payload, size, index, t: Date.now() });
+      if (!response || !response.status) return;
+      if (callback) { callback(response); return; }
       if (!action.includes("list")) {
-        const specialUrl = [LetterAPI.BASE_URL, ReviewAPI.BASE_URL, OrderAPI.BASE_URL];
+        // const specialUrl = [LetterAPI.BASE_URL, ReviewAPI.BASE_URL, OrderAPI.BASE_URL];
         const baseUrl = netUrl.substring(0, position - 1);
+
         // if (specialUrl.includes(baseUrl)){
         //   yield put({ type: 'global/fetchNotices' });
         //   const specialPathname=["letter","commodityevaluation","orderlist"];
@@ -55,14 +53,22 @@ export default {
         //   const title = `${success.length}项成功${action}，${error.length}项失败！原因：`;
         //   Modal.warning({ title, content });
         // }
-        response = yield call(handleArticles, {conditionQuery, netUrl: `${baseUrl}/list`, index, size, t: Date.now() });
+
+        // 如果删除的那一页刚好没有list，那么要将页数往前移动
+        let tempIndex = index;
+        do {
+          response = yield call(handleArticles, { conditionQuery, netUrl: `${baseUrl}/list`, index: tempIndex, size, t: Date.now() });
+          if (!response && !response.status) return;
+          tempIndex--;
+        } while (tempIndex > 0 && response.list && !response.list.length);
+        // 考虑添加时自动将页数往后移动？
       }
       const { total } = response;
       const maxIndex = Math.ceil(total / size);
       const actualIndex = maxIndex > index ? index : maxIndex < 1 ? 1 : maxIndex;
-      yield put({ type: 'save', payload: { ...response,index: actualIndex, size } });
+      yield put({ type: 'save', payload: { ...response, index: actualIndex, size } });
     },
-    *handle({ payload, callback}, { call, put, select }) {
+    *handle({ payload, callback }, { call, put, select }) {
       // console.log("common",window.g_app._store.getState().common)
       const { index: pageIndex, size: pageSize, lang } = yield select(models => models.common);
       const { netUrl, index = pageIndex, size = pageSize, condition: netQueryCondition, manager_type } = payload;
@@ -85,12 +91,12 @@ export default {
       if (action !== "list") {
         const specialUrl = [LetterAPI.BASE_URL, ReviewAPI.BASE_URL, OrderAPI.BASE_URL];
         const baseUrl = netUrl.substring(0, position - 1);
-        if (specialUrl.includes(baseUrl)){
+        if (specialUrl.includes(baseUrl)) {
           yield put({ type: 'global/fetchNotices' });
-          const specialPathname=["letter","commodityevaluation","orderlist"];
-          const pathnameArr=window.location.pathname.split("/");
-          if(!specialPathname.includes(pathnameArr[pathnameArr.length-1])) return;
-        } 
+          const specialPathname = ["letter", "commodityevaluation", "orderlist"];
+          const pathnameArr = window.location.pathname.split("/");
+          if (!specialPathname.includes(pathnameArr[pathnameArr.length - 1])) return;
+        }
         const { Action_POS } = SystemEnum;
         action = Action_POS[action.toUpperCase()][lang] || ACTION[lang];
         // if (!action) action = ACTION[lang];
@@ -114,7 +120,7 @@ export default {
       const { total } = response;
       const maxIndex = Math.ceil(total / size);
       const actualIndex = maxIndex > index ? index : maxIndex < 1 ? 1 : maxIndex;
-      yield put({ type: 'save', payload: { ...response,index: actualIndex, size, formItem: {} } });
+      yield put({ type: 'save', payload: { ...response, index: actualIndex, size, formItem: {} } });
     },
   },
   reducers: {

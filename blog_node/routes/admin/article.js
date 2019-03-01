@@ -32,7 +32,6 @@ router.post("/list", async (ctx) => {
     const res = await db.query(querySql, []);
     const countArr = await db.query("select found_rows() as count", []);
     ctx.body = { "total": countArr[0].count, "list": res };
-
 });
 
 router.post("/content", async (ctx) => {
@@ -108,6 +107,5 @@ router.post("/unlock", async (ctx) => {
     const res = await db.query(updateSql, updateParams);
     ctx.body = { "list": res };
 });
-
 
 module.exports = router.routes();

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form ,Cascader} from 'antd';
+import { Form ,Modal} from 'antd';
+import CustomUpload from '@/components/CustomUpload';
 import Editor from 'for-editor';
 import Region from '@/assets/region.json';
 import { UrlEnum, ProductEnum } from '@/assets/Enum';
@@ -14,7 +15,8 @@ class EditorialForm extends React.PureComponent {
   state = {
     initialFormData: {},
     markdownValue:"",
-    categoryOptions :[]
+    categoryOptions :[],
+    fileList: [],
   }
 
   componentDidMount=()=>{
@@ -72,13 +74,26 @@ class EditorialForm extends React.PureComponent {
 
   render() {
     const { form, editorialPanelVisible, lang, request } = this.props;
-    const { shipmodeContainer, initialFormData,markdownValue,categoryOptions } = this.state;
+    const { shipmodeContainer, initialFormData,markdownValue,categoryOptions,fileList } = this.state;
     const markdownNode=<Editor value={markdownValue} preview={true} expand={true} onChange={this.markDownChange} />;
+    const imgUpload = (
+      <CustomUpload
+        fileList={fileList}
+        action="http://localhost:3000/user/article/testpic"
+        handleUpload={(list) => {
+          const arr = list.filter(i => i.url || (i.response && i.response.list));
+          if (arr.length < list.length) Modal.error({ title: "上传失败！" });
+          this.setState({ fileList: arr });
+        }}
+      />
+    )
     const modalFormConfig = [
       { fieldId: 'title', label:"标题", rules: [{ required: true, message: "标题是必须的" }],fieldProps: { style: { width: "86%" } }, fieldType: 'input', formItemLayout: { labelCol: { span: 6 } }, colLayout: { span: 12 } },
       { fieldId: 'label', label:"标签", fieldProps: { style: { width: "86%" } }, fieldType: 'input', formItemLayout: { labelCol: { span: 6 } }, colLayout: { span: 12 } },
       { fieldId: 'category_id', label: '分类',rules: [{ required: true, message: "分类是必须的" }], fieldType: 'cascader', fieldProps: {options:categoryOptions, fieldNames:{label:"name",value:"id"},style: { width: "86%" } },  formItemLayout: { labelCol: { span: 6 } }, colLayout: { span: 12 } },
       { fieldId: 'is_top', label:"置顶", fieldType: 'select', fieldProps: { options: [{value:1,label:"是"},{value:0,label:"否"}], style: { width: "86%" } },initialValue:0, formItemLayout: { labelCol: { span: 6 } }, colLayout: { span: 12 }},
+      { fieldId: 'image_url', label: "封面", fieldType: 'node', fieldNode: imgUpload, formItemLayout: { labelCol: { span: 3 } } },
+
       { fieldId: 'abstract', label: "摘要", fieldProps: { style: { width: "94%" }, autosize: true }, fieldType: 'textArea', formItemLayout: { labelCol: { span: 3 } } },
       { fieldId: 'content', label: '内容', fieldType: 'node', fieldProps: { style: { width: "94%" } }, fieldNode: markdownNode, formItemLayout: { labelCol: { span: 3 } } },
 
