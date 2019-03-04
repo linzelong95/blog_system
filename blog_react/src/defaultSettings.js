@@ -27,7 +27,7 @@ module.exports = {
 
   apiPrefix: 'http://192.168.1.3:336',
   // apiPrefix:"https://www.easy-mock.com/mock/5bf257d2b72cd5410f4fbf9e/ec6",
-  imgPrefix: 'http://192.168.1.3:337',
+  imgPrefix: 'http://127.0.0.1:3000',
   editorPrefix:'http://120.78.139.146:8080'
 };
  

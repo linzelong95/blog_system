@@ -16,7 +16,7 @@ class CustomUpload extends React.Component {
 
   render() {
     const { previewVisible, previewImage } = this.state;
-    const { action, listType = "picture-card", multiple = false, maxNum = 1, fileList = [], withCredentials = true } = this.props;
+    const { action, withCredentials = true, listType = "picture-card", multiple = false, maxNum = 1, fileList = [], ...otherProps } = this.props;
     return (
       <div className="clearfix">
         <Upload
@@ -27,6 +27,7 @@ class CustomUpload extends React.Component {
           fileList={fileList}
           onPreview={this.handlePreview}
           onChange={this.handleChange}
+          {...otherProps}
         >
           {
             fileList.length < maxNum &&

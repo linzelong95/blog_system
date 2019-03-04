@@ -12,6 +12,7 @@ const passport = require("./components/passport");
 const admin = require("./routes/admin.js");
 const account = require("./routes/account.js")(router, db, passport);
 const user = require("./routes/user.js");
+const upload = require("./routes/upload.js");
 
 const app = new Koa();
 render(app, {
@@ -21,7 +22,9 @@ render(app, {
 });
 app.use(static(path.join(__dirname, "statics")));
 app.use(bodyParser());
-app.use(cors());
+app.use(cors({
+  credentials: true
+}));
 app.keys = ["linzelong"];
 app.use(session({
   key: "koa:sess",
@@ -33,7 +36,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 app.use(async (ctx, next) => {
   const limitedUrls = ['/admin/', '/user/comment/delete','/user/comment/insert'];
   if (limitedUrls.some(i => ctx.originalUrl.includes(i)) && !ctx.isAuthenticated()) {
@@ -43,10 +45,12 @@ app.use(async (ctx, next) => {
   }
   await next();
 });
+ 
 
 router.use("/account", account);
 router.use("/admin", admin);
 router.use("/user", user);
+router.use("/upload", upload);
 
 app.use(router.routes()).use(router.allowedMethods());
 

@@ -1,5 +1,6 @@
 const router = require("koa-router")();
 const db = require("../../components/db");
+const fs=require("fs");
 
 router.post("/list", async (ctx) => {
     const { id: currentUserId } = ctx.state.user;
@@ -7,7 +8,7 @@ router.post("/list", async (ctx) => {
     const { sort = [], child = [] } = category;
     const querySql = `
         select sql_calc_found_rows
-            a.id,a.author_id,a.disabled,a.category_id,a.title,a.is_top,a.abstract,a.label,a.create_time,a.modified_time,c.name as category_name,c.sort,s.name as sort_name
+            a.id,a.image_url,a.author_id,a.disabled,a.category_id,a.title,a.is_top,a.abstract,a.label,a.create_time,a.modified_time,c.name as category_name,c.sort,s.name as sort_name
         from 
             article as a,category as c,sort as s
         where 
@@ -43,10 +44,10 @@ router.post("/content", async (ctx) => {
 
 router.post("/insert", async (ctx) => {
     const { id: author_id } = ctx.state.user;
-    const { title, label = "", abstract = "", content = "", category_id, is_top } = ctx.request.body;
+    const { title, label = "", abstract = "", content = "", category_id, is_top,image_url } = ctx.request.body;
     const cateId = category_id[category_id.length - 1];
-    const insertSql = "insert into article (category_id,title,is_top,abstract,label,author_id) values(?,?,?,?,?,?)";
-    const insertParams = [cateId, title, is_top, abstract, label, author_id];
+    const insertSql = "insert into article (category_id,title,is_top,abstract,label,author_id,image_url) values(?,?,?,?,?,?,?)";
+    const insertParams = [cateId, title, is_top, abstract, label, author_id,image_url||"/img/article/1551675912195.png"];
     const res = await db.query(insertSql, insertParams);
     const resCate = await db.query(`update category set is_use=1 where id=${cateId}`, []);
     const resContent = await db.query("insert into content (content) values(?)", [content]);
@@ -69,6 +70,8 @@ router.post("/delete", async (ctx) => {
     const condition = items.map(i => i.id).join(",");
     const deleteSql = `delete from article where id in (${condition})`;
     const res = await db.query(deleteSql, []);
+    // 删除图片
+    // fs.unlinkSync("/statics/img/article/",(err)=>{})
     ctx.body = { "list": res };
 });
 

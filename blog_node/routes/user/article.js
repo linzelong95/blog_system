@@ -38,11 +38,4 @@ router.post("/content", async (ctx) => {
     ctx.body = { "list": res };
 });
 
-
-router.post("/testpic", async (ctx) => {
-    console.log(ctx.query)
-    console.log(ctx.request.body)
-    ctx.body = { "list": []};
-});
-
 module.exports = router.routes();
