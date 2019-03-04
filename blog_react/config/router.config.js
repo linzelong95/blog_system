@@ -24,6 +24,14 @@ export default [
         name: 'HomePage',
         component: './HomePage/HomePage',
       },
+      {
+        path: '/article/:id',
+        icon: 'idcard',
+        name: 'OneArticle',
+        target:"_blank",
+        hideInMenu: true,
+        component: './OneArticle/OneArticle',
+      },
       // {
       //   path: '/frontend',
       //   icon: 'idcard',

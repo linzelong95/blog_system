@@ -2,7 +2,7 @@ const router = require("koa-router")();
 const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
-    const { conditionQuery: { title = "", category = {}, orderBy = {} }, index = 1, size = 10 } = ctx.request.body;
+    const { id, conditionQuery: { title = "", category = {}, orderBy = {} }, index = 1, size = 10 } = ctx.request.body;
     const { sort = [], child = [] } = category;
     const querySql = `
         select sql_calc_found_rows
@@ -14,6 +14,7 @@ router.post("/list", async (ctx) => {
             and c.sort=s.id 
             and c.disabled=0 
             and s.disabled=0 
+            ${id ? `and a.id=${id}` : ""}
             and a.title like '%${title}%'
             ${sort.length && !child.length ? `and c.sort in (${sort.join(",")})` : ""}
             ${!sort.length && child.length ? `and c.id in (${child.join(",")})` : ""}

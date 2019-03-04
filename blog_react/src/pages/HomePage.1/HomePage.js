@@ -1,10 +1,10 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Switch, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Drawer, Tree, Avatar } from 'antd';
-import router from 'umi/router';
+import { Switch, Modal, Card, Checkbox, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Drawer, Tree, Collapse } from 'antd';
 import PageHeaderLayout from '@/components/PageHeaderWrapper';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
+import ShowArticle from './ShowArticle';
 import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
@@ -21,6 +21,7 @@ class HomePage extends React.Component {
     conditionQuery: { title: "", category: {}, orderBy: {} },
     showSorterFlag: false,// 是否显示排序按钮
     formItem: {},
+    drawerVisible: false,
     filterModalVisible: false,
     categoryOptions: [],
     temporaryCondition: {},
@@ -62,7 +63,14 @@ class HomePage extends React.Component {
     this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: { name, by: orderBy.by === "asc" ? "desc" : "asc" } } }), () => this.request({ index: 1 }));
   }
 
-  readArticle = (id) => window.open(`http://localhost:8000/platform/article/${id}`);
+  readArticle = (item) => {
+    const callback = (res) => {
+      const formItem = item;
+      formItem.content = res.list[0].content;
+      this.setState({ formItem, drawerVisible: true });
+    }
+    this.request({ netUrl: CONTENT.url, id: item.id }, callback);
+  }
 
 
   onCloseDrawer = () => this.setState({ formItem: {}, drawerVisible: false });
@@ -135,12 +143,10 @@ class HomePage extends React.Component {
               <Input.Search placeholder="请输入标题" onSearch={this.handleOnSearch} enterButton allowClear ref={inputSearch => this.inputSearch = inputSearch} />
             </Col>
           </Row>
-          <Row>
-            <Col span={18}>
-            <List
+          <List
             loading={loading}
-            itemLayout="vertical"
             size="large"
+            grid={{ gutter: 16, sm: 2, md: 3, xl: 3, xxl: 3 }}
             dataSource={list}
             pagination={{
               showQuickJumper: true,
@@ -154,19 +160,8 @@ class HomePage extends React.Component {
               current: index
             }}
             renderItem={item => (
-              <List.Item
-                key={item.id}
-                actions={[<Icon type="star-o" />, <Icon type="like-o" />, <Icon type="message" />]}
-                extra={<img width={272} alt="logo" src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png" />}
-              >
-                <List.Item.Meta
-                  avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
-                  title={<a onClick={()=>this.readArticle(item.id)}>{item.title}</a>}
-                  description="标签"
-                />
-                {item.abstract}
-
-                {/* <Card
+              <List.Item>
+                <Card
                   title={<Tooltip title={item.title}><span>{item.title}</span></Tooltip>}
                   extra={<Tag color="purple"><Icon type="tag" />&nbsp;{item.sort_name},{item.category_name}</Tag>}
                   className={styles.eachChild}
@@ -192,14 +187,10 @@ class HomePage extends React.Component {
                       <span style={{ color: "yellow" }}>置顶</span>
                     </div>
                   }
-                </Card> */}
+                </Card>
               </List.Item>
             )}
           />
-            </Col>
-            <Col span={6}>jkhfjsdhi</Col>
-          </Row>
-
           <Modal
             destroyOnClose
             visible={filterModalVisible}
@@ -219,6 +210,7 @@ class HomePage extends React.Component {
               )}
             </Tree>
           </Modal>
+          {drawerVisible && <ShowArticle loading={loading} visible={drawerVisible} item={formItem} onClose={this.onCloseDrawer} request={this.request} />}
         </Card>
       </GridContent>
     );
