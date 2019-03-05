@@ -6,7 +6,7 @@ router.post("/list", async (ctx) => {
     const { sort = [], child = [] } = category;
     const querySql = `
         select sql_calc_found_rows
-            a.id,a.author_id,a.disabled,a.category_id,a.title,a.is_top,a.abstract,a.label,a.create_time,a.modified_time,c.name as category_name,c.sort,s.name as sort_name
+            a.id,a.image_url,a.author_id,a.disabled,a.category_id,a.title,a.is_top,a.abstract,a.label,a.create_time,a.modified_time,c.name as category_name,c.sort,s.name as sort_name
         from 
             article as a,category as c,sort as s
         where 

@@ -2,54 +2,48 @@ import React from 'react';
 import { connect } from 'dva';
 import { Card, Upload, Icon, Modal } from 'antd';
 import Editor from 'for-editor';
-const Markdown = require('react-markdown')
 import PageHeaderLayout from '@/components/PageHeaderWrapper';
-
-
 
 @connect(({ common, loading }) => ({
   common,
   loading: loading.models.common,
 }))
 class DistributionMode extends React.Component {
-
-
-
   state = {
     previewVisible: false,
     previewImage: '',
-    fileList: [{
-      uid: '-1',
-      name: 'xxx.png',
-      status: 'done',
-      url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-    }],
-    value:""
+    fileList: [
+      {
+        uid: '-1',
+        name: 'xxx.png',
+        status: 'done',
+        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+      },
+    ],
+    value: '',
   };
 
-  componentDidMount=()=>{
+  componentDidMount = () => {};
 
-  }
+  handleOnclick = () => {
+    console.log(this.smde.value);
+  };
 
-  handleOnclick=()=>{
-    console.log(this.smde.value)
-  }
+  handleCancel = () => this.setState({ previewVisible: false });
 
-  handleCancel = () => this.setState({ previewVisible: false })
-
-  handlePreview = (file) => {
+  handlePreview = file => {
     this.setState({
       previewImage: file.url || file.thumbUrl,
       previewVisible: true,
     });
-  }
+  };
 
-  handleChange = ({ fileList }) => this.setState({ fileList },console.log(fileList))
+  handleChange = ({ fileList }) => this.setState({ fileList }, console.log(fileList));
 
-  markDownChange=(value)=>this.setState({value},console.log(value));
+  markDownChange = value => this.setState({ value }, console.log(value));
 
   render() {
-    const { previewVisible, previewImage, fileList,value } = this.state;
+    const { previewVisible, previewImage, fileList, value } = this.state;
     const uploadButton = (
       <div>
         <Icon type="plus" />
@@ -73,9 +67,7 @@ class DistributionMode extends React.Component {
               <img alt="example" style={{ width: '100%' }} src={previewImage} />
             </Modal>
           </div>
-          <Editor value={value} height="1000px" preview={true} expand={true} onChange={this.markDownChange} />
-          <h1>显示</h1>
-          <Markdown source={value} />
+          <Editor value={value} height="1000px" preview expand onChange={this.markDownChange} />
         </Card>
       </PageHeaderLayout>
     );
