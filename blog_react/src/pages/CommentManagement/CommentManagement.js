@@ -50,7 +50,7 @@ const initArticleContainer = {
 class CommentManagement extends React.Component {
   state = {
     conditionQuery: { title: '', category: {}, orderBy: {} },
-    showSorterFlag: false, // 是否显示排序按钮
+    showSorterFlag: false, 
     selectedItems: [],
     allSelectedFlag: false,
     editorialPanelVisible: false,
@@ -62,7 +62,7 @@ class CommentManagement extends React.Component {
     temporaryCondition: {},
   };
 
-  componentDidMount = () => this.request({ index: 1, size: 10 });
+  componentDidMount = () => this.request({ index: 1, size: 6 });
 
   componentWillReceiveProps = nextProps => {
     const { selectedItems } = this.state;
@@ -310,7 +310,7 @@ class CommentManagement extends React.Component {
 
   render() {
     const {
-      articleManagement: { total = 10, list = [], size = 12, index = 1 },
+      articleManagement: { total = 6, list = [], size = 6, index = 1 },
       loading,
     } = this.props;
     const {
@@ -517,9 +517,9 @@ class CommentManagement extends React.Component {
               showSizeChanger: true,
               onChange: this.handlePageChange,
               onShowSizeChange: this.handlePageChange,
-              // pageSizeOptions: ["10", "20", "30", "40"],
+              pageSizeOptions: ["6", "12", "18", "24"],
               pageSize: size,
-              // defaultPageSize: 10,
+              defaultPageSize: 6,
               total,
               current: index,
             }}

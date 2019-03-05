@@ -32,7 +32,7 @@ class ArticleManagement extends React.Component {
     categoryOptions: [],
   };
 
-  componentDidMount = () => this.request({ index: 1, size: 12 });
+  componentDidMount = () => this.request({ index: 1, size: 6 });
 
   componentWillReceiveProps = nextProps => {
     const { selectedItems } = this.state;
@@ -254,7 +254,7 @@ class ArticleManagement extends React.Component {
 
   render() {
     const {
-      articleManagement: { total = 10, list = [], size = 12, index = 1 },
+      articleManagement: { total = 6, list = [], size = 6, index = 1 },
       loading,
     } = this.props;
     const {
@@ -319,8 +319,8 @@ class ArticleManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'title' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'title' &&
+                          conditionQuery.orderBy.by === 'desc'
                           ? 'down'
                           : 'up'
                       }
@@ -336,8 +336,8 @@ class ArticleManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'create_time' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'create_time' &&
+                          conditionQuery.orderBy.by === 'desc'
                           ? 'down'
                           : 'up'
                       }
@@ -353,8 +353,8 @@ class ArticleManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'modified_time' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'modified_time' &&
+                          conditionQuery.orderBy.by === 'desc'
                           ? 'down'
                           : 'up'
                       }
@@ -456,9 +456,9 @@ class ArticleManagement extends React.Component {
               showSizeChanger: true,
               onChange: this.handlePageChange,
               onShowSizeChange: this.handlePageChange,
-              pageSizeOptions: ['12', '24', '36', '48'],
+              pageSizeOptions: ['6', '12', '18', '24',],
               pageSize: size,
-              defaultPageSize: 12,
+              defaultPageSize: 6,
               total,
               current: index,
             }}
@@ -500,7 +500,7 @@ class ArticleManagement extends React.Component {
                         style={{ color: 'black', width: '60px' }}
                         onClick={() => this.handleItems(UNTOP, item)}
                       />
-                    ),
+                      ),
                     item.disabled === 0 ? (
                       <Icon
                         type="lock"
@@ -513,7 +513,7 @@ class ArticleManagement extends React.Component {
                         style={{ color: 'black', width: '60px' }}
                         onClick={() => this.handleItems(UNLOCK, item)}
                       />
-                    ),
+                      ),
                     <Icon
                       type="eye"
                       style={{ color: '#A52A2A', width: '60px' }}
@@ -535,15 +535,13 @@ class ArticleManagement extends React.Component {
                         item.label.split('&&').map(i => <Tag color="volcano">{i}</Tag>)
                       ) : (
                         <Tag color="volcano">无</Tag>
-                      )}
+                        )}
                     </Ellipsis>
                   </div>
-                  <div style={{ height: '45px' }}>
-                    <Ellipsis lines={2}>
-                      摘要：
-                      {item.abstract ? item.abstract : '无'}
-                    </Ellipsis>
-                  </div>
+                  <Ellipsis lines={2} style={{ height: '40px' }}>
+                    摘要：
+                    {item.abstract ? item.abstract : '无'}
+                  </Ellipsis>
                   <div style={{ marginTop: '5px', fontSize: '12px' }}>
                     <div style={{ float: 'left' }}>
                       <Icon type="clock-circle" />

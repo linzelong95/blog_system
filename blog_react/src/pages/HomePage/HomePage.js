@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Modal, Card, Col, Row, Button, Tooltip, Input, Tag, Icon, List, Tree, Avatar } from 'antd';
+import { Modal, Card, Col, Row, Button, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider,Timeline } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
 import { adminType, imgPrefix } from '@/defaultSettings';
@@ -19,13 +19,19 @@ const {
 class HomePage extends React.Component {
   state = {
     conditionQuery: { title: '', category: {}, orderBy: {} },
-    showSorterFlag: false, // 是否显示排序按钮
+    showSorterFlag: false,
     filterModalVisible: false,
     categoryOptions: [],
     temporaryCondition: {},
   };
 
-  componentDidMount = () => this.request({ index: 1, size: 12 });
+  componentDidMount = () =>{
+    this.request({ index: 1, size: 6 });
+    this.request(
+      { netUrl: UserCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true },
+      (res) => this.setState({ categoryOptions: res.list })
+    );
+  } 
 
   request = (params, callback) => {
     const { conditionQuery: con } = this.state;
@@ -86,21 +92,12 @@ class HomePage extends React.Component {
   toggleFilterModal = () =>
     this.setState(oldState => ({ filterModalVisible: !oldState.filterModalVisible }));
 
-  showFilterModal = () => {
-    const callback = res => this.setState({ categoryOptions: res.list });
-    this.request(
-      { netUrl: UserCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true },
-      callback
-    );
-    this.toggleFilterModal();
-  };
-
   filterRequest = method => {
     if (method === 'clear') {
       this.setState({ temporaryCondition: {} });
       return;
     }
-    this.toggleFilterModal();
+    if(method!=="noModal") this.toggleFilterModal();
     let filterflag = false;
     if (method === 'exit') {
       const {
@@ -141,7 +138,7 @@ class HomePage extends React.Component {
 
   render() {
     const {
-      articleManagement: { total = 10, list = [], size = 12, index = 1 },
+      articleManagement: { total = 6, list = [], size = 6, index = 1 },
       loading,
     } = this.props;
     const {
@@ -160,7 +157,7 @@ class HomePage extends React.Component {
                 icon="filter"
                 type={temporaryCondition.filterflag ? 'danger' : 'primary'}
                 size="small"
-                onClick={this.showFilterModal}
+                onClick={this.toggleFilterModal}
               >
                 筛选&nbsp;
               </Button>
@@ -255,7 +252,7 @@ class HomePage extends React.Component {
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col span={18}>
+            <Col span={17}>
               <List
                 loading={loading}
                 itemLayout="vertical"
@@ -265,9 +262,9 @@ class HomePage extends React.Component {
                   showSizeChanger: true,
                   onChange: this.handlePageChange,
                   onShowSizeChange: this.handlePageChange,
-                  pageSizeOptions: ['12', '24', '36', '48'],
+                  pageSizeOptions: ['6','12', '18', '24'],
                   pageSize: size,
-                  defaultPageSize: 12,
+                  defaultPageSize: 6,
                   total,
                   current: index,
                 }}
@@ -275,14 +272,14 @@ class HomePage extends React.Component {
                   <List.Item
                     key={item.id}
                     actions={[
-                      <Icon type="star-o" />,
-                      <Icon type="like-o" />,
-                      <Icon type="message" />,
                       <span>
                         <Icon type="edit" />
                         &nbsp;
                         {timeFormat(Number(new Date(item.modified_time)))}
                       </span>,
+                      <Icon type="star-o" />,
+                      <Icon type="like-o" />,
+                      <Icon type="message" />,
                       <div>
                         {item.label.split('&&').map(i => (
                           <Tag color="volcano">{i}</Tag>
@@ -336,8 +333,9 @@ class HomePage extends React.Component {
                           </Tag>
                         </a>
                       }
+                      style={{marginBottom:"0px"}}
                     />
-                    <Ellipsis lines={2}>
+                    <Ellipsis lines={2} style={{ height: '40px' }}>
                       <span style={{ paddingLeft: '30px', fontWeight: 'bold' }}>摘要：</span>
                       {item.abstract ? item.abstract : '无'}
                     </Ellipsis>
@@ -345,7 +343,48 @@ class HomePage extends React.Component {
                 )}
               />
             </Col>
-            <Col span={6}>这里干点别的事</Col>
+            <Col span={7}>
+              <div style={{textAlign:"center"}}>
+                <p><Avatar size={200} src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /></p>
+                <span style={{fontSize:"25px",fontWeight:"bold",margin:"10px"}}>博客</span>
+                <Divider style={{margin:"5px 0px"}}> 
+                  <span>
+                    <a><Icon type="github" /></a>&nbsp;&nbsp;
+                    <a><Icon type="cloud" /></a>
+                  </span>
+                </Divider> 
+                <span>这个人很懒，什么都没留下</span>
+              </div>
+              <div>
+                <Divider style={{margin:"25px 0px 10px 0px"}}><Icon type="tags" style={{color:"purple"}} /></Divider> 
+                {categoryOptions.map(i=>{
+                  if(!i.disabled&&i.is_use){
+                    return i.children.filter(v=>!v.disabled&&v.is_use).map(m=>
+                      <Tag 
+                        onClick={()=>{this.setState(oldState => ({
+                          temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr:[`${i.id}-${m.id}`] },
+                        }),()=>this.filterRequest("noModal"))}}
+                        color={["#f50","#2db7f5","#87d068","#108ee9","#6fa1d1","#f84d78","#de7b5d","#4c9447"][Math.floor(Math.random()*7)]}
+                        style={{fontSize:"15px"}}
+                      >
+                        {m.name}
+                      </Tag>
+                    )
+                  }
+                  return undefined;
+                })}
+              </div>
+              <div>
+                <Divider style={{margin:"25px 0px 10px 0px"}}><Icon type="clock-circle" style={{color:"blue"}} /></Divider> 
+                <Timeline>
+                  <Timeline.Item>Create a services site 2015-09-01</Timeline.Item>
+                  <Timeline.Item>Solve initial network problems 2015-09-01</Timeline.Item>
+                  <Timeline.Item>Technical testing 2015-09-01</Timeline.Item>
+                  <Timeline.Item>Network problems being solved 2015-09-01</Timeline.Item>
+                  <Timeline.Item><a>more...</a></Timeline.Item>
+                </Timeline>
+              </div>
+            </Col>
           </Row>
           <Modal
             destroyOnClose

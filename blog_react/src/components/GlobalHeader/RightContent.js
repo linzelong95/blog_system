@@ -337,8 +337,8 @@ export default class GlobalHeaderRight extends PureComponent {
         ) : (
           // <Spin size="small" style={{ marginLeft: 8, marginRight: 8 }} />
           <Fragment>
-            <Link to="/user/login">登录</Link>&nbsp;&nbsp;
-            <Link to="/user/register">注册</Link>
+            <Link to="/user/login"><Button type="primary" size="small">登录</Button></Link>&nbsp;&nbsp;
+            <Link to="/user/register"><Button type="danger" size="small">注册</Button></Link>
           </Fragment>
           )}
         <SelectLang className={styles.action} />
