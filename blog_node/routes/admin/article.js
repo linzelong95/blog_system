@@ -47,7 +47,7 @@ router.post("/insert", async (ctx) => {
     const { title, label = "", abstract = "", content = "", category_id, is_top,image_url } = ctx.request.body;
     const cateId = category_id[category_id.length - 1];
     const insertSql = "insert into article (category_id,title,is_top,abstract,label,author_id,image_url) values(?,?,?,?,?,?,?)";
-    const insertParams = [cateId, title, is_top, abstract, label, author_id,image_url||"/img/article/1551675912195.png"];
+    const insertParams = [cateId, title, is_top, abstract, label, author_id,image_url||"/img/article/defaultimg.jpeg"];
     const res = await db.query(insertSql, insertParams);
     const resCate = await db.query(`update category set is_use=1 where id=${cateId}`, []);
     const resContent = await db.query("insert into content (content) values(?)", [content]);

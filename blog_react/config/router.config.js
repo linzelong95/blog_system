@@ -66,6 +66,13 @@ export default [
         component: './CategoryManagement/CategoryManagement',
       },
       {
+        path: '/labelmanagement',
+        icon: 'idcard',
+        name: 'LabelManagement',
+        authority: ['admin'],
+        component: './LabelManagement/LabelManagement',
+      },
+      {
         icon: 'idcard',
         path: '/center',
         name: 'Center',

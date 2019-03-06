@@ -54,10 +54,10 @@ class CategoryManagement extends React.Component {
   handleTableChange = (pagination, filters, sorter) => {
     const { current: index, pageSize: size } = pagination;
     const { columnKey, order } = sorter;
-    const { disabled: disabledArr, sort: s = [] } = filters;
+    const { disabled: disabledArr, sort: s } = filters;
     const disabled =
       disabledArr && disabledArr.length > 0 ? parseInt(disabledArr[0], 10) : undefined;
-    const sort = s.map(i => parseInt(i, 10));
+    const sort = s && s.length > 0 ?s.map(i => parseInt(i, 10)):[];
     const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'desc' : 'asc' } : {};
     this.setState(
       oldState => ({
@@ -209,7 +209,7 @@ class CategoryManagement extends React.Component {
       },
       {
         title: '修改时间',
-        dataIndex: 'modified_time_time',
+        dataIndex: 'modified_time',
         sorter: true,
         width: '20%',
         render: val => (
@@ -298,7 +298,7 @@ class CategoryManagement extends React.Component {
       },
       {
         title: '修改时间',
-        dataIndex: 'modified_time_time',
+        dataIndex: 'modified_time',
         sorter: true,
         width: '20%',
         render: val => (

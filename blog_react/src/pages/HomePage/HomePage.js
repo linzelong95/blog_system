@@ -4,13 +4,14 @@ import { Modal, Card, Col, Row, Button, Tooltip, Input, Tag, Icon, List, Tree, A
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
 import { adminType, imgPrefix } from '@/defaultSettings';
-import { timeFormat } from '@/utils/utils';
+import { timeFormat,getRandomColor } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 
 const {
   UserArticleAPI: { LIST },
   UserCateAPI,
 } = UrlEnum;
+
 
 @connect(({ articleManagement, loading }) => ({
   articleManagement,
@@ -23,13 +24,14 @@ class HomePage extends React.Component {
     filterModalVisible: false,
     categoryOptions: [],
     temporaryCondition: {},
+    timelines:[]
   };
 
   componentDidMount = () =>{
     this.request({ index: 1, size: 6 });
-    this.request(
-      { netUrl: UserCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true },
-      (res) => this.setState({ categoryOptions: res.list })
+    // this.request({ size: 5,conditionQuery:{orderBy:{name:"create_time",by:"desc"}}},(res) => this.setState({ timelines: res.list }));
+    this.request({ netUrl: UserCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true },(res) => 
+      this.setState({ categoryOptions: res.list })
     );
   } 
 
@@ -141,12 +143,14 @@ class HomePage extends React.Component {
       articleManagement: { total = 6, list = [], size = 6, index = 1 },
       loading,
     } = this.props;
+    console.log(total)
     const {
       showSorterFlag,
       filterModalVisible,
       categoryOptions,
       conditionQuery,
       temporaryCondition,
+      timelines
     } = this.state;
     return (
       <GridContent>
@@ -280,11 +284,12 @@ class HomePage extends React.Component {
                       <Icon type="star-o" />,
                       <Icon type="like-o" />,
                       <Icon type="message" />,
-                      <div>
-                        {item.label.split('&&').map(i => (
-                          <Tag color="volcano">{i}</Tag>
-                        ))}
-                      </div>,
+                      <div>标签待处理</div>
+                      // <div>
+                      //   {item.label.split('&&').map(i => (
+                      //     <Tag color="volcano">{i}</Tag>
+                      //   ))}
+                      // </div>,
                     ]}
                     extra={
                       <img
@@ -364,7 +369,7 @@ class HomePage extends React.Component {
                         onClick={()=>{this.setState(oldState => ({
                           temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr:[`${i.id}-${m.id}`] },
                         }),()=>this.filterRequest("noModal"))}}
-                        color={["#f50","#2db7f5","#87d068","#108ee9","#6fa1d1","#f84d78","#de7b5d","#4c9447"][Math.floor(Math.random()*7)]}
+                        color={getRandomColor()}
                         style={{fontSize:"15px"}}
                       >
                         {m.name}
@@ -376,11 +381,21 @@ class HomePage extends React.Component {
               </div>
               <div>
                 <Divider style={{margin:"25px 0px 10px 0px"}}><Icon type="clock-circle" style={{color:"blue"}} /></Divider> 
-                <Timeline>
-                  <Timeline.Item>Create a services site 2015-09-01</Timeline.Item>
-                  <Timeline.Item>Solve initial network problems 2015-09-01</Timeline.Item>
-                  <Timeline.Item>Technical testing 2015-09-01</Timeline.Item>
-                  <Timeline.Item>Network problems being solved 2015-09-01</Timeline.Item>
+                <Timeline mode="alternate">
+                  {timelines.map(i=>(
+                    <Timeline.Item color={getRandomColor()}>
+                      <b>{timeFormat(Number(new Date(i.modified_time)))}</b>
+                      <a
+                        href={`${window.location.origin}/${adminType}/article/${i.id}`}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        style={{display:"block"}}
+                      >
+                        {i.title}
+                      </a>
+                    </Timeline.Item>
+                    )
+                  )}
                   <Timeline.Item><a>more...</a></Timeline.Item>
                 </Timeline>
               </div>

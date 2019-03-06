@@ -209,6 +209,14 @@ export function rsa(value, publicKey) {
 // }
 
 
+export const getRandomColor=()=>{
+  const colorArr=["#f50","#2db7f5","#87d068","#108ee9","#6fa1d1","#f84d78","#de7b5d","#4c9447"];
+  return colorArr[Math.floor(Math.random()*(colorArr.length-1))];
+}
+
+
+
+
 /**
  * 导出数据
  *

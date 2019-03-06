@@ -17,66 +17,45 @@ class CustomFormTable extends React.PureComponent {
   };
 
   componentDidMount = () => {
-    const {condition}=this.state;
-    const { getList, netUrl, netValue={} } = this.props;
+    const { getList, netUrl, netValue={},request,handleSetState,handleGetState } = this.props;
     const {size=6}=netValue;
     this.setState({ size });
-    const customValue={...netValue};
-    let conditionQuery={...condition};
-    if(customValue.conditionQuery){
-      conditionQuery={...condition,...customValue.conditionQuery};
-      delete customValue.conditionQuery;
-    }
-    getList({ netUrl, index:1, size, conditionQuery, ...customValue  });
+    // getList({ netUrl, index:1, size, ...netValue });
+    const payload={ netUrl, index:1, size, ...netValue };
+    getList({ payload, request,handleSetState,handleGetState});
   }
 
   cleanSelectedItem = () => this.handleSelectRows([], []);
 
   onQuery = (condition) => {
-    const { getList, netUrl, netValue={} } = this.props;
+    const { getList, netUrl, netValue={},request,handleSetState,handleGetState } = this.props;
     const {size:pageSize}=this.state;
     const {size=pageSize}=netValue;
     this.setState({ condition,index:1, size });
-    const customValue={...netValue};
-    let conditionQuery={...condition};
-    if(customValue.conditionQuery){
-      conditionQuery={...condition,...customValue.conditionQuery};
-      delete customValue.conditionQuery;
-    }
-    getList({ netUrl, index: 1, size,conditionQuery, ...customValue });
+    const payload={ netUrl, index: 1, size,...condition, ...netValue };
+    // getList({ netUrl, index: 1, size,...condition, ...netValue });
+    getList({ payload,request,handleSetState,handleGetState });
   }
 
   toggleCustomFormTable = () => this.setState((oldState) => ({ customFormTableVisible: !oldState.customFormTableVisible }));
 
   handleSelectRows = (keys, items) => {
-    const {  onHandleCustomTableChange,formVerify} = this.props;
-    onHandleCustomTableChange({keys, items,formVerify});
+    const { netUrl, onHandleCustomTableChange,formVerify,form,handleSetState,handleGetState,notAllowChange } = this.props;
+    // onHandleCustomTableChange(keys, items, netUrl,formVerify);
+    onHandleCustomTableChange({keys, items, netUrl,formVerify,form,handleSetState,handleGetState,notAllowChange});
   }
 
   dataChange = ({ current: index, pageSize: size }, filters, sorter) => {
-    const { getList, netUrl, netValue={}} = this.props;
+    const { getList, netUrl, netValue={},request,handleSetState,handleGetState} = this.props;
     const { condition } = this.state;
     const { columnKey, order } = sorter;
     const sort = SortField[columnKey].code;
     const direction = order === "descend" ? 1 : 0;
-    getList({ netUrl, direction, sort, index, size, ...condition, ...netValue });
+    const payload={netUrl, direction, sort, index, size, ...condition, ...netValue};
+    // getList({ netUrl, direction, sort, index, size, ...condition, ...netValue });
+    getList({ payload,request,handleSetState,handleGetState});
     this.setState({ index, size });
   }
-
-  dataChange = ({ current: index, pageSize: size }, filters, sorter) => {
-    const { getList, netUrl, netValue={}} = this.props;
-    const { condition } = this.state;
-    const { columnKey, order } = sorter;
-    const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'desc' : 'asc' } : {};
-    const customValue={...netValue};
-    let conditionQuery={...condition,orderBy};
-    if(customValue.conditionQuery){
-      conditionQuery={...condition,...customValue.conditionQuery};
-      delete customValue.conditionQuery;
-    }
-    getList({ netUrl, index, size, conditionQuery, ...customValue });
-    this.setState({ index, size });
-  };
 
   getTableScroll=(columns)=>({ x: !columns[0].width.toString().endsWith("%") ? columns.reduce((col_width, column) => col_width + column.width, 0) : undefined });
 
@@ -93,13 +72,16 @@ class CustomFormTable extends React.PureComponent {
       selectBtnName, 
       type = "checkbox", 
       tableWidth, 
-      lang="zh_CN", 
+      lang, 
       actionColumnConfig,
       onHandleCustomTableChange,
       actionColumn,
       netUrl,
       itemTable:{COLUMNS,CONDITION},
       formVerify,
+      form,
+      handleSetState,
+      handleGetState,
       notAllowChange,
       showTableConfig={},
       ...restProps 
@@ -111,7 +93,7 @@ class CustomFormTable extends React.PureComponent {
       dataIndex: 'x', 
       align: 'center', 
       render: (_, item) => selectedItems.some(i => i.id === item.id) &&
-        <Button size="small" style={{ color: "white", background: "red" }} onClick={() => onHandleCustomTableChange({keys:selectedItems.filter(i => i.id !== item.id).map(i => i.id), items:[], formVerify,notAllowChange})}>{DROP[lang]}</Button>,
+        <Button size="small" style={{ color: "white", background: "red" }} onClick={() => onHandleCustomTableChange({keys:selectedItems.filter(i => i.id !== item.id).map(i => i.id), items:[], netUrl,formVerify,form,handleSetState,handleGetState,notAllowChange})}>{DROP[lang]}</Button>,
       ...actionColumnConfig
     };
     const baseTableColumns=hasBaseTableAction?[...COLUMNS,customActionColumn]:COLUMNS;
