@@ -31,6 +31,8 @@ class LabelManagement extends React.Component {
     );
   }
 
+  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+
   request = (params, callback) => {
     const { conditionQuery } = this.state;
     const netUrl = LIST.url;

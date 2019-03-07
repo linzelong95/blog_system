@@ -1,15 +1,16 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Modal, Card, Col, Row, Button, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider,Timeline } from 'antd';
+import { Modal, Card, Col, Row, Button, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider, Timeline } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
 import { adminType, imgPrefix } from '@/defaultSettings';
-import { timeFormat,getRandomColor } from '@/utils/utils';
+import { timeFormat, getRandomColor } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 
 const {
   UserArticleAPI: { LIST },
   UserCateAPI,
+  UserLabelAPI
 } = UrlEnum;
 
 
@@ -23,17 +24,23 @@ class HomePage extends React.Component {
     showSorterFlag: false,
     filterModalVisible: false,
     categoryOptions: [],
+    labelOptions: [],
     temporaryCondition: {},
-    timelines:[]
+    timelines: []
   };
 
-  componentDidMount = () =>{
+  componentDidMount = () => {
     this.request({ index: 1, size: 6 });
-    this.request({ size: 5,conditionQuery:{orderBy:{name:"create_time",by:"desc"}}},(res) => this.setState({ timelines: res.list }));
-    this.request({ netUrl: UserCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true },(res) => 
+    this.request({ size: 5, conditionQuery: { orderBy: { name: "create_time", by: "desc" } } }, (res) => this.setState({ timelines: res.list }));
+    this.request({ netUrl: UserLabelAPI.LIST.url, index: 1, size: 100 }, (res) =>
+      this.setState({ labelOptions: res.list })
+    );
+    this.request({ netUrl: UserCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true }, (res) =>
       this.setState({ categoryOptions: res.list })
     );
-  } 
+  }
+
+  componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
 
   request = (params, callback) => {
     const { conditionQuery: con } = this.state;
@@ -99,22 +106,22 @@ class HomePage extends React.Component {
       this.setState({ temporaryCondition: {} });
       return;
     }
-    if(method!=="noModal") this.toggleFilterModal();
+    if (method !== "noModal") this.toggleFilterModal();
     let filterflag = false;
     if (method === 'exit') {
       const {
-        conditionQuery: { filteredSortArr = [] },
+        conditionQuery: { filteredSortArr = [], labelIds = [] },
       } = this.state;
-      filterflag = filteredSortArr.length > 0;
+      filterflag = filteredSortArr.length > 0 || labelIds.length;
       this.setState(oldState => ({
-        temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, filterflag },
+        temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, labelIds, filterflag },
       }));
       return;
     }
     const {
-      temporaryCondition: { filteredSortArr = [] },
+      temporaryCondition: { filteredSortArr = [], labelIds = [] },
     } = this.state;
-    filterflag = filteredSortArr.length > 0;
+    filterflag = filteredSortArr.length > 0 || labelIds.length > 0;
     const category = { sort: [], child: [] };
     filteredSortArr.forEach(item => {
       const arr = item.split('-');
@@ -126,7 +133,7 @@ class HomePage extends React.Component {
     });
     this.setState(
       oldState => ({
-        conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr },
+        conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr, labelIds },
         temporaryCondition: { ...oldState.temporaryCondition, filterflag },
       }),
       () => this.request({ index: 1 })
@@ -147,6 +154,7 @@ class HomePage extends React.Component {
       showSorterFlag,
       filterModalVisible,
       categoryOptions,
+      labelOptions,
       conditionQuery,
       temporaryCondition,
       timelines
@@ -187,8 +195,8 @@ class HomePage extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'title' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'title' &&
+                          conditionQuery.orderBy.by === 'desc'
                           ? 'down'
                           : 'up'
                       }
@@ -204,8 +212,8 @@ class HomePage extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'create_time' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'create_time' &&
+                          conditionQuery.orderBy.by === 'desc'
                           ? 'down'
                           : 'up'
                       }
@@ -221,8 +229,8 @@ class HomePage extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'modified_time' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'modified_time' &&
+                          conditionQuery.orderBy.by === 'desc'
                           ? 'down'
                           : 'up'
                       }
@@ -265,7 +273,7 @@ class HomePage extends React.Component {
                   showSizeChanger: true,
                   onChange: this.handlePageChange,
                   onShowSizeChange: this.handlePageChange,
-                  pageSizeOptions: ['6','12', '18', '24'],
+                  pageSizeOptions: ['6', '12', '18', '24'],
                   pageSize: size,
                   defaultPageSize: 6,
                   total,
@@ -283,12 +291,11 @@ class HomePage extends React.Component {
                       <Icon type="star-o" />,
                       <Icon type="like-o" />,
                       <Icon type="message" />,
-                      <div>标签待处理</div>
-                      // <div>
-                      //   {item.label.split('&&').map(i => (
-                      //     <Tag color="volcano">{i}</Tag>
-                      //   ))}
-                      // </div>,
+                      <div>
+                        {item.label.map(i => (
+                          <Tag color="volcano">{i.name}</Tag>
+                        ))}
+                      </div>,
                     ]}
                     extra={
                       <img
@@ -338,7 +345,7 @@ class HomePage extends React.Component {
                           </Tag>
                         </a>
                       }
-                      style={{marginBottom:"0px"}}
+                      style={{ marginBottom: "0px" }}
                     />
                     <Ellipsis lines={2} style={{ height: '40px' }}>
                       <span style={{ paddingLeft: '30px', fontWeight: 'bold' }}>摘要：</span>
@@ -349,52 +356,51 @@ class HomePage extends React.Component {
               />
             </Col>
             <Col span={7}>
-              <div style={{textAlign:"center"}}>
+              <div style={{ textAlign: "center" }}>
                 <p><Avatar size={200} src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /></p>
-                <span style={{fontSize:"25px",fontWeight:"bold",margin:"10px"}}>博客</span>
-                <Divider style={{margin:"5px 0px"}}> 
+                <span style={{ fontSize: "25px", fontWeight: "bold", margin: "10px" }}>博客</span>
+                <Divider style={{ margin: "5px 0px" }}>
                   <span>
                     <a><Icon type="github" /></a>&nbsp;&nbsp;
                     <a><Icon type="cloud" /></a>
                   </span>
-                </Divider> 
+                </Divider>
                 <span>这个人很懒，什么都没留下</span>
               </div>
               <div>
-                <Divider style={{margin:"25px 0px 10px 0px"}}><Icon type="tags" style={{color:"purple"}} /></Divider> 
-                {categoryOptions.map(i=>{
-                  if(!i.disabled&&i.is_use){
-                    return i.children.filter(v=>!v.disabled&&v.is_use).map(m=>
-                      <Tag 
-                        onClick={()=>{this.setState(oldState => ({
-                          temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr:[`${i.id}-${m.id}`] },
-                        }),()=>this.filterRequest("noModal"))}}
-                        color={getRandomColor()}
-                        style={{fontSize:"15px"}}
-                      >
-                        {m.name}
-                      </Tag>
-                    )
-                  }
-                  return undefined;
-                })}
+                <Divider style={{ margin: "25px 0px 10px 0px" }}><Icon type="tags" style={{ color: "purple" }} /></Divider>
+                {
+                  labelOptions.map(i => (
+                    <Tag
+                      onClick={() => {
+                        this.setState(oldState => ({
+                          temporaryCondition: { ...oldState.temporaryCondition, labelIds: [i.id] },
+                        }), () => this.filterRequest("noModal"))
+                      }}
+                      color={getRandomColor()}
+                      style={{ fontSize: "13px",margin:"3px" }}
+                    >
+                      {i.name}
+                    </Tag>
+                  ))
+                }
               </div>
               <div>
-                <Divider style={{margin:"25px 0px 10px 0px"}}><Icon type="clock-circle" style={{color:"blue"}} /></Divider> 
+                <Divider style={{ margin: "25px 0px 10px 0px" }}><Icon type="clock-circle" style={{ color: "blue" }} /></Divider>
                 <Timeline mode="alternate">
-                  {timelines.map(i=>(
+                  {timelines.map(i => (
                     <Timeline.Item color={getRandomColor()}>
                       <b>{timeFormat(Number(new Date(i.modified_time)))}</b>
                       <a
                         href={`${window.location.origin}/${adminType}/article/${i.id}`}
                         target="_blank"
                         rel="noreferrer noopener"
-                        style={{display:"block"}}
+                        style={{ display: "block" }}
                       >
                         {i.title}
                       </a>
                     </Timeline.Item>
-                    )
+                  )
                   )}
                   <Timeline.Item><a>more...</a></Timeline.Item>
                 </Timeline>
@@ -441,6 +447,17 @@ class HomePage extends React.Component {
                 </Tree.TreeNode>
               ))}
             </Tree>
+            {
+                labelOptions.map(item=>(
+                  <Tag.CheckableTag 
+                    key={item.id} 
+                    checked={temporaryCondition.labelIds&&temporaryCondition.labelIds.includes(item.id)}
+                    onChange={(val,options)=>console.log(val,options)}
+                  >
+                    {item.name}
+                  </Tag.CheckableTag>
+                ))
+              }
           </Modal>
         </Card>
       </GridContent>

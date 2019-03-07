@@ -34,6 +34,8 @@ class ArticleManagement extends React.Component {
 
   componentDidMount = () => this.request({ index: 1, size: 6 });
 
+  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+
   componentWillReceiveProps = nextProps => {
     const { selectedItems } = this.state;
     const {
@@ -531,8 +533,8 @@ class ArticleManagement extends React.Component {
                   <div style={{ marginBottom: '5px', fontSize: '12px' }}>
                     <Ellipsis lines={1}>
                       标签：
-                      {item.label ? (
-                        item.label.split('&&').map(i => <Tag color="volcano">{i}</Tag>)
+                      {item.label&&item.label.length>0 ? (
+                        item.label.map(i => <Tag color="volcano">{i.name}</Tag>)
                       ) : (
                         <Tag color="volcano">无</Tag>
                         )}

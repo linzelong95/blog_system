@@ -27,6 +27,8 @@ class CategoryManagement extends React.Component {
 
   componentDidMount = () => this.request({ index: 1, size: 10 });
 
+  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+
   request = (params, callback) => {
     const { conditionQuery, tabKey } = this.state;
     const netUrl = tabKey === 'sort' ? AdminSortAPI.LIST.url : AdminCateAPI.LIST.url;

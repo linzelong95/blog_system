@@ -64,6 +64,8 @@ class CommentManagement extends React.Component {
 
   componentDidMount = () => this.request({ index: 1, size: 6 });
 
+  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+
   componentWillReceiveProps = nextProps => {
     const { selectedItems } = this.state;
     const {

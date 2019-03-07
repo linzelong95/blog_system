@@ -805,6 +805,10 @@ const UrlEnum = {
     DELETE: { url: "/api/user/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
     INSERT: { url: "/api/user/comment/insert", desc: { zh_CN: "添加", en_US: "insert" } },
   },
+  UserLabelAPI: {
+    BASE_URL: "/user/label",
+    LIST: { url: "/api/user/label/list", desc: { zh_CN: "获取标签列表", en_US: "getList" } },
+  },
 
 
   AdminArticleAPI: {

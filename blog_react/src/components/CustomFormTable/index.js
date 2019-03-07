@@ -106,6 +106,7 @@ class CustomFormTable extends React.PureComponent {
     } = this.props;
     const { condition, customFormTableVisible, index, size } = this.state;
     const selectedRowKeys = selectedItems.map(i => i.id);
+    console.log(selectedRowKeys)
     const customActionColumn =actionColumn || {
       title: ACTION[lang], 
       dataIndex: 'x', 

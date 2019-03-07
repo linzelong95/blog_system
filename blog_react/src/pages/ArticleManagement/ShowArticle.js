@@ -176,9 +176,9 @@ class ShowArticle extends React.Component {
               {item.label && (
                 <p style={{ textIndent: '2em' }}>
                   <b>标签：</b>
-                  {item.label.split('&&').map(i => (
+                  {item.label.map(i => (
                     <Tag color="volcano" style={{ textIndent: '0em' }}>
-                      {i}
+                      {i.name}
                     </Tag>
                   ))}
                 </p>

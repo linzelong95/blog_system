@@ -5,7 +5,7 @@ router.post("/list", async (ctx) => {
     const { conditionQuery: { disabled, name = "", orderBy = {}, sort = [] }, index = 1, size = 10, prettyFormat = false, allCateAndSort = false } = ctx.request.body;
     const getSql = (onlyTotalNum) => (`
         select
-            ${onlyTotalNum? "count(*) as count": "c.id,c.name,c.sort,c.disabled,c.is_use,s.name as sort_name,s.is_use as sort_is_use,s.disabled as sort_disabled"}
+            ${onlyTotalNum? "count(*) as count": "c.*,s.name as sort_name,s.is_use as sort_is_use,s.disabled as sort_disabled"}
         from 
             category as c,sort as s
         where

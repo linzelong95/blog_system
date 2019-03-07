@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Modal,Tag,Icon } from 'antd';
+import { Form, Modal, Tag, Icon } from 'antd';
 import CustomUpload from '@/components/CustomUpload';
 import CustomFormTable from '@/components/CustomFormTable';
 import { timeFormat } from '@/utils/utils';
@@ -49,10 +49,16 @@ class EditorialForm extends React.PureComponent {
   };
 
   formatInitialFormData = (formItem, extraObj) => {
-    const { category_id, content, sort, image_url } = formItem;
+    const { category_id, content, sort, image_url,label } = formItem;
     const fileList = image_url ? [{ uid: -1, url: `${imgPrefix}${image_url}` }] : [];
     const initialFormData = { ...formItem, category_id: [sort, category_id] };
-    this.setState({ initialFormData, fileList, markdownValue: content, ...extraObj });
+    this.setState(oldState => ({
+      initialFormData,
+      labelContainer: { ...oldState.labelContainer, selectedItems: label },
+      fileList, 
+      markdownValue: content,
+      ...extraObj
+    }));
   };
 
   handleSetState = (obj, func) => this.setState({ ...obj }, () => func);
@@ -76,8 +82,7 @@ class EditorialForm extends React.PureComponent {
     }
     form.validateFields((err, values) => {
       if (err) return;
-      const { fileList,labelContainer:{selectedItems} } = this.state;
-      const label=selectedItems.map(i=>i.id).join(",");
+      const { fileList, labelContainer: { selectedItems: label } } = this.state;
       const image_urls = [];
       fileList.forEach(i => {
         if (i.url) {
@@ -88,7 +93,7 @@ class EditorialForm extends React.PureComponent {
       });
       const netUrl = id ? UPDATE.url : INSERT.url;
       const image_url = image_urls[0];
-      request({ ...values, id, netUrl, image_url,label });
+      request({ ...values, id, netUrl, image_url, label });
       toggleEditorialPanel();
       cleanFormItem();
       form.resetFields();
@@ -97,13 +102,13 @@ class EditorialForm extends React.PureComponent {
 
   markDownChange = markdownValue => this.setState({ markdownValue });
 
-  onHandleCustomTableChange = ({ keys, items, formVerify,  notAllowChange }) => {
-    const {form}=this.props;
+  onHandleCustomTableChange = ({ keys, items, formVerify, notAllowChange }) => {
+    const { form } = this.props;
     if (notAllowChange) {
       Modal.error({ title: "不能修改" });
       return;
     }
-    const {labelContainer}=this.state;
+    const { labelContainer } = this.state;
     const { selectedItems } = labelContainer;
     let newItems = [];
     if (selectedItems.length === keys.length) {
@@ -119,26 +124,27 @@ class EditorialForm extends React.PureComponent {
 
   getList = (payload) => {
     const { index = 1, size = 6, query = "" } = payload;
-    const {request}=this.props;
-    const {labelContainer}=this.state;
-    const callback = (res) => this.setState({ labelContainer: { ...labelContainer, ...res, index, size, query } });
-    request({ ...payload, is_enable: 1, index, size }, callback);
+    const { request } = this.props;
+    request({ ...payload, is_enable: 1, index, size }, (res) => 
+      this.setState(oldState=>({ labelContainer: { ...oldState.labelContainer, ...res, index, size, query } }))
+    );
   }
 
-  categoryChange=(option)=>{
-    const sortIds=option[option.length-1];
-    const {labelContainer:{index,size,query}}=this.state;
-    this.getList({netUrl:AdminLabelAPI.LIST.url,index,size,query,conditionQuery:{sortIds}});
+  categoryChange = (option) => {
+    const sortIds = option.slice(0, 1);
+    const { labelContainer: { index, size, query } } = this.state;
+    this.getList({ netUrl: AdminLabelAPI.LIST.url, index, size, query, conditionQuery: { sortIds } });
   }
 
   render() {
     const { form, editorialPanelVisible } = this.props;
-    const { initialFormData, markdownValue, categoryOptions, fileList,labelContainer } = this.state;
+    const { initialFormData, markdownValue, categoryOptions, fileList, labelContainer } = this.state;
     const markdownNode = <Editor value={markdownValue} preview expand onChange={this.markDownChange} />;
     const tagColumn = [
       { title: '名称', dataIndex: 'name', sorter: true, width: '15%' },
-      {title: '所属',dataIndex: 'sort_id',sorter: true,width: '15%',render: (_, item) => <span>{item.sort_name}</span>,},
-      {title: '创建时间',dataIndex: 'create_time',sorter: true,width: '20%',
+      { title: '所属', dataIndex: 'sort_id', sorter: true, width: '15%', render: (_, item) => <span>{item.sort_name}</span>, },
+      {
+        title: '创建时间', dataIndex: 'create_time', sorter: true, width: '20%',
         render: val => (
           <span>
             <Icon type="clock-circle" />
@@ -168,11 +174,15 @@ class EditorialForm extends React.PureComponent {
         render: val => <Tag color="blue">{val === 0 ? '可用' : '不可用'}</Tag>,
       },
     ];
-    const tagTable={COLUMNS:tagColumn,CONDITION: [
-      { fieldId: 'name', label: "标签名", fieldType: 'input', colLayout: { span: 8 } },
-    ],};
-    const tagComponent=(
-      <CustomFormTable 
+    const tagTable = {
+      COLUMNS: tagColumn, CONDITION: [
+        { fieldId: 'name', label: "标签名", fieldType: 'input', colLayout: { span: 8 } },
+      ],
+    };
+    const categoryIds = form.getFieldValue("category_id") || [];
+    const sortIds = categoryIds.slice(0, 1);
+    const tagComponent = (
+      <CustomFormTable
         onHandleCustomTableChange={this.onHandleCustomTableChange}
         getList={this.getList}
         itemTable={tagTable}
@@ -181,9 +191,9 @@ class EditorialForm extends React.PureComponent {
         total={labelContainer.total}
         netUrl={labelContainer.netUrl}
         selectedItems={labelContainer.selectedItems}
-        tableWidth={{width: "100%"}}
+        tableWidth={{ width: "100%" }}
         type="checkbox"
-        netValue={{conditionQuery:{sortIds:[]}}}
+        netValue={{ conditionQuery: { sortIds } }}
       />
     );
     const imgUpload = (
@@ -220,7 +230,7 @@ class EditorialForm extends React.PureComponent {
           options: categoryOptions,
           fieldNames: { label: 'name', value: 'id' },
           style: { width: '86%' },
-          onChange:this.categoryChange
+          onChange: this.categoryChange
         },
         formItemLayout: { labelCol: { span: 6 } },
         colLayout: { span: 12 },
@@ -238,13 +248,13 @@ class EditorialForm extends React.PureComponent {
         formItemLayout: { labelCol: { span: 6 } },
         colLayout: { span: 12 },
       },
-      { 
-        fieldId: 'label', 
-        label: "标签", 
-        fieldType: 'node', 
-        fieldProps: { style: { width: "90%" } }, 
-        fieldNode: tagComponent, 
-        formItemLayout: { labelCol: { span: 3 } } 
+      {
+        fieldId: 'label',
+        label: "标签",
+        fieldType: 'node',
+        fieldProps: { style: { width: "90%" } },
+        fieldNode: tagComponent,
+        formItemLayout: { labelCol: { span: 3 } }
       },
       {
         fieldId: 'image_url',

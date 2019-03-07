@@ -7,7 +7,7 @@ router.post("/list", async (ctx) => {
     const { sort = [], child = [] } = category;
     const getSql = (onlyTotalNum) => (`
         select
-            ${onlyTotalNum? "count(*) as count": "c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.is_top,c.create_time,a.account as from_name,b.account as to_name,e.title"}
+            ${onlyTotalNum? "count(*) as count": "c.*,a.account as from_name,b.account as to_name,e.title"}
         from 
             comment c
         inner join 
