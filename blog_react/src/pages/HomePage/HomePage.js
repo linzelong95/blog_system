@@ -29,7 +29,7 @@ class HomePage extends React.Component {
 
   componentDidMount = () =>{
     this.request({ index: 1, size: 6 });
-    // this.request({ size: 5,conditionQuery:{orderBy:{name:"create_time",by:"desc"}}},(res) => this.setState({ timelines: res.list }));
+    this.request({ size: 5,conditionQuery:{orderBy:{name:"create_time",by:"desc"}}},(res) => this.setState({ timelines: res.list }));
     this.request({ netUrl: UserCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true },(res) => 
       this.setState({ categoryOptions: res.list })
     );
@@ -143,7 +143,6 @@ class HomePage extends React.Component {
       articleManagement: { total = 6, list = [], size = 6, index = 1 },
       loading,
     } = this.props;
-    console.log(total)
     const {
       showSorterFlag,
       filterModalVisible,
@@ -294,6 +293,7 @@ class HomePage extends React.Component {
                     extra={
                       <img
                         width={200}
+                        height={110}
                         alt="logo"
                         src={
                           item.image_url

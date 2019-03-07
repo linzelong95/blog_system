@@ -3,9 +3,9 @@ const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
     const { conditionQuery: { disabled, name = "", orderBy = {}, sortIds = [] }, index = 1, size = 10, prettyFormat = false, allCateAndSort = false } = ctx.request.body;
-    const sql = `
-        select sql_calc_found_rows
-            l.id,l.name,l.sort_id,l.disabled,l.is_use,s.name as sort_name,s.is_use as sort_is_use,s.disabled as sort_disabled
+    const getSql = (onlyTotalNum) => (`
+        select
+            ${onlyTotalNum? "count(*) as count": "l.id,l.name,l.sort_id,l.disabled,l.is_use,s.name as sort_name,s.is_use as sort_is_use,s.disabled as sort_disabled"}
         from 
             label as l,sort as s
         where
@@ -13,16 +13,20 @@ router.post("/list", async (ctx) => {
             and l.name like '%${name}%' 
             ${disabled ? `and l.disabled=${disabled}` : ""} 
             ${sortIds.length > 0 ? `and l.sort_id in (${sortIds.join(",")})` : ""}
-        order by
-            ${(() => {
-                const { name="create_time", by="asc" } = orderBy;
-                if (!["name", "sort_id", "create_time", "modified_time", "disabled"].includes(name)) return "";
-                return `l.${name} ${by}`;
-            })()}
-        limit 
-            ${(index - 1) * size},${size}
-    `;
-    const tagList = await db.query(sql, []);
+        ${onlyTotalNum ? "":
+            `
+                order by
+                    ${(() => {
+                        const { name="create_time", by="asc" } = orderBy;
+                        if (!["name", "sort_id", "create_time", "modified_time", "disabled"].includes(name)) return "";
+                        return `l.${name} ${by}`;
+                    })()}
+                limit 
+                    ${(index - 1) * size},${size}
+            `
+        }
+    `);
+    const tagList = await db.query(getSql(), []);
     const uniqueSortIds = Array.from(new Set(tagList.map(i => i.sort_id)));
     let res = tagList;
     if (prettyFormat) {
@@ -47,7 +51,7 @@ router.post("/list", async (ctx) => {
             return obj;
         });
     }
-    const countArr = await db.query("select found_rows() as count", []);
+    const countArr = await db.query(getSql(true), []);
     ctx.body = { "total": countArr[0].count, "list": res };
 });
 

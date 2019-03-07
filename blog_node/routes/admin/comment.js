@@ -5,9 +5,9 @@ router.post("/list", async (ctx) => {
     const { id: currentUserId } = ctx.state.user;
     const { conditionQuery: { content = "", orderBy = {}, aids = [], category = {},is_show,is_top,pid_field },index=1,size=10, prettyFormat = false } = ctx.request.body;
     const { sort = [], child = [] } = category;
-    const sql = `
-        select sql_calc_found_rows
-            c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.is_top,c.create_time,a.account as from_name,b.account as to_name,e.title
+    const getSql = (onlyTotalNum) => (`
+        select
+            ${onlyTotalNum? "count(*) as count": "c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.is_top,c.create_time,a.account as from_name,b.account as to_name,e.title"}
         from 
             comment c
         inner join 
@@ -28,16 +28,20 @@ router.post("/list", async (ctx) => {
             ${is_show!==undefined? `and c.is_show=${is_show}` : ""} 
             ${is_top!==undefined? `and c.is_top=${is_top}` : ""} 
             ${pid_field===0?"and c.pid=0":pid_field===1?"and c.pid>1":""}
-        order by
-            ${(()=>{
-                const {name="is_top",by="desc"}=orderBy;
-                if (!["create_time","is_top","is_show"].includes(name)) return "";
-                return `c.${name} ${by}`;
-            })()}
-        limit 
-            ${(index - 1) * size},${size}
-    `;
-    let res = await db.query(sql, []);
+        ${onlyTotalNum ? "":
+            `
+                order by
+                    ${(() => {
+                        const {name="is_top",by="desc"}=orderBy;
+                        if (!["create_time","is_top","is_show"].includes(name)) return "";
+                        return `c.${name} ${by}`;
+                    })()}
+                limit 
+                    ${(index - 1) * size},${size}
+            `
+        }
+    `);
+    let res = await db.query(getSql(), []);
     if (prettyFormat) {
         const parentArr = [];
         const sonArr = [];
@@ -55,7 +59,7 @@ router.post("/list", async (ctx) => {
             return i;
         });
     }
-    const countArr = await db.query("select found_rows() as count", []);
+    const countArr = await db.query(getSql(true), []);
     ctx.body = { "total": countArr[0].count, "list": res };
 });
 

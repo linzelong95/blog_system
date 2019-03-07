@@ -3,9 +3,9 @@ const db = require("../../components/db");
 
 router.post("/list", async (ctx) => {
     const { conditionQuery: { orderBy = {}, aids = [] }, prettyFormat = false } = ctx.request.body;
-    const sql = `
-        select sql_calc_found_rows
-            c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.create_time,a.account as from_name,b.account as to_name
+    const getSql = (onlyTotalNum) => (`
+        select
+            ${onlyTotalNum? "count(*) as count": "c.id,c.aid,c.from_id,c.to_id,c.pid,c.content,c.is_show,c.create_time,a.account as from_name,b.account as to_name"}
         from 
             comment c
         inner join 
@@ -14,14 +14,18 @@ router.post("/list", async (ctx) => {
             user b on c.to_id=b.id
         where 
             ${aids.length > 0 ? `c.aid in (${aids.join(",")})` : ""}
-        order by
-            ${(() => {
-            const { name = "is_top", by = "desc" } = orderBy;
-            if (!["create_time", "is_top"].includes(name)) return "";
-            return `c.${name} ${by}`;
-        })()}
-    `;
-    let res = await db.query(sql, []);
+        ${onlyTotalNum ? "":
+            `
+                order by
+                    ${(() => {
+                        const { name = "is_top", by = "desc" } = orderBy;
+                        if (!["create_time", "is_top"].includes(name)) return "";
+                        return `c.${name} ${by}`;
+                    })()}
+            `
+        }
+    `);
+    let res = await db.query(getSql(), []);
     if (prettyFormat) {
         const parentArr = [];
         const sonArr = [];
@@ -39,7 +43,7 @@ router.post("/list", async (ctx) => {
             return i;
         });
     }
-    const countArr = await db.query("select found_rows() as count", []);
+    const countArr = await db.query(getSql(true), []);
     ctx.body = { "total": countArr[0].count, "list": res };
 });
 

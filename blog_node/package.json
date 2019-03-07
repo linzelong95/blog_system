@@ -28,7 +28,8 @@
     "mongodb": "^3.1.13",
     "mysql": "^2.16.0",
     "node-mysql": "^0.4.2",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "webpack": "^4.29.6"
   },
   "devDependencies": {
     "nodemon": "^1.18.9"
