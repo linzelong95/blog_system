@@ -1,0 +1,4 @@
+
+错误返回形式：
+  ctx.status=400;
+  ctx.body={errMsg:"错误信息"};

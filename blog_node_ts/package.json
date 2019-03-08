@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@types/koa-router": "^7.0.40",
+    "koa": "^2.7.0",
+    "koa-router": "^7.4.0",
+    "nodemon": "^1.18.10",
+    "ts-node": "^8.0.3",
+    "typescript": "^3.3.3333"
+  },
+  "scripts": {
+    "start": "tsc && node dist/server.js",
+    "watch-server": "nodemon --watch './src/**/*' -e ts,tsx --exec ts-node ./src/server.ts"
+  }
+}

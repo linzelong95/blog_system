@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Modal, Card, Col, Row, Button, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider, Timeline } from 'antd';
+import { Modal, Card, Col, Row, Button, Radio, Alert, Badge, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider, Timeline } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
 import { adminType, imgPrefix } from '@/defaultSettings';
@@ -26,6 +26,7 @@ class HomePage extends React.Component {
     categoryOptions: [],
     labelOptions: [],
     temporaryCondition: {},
+    filterSort: 'selectedByCate',
     timelines: []
   };
 
@@ -145,12 +146,23 @@ class HomePage extends React.Component {
       temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr },
     }));
 
+  labelChange = (id, checked) => {
+    const { temporaryCondition: { labelIds = [] } } = this.state;
+    const newlabelIds = checked ? [...labelIds, id] : labelIds.filter(i => i !== id);
+    this.setState(oldState => ({
+      temporaryCondition: { ...oldState.temporaryCondition, labelIds: newlabelIds },
+    }));
+  }
+
+  filterSort = e => this.setState({ filterSort: e.target.value });
+
   render() {
     const {
       articleManagement: { total = 6, list = [], size = 6, index = 1 },
       loading,
     } = this.props;
     const {
+      filterSort,
       showSorterFlag,
       filterModalVisible,
       categoryOptions,
@@ -378,7 +390,7 @@ class HomePage extends React.Component {
                         }), () => this.filterRequest("noModal"))
                       }}
                       color={getRandomColor()}
-                      style={{ fontSize: "13px",margin:"3px" }}
+                      style={{ fontSize: "13px", margin: "3px" }}
                     >
                       {i.name}
                     </Tag>
@@ -422,42 +434,83 @@ class HomePage extends React.Component {
               </Button>,
             ]}
           >
-            <Tree
-              checkable
-              showLine
-              onCheck={this.conditionTreeSelect}
-              defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
-              checkedKeys={temporaryCondition.filteredSortArr || []}
-            >
-              {categoryOptions.map(item => (
-                <Tree.TreeNode
-                  title={item.name}
-                  key={`${item.id}`}
-                  selectable={false}
-                  disabled={item.disabled}
-                >
-                  {item.children.map(i => (
-                    <Tree.TreeNode
-                      title={i.name}
-                      key={`${item.id}-${i.id}`}
-                      selectable={false}
-                      disabled={item.disabled === 0 ? i.disabled : true}
-                    />
-                  ))}
-                </Tree.TreeNode>
-              ))}
-            </Tree>
-            {
-                labelOptions.map(item=>(
-                  <Tag.CheckableTag 
-                    key={item.id} 
-                    checked={temporaryCondition.labelIds&&temporaryCondition.labelIds.includes(item.id)}
-                    onChange={(val,options)=>console.log(val,options)}
+            <div style={{ textAlign: 'center' }}>
+              <Radio.Group
+                size="small"
+                value={filterSort}
+                buttonStyle="solid"
+                onChange={this.filterSort}
+              >
+                <Radio.Button value="selectedByCate">
+                  <Badge
+                    dot={
+                      temporaryCondition.filteredSortArr &&
+                      temporaryCondition.filteredSortArr.length > 0
+                    }
                   >
-                    {item.name}
-                  </Tag.CheckableTag>
-                ))
-              }
+                    &nbsp;按分类&nbsp;&nbsp;
+                  </Badge>
+                </Radio.Button>
+                <Radio.Button value="selectedByLabel">
+                  <Badge
+                    dot={temporaryCondition.labelIds && temporaryCondition.labelIds.length > 0}
+                  >
+                    &nbsp;按标签&nbsp;&nbsp;
+                  </Badge>
+                </Radio.Button>
+              </Radio.Group>
+            </div>
+            <Alert
+              message="筛选分两种类别，请注意您是否需要同时进行两种类别的筛选！"
+              type="warning"
+              showIcon
+              style={{ margin: '15px 0px' }}
+            />
+            {filterSort === 'selectedByCate' && (
+              <Tree
+                checkable
+                showLine
+                onCheck={this.conditionTreeSelect}
+                defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
+                checkedKeys={temporaryCondition.filteredSortArr || []}
+              >
+
+                {categoryOptions.map(item => (
+                  <Tree.TreeNode
+                    title={item.name}
+                    key={`${item.id}`}
+                    selectable={false}
+                    disabled={item.disabled}
+                  >
+                    {item.children.map(i => (
+                      <Tree.TreeNode
+                        title={i.name}
+                        key={`${item.id}-${i.id}`}
+                        selectable={false}
+                        disabled={item.disabled === 0 ? i.disabled : true}
+                      />
+                    ))}
+                  </Tree.TreeNode>
+                ))}
+              </Tree>
+            )}
+            {filterSort === 'selectedByLabel' && (
+              <Row>
+                <Col span={3} style={{marginTop:"5px"}}>请选择：</Col>
+                <Col span={21}>
+                  {labelOptions.map(item => (
+                    <Tag.CheckableTag
+                      key={item.id}
+                      checked={temporaryCondition.labelIds && temporaryCondition.labelIds.includes(item.id)}
+                      onChange={(checked) => this.labelChange(item.id, checked)}
+                      style={{ marginTop: "5px" }}
+                    >
+                      {item.name}
+                    </Tag.CheckableTag>
+                  ))}
+                </Col>
+              </Row>
+            )}
           </Modal>
         </Card>
       </GridContent>
