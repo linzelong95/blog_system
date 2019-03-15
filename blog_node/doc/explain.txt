@@ -1,0 +1,84 @@
+
+CREATE TABLE `article` (
+  `id` int(20) NOT NULL AUTO_INCREMENT,
+  `category_id` int(20) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `is_top` int(11) DEFAULT '0',
+  `abstract` varchar(255) DEFAULT NULL,
+  `author_id` int(20) NOT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `disabled` int(20) DEFAULT '0',
+  `image_url` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `article_label` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `article_id` int(11) NOT NULL,
+  `label_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `category` (
+  `id` int(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `sort` int(20) NOT NULL,
+  `disabled` int(10) DEFAULT '0',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_use` int(20) DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `comment` (
+  `id` int(20) NOT NULL AUTO_INCREMENT,
+  `aid` int(20) NOT NULL COMMENT '文章id',
+  `from_id` int(20) NOT NULL,
+  `to_id` int(20) DEFAULT '0',
+  `pid` int(20) DEFAULT '0' COMMENT '父评论id，没有为0',
+  `content` varchar(255) NOT NULL,
+  `is_show` int(20) DEFAULT '0',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_top` int(20) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `fk_comment` (`aid`),
+  CONSTRAINT `fk_comment` FOREIGN KEY (`aid`) REFERENCES `article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `content` (
+  `id` int(20) NOT NULL AUTO_INCREMENT,
+  `content` text,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FK_ID` FOREIGN KEY (`id`) REFERENCES `article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `label` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `sort_id` int(11) NOT NULL,
+  `disabled` int(11) DEFAULT '0',
+  `is_use` int(11) DEFAULT '0',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `sort` (
+  `id` int(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `disabled` int(10) DEFAULT '0',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_use` int(20) DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `password` varchar(255) NOT NULL,
+  `account` varchar(255) NOT NULL,
+  `role_name` varchar(255) DEFAULT '',
+  `nick_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
