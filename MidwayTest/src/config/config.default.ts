@@ -5,15 +5,20 @@ export = (appInfo: any) => {
   config.keys = appInfo.name + '_1552632441524_9669';
 
   // add your config here
-  config.middleware = ["filterOptions"];
+  config.middleware = ["passport"];
 
   config.hello="this is hello"
 
   config.security={
+    domainWhiteList:["http://localhost:8000"],
     csrf: {
       enable: false,
     },
-}
+  }
+
+  config.cors={
+    credentials: true
+  }
 
   return config;
 };

@@ -8,7 +8,7 @@ export class AdminSortService {
 
   repository = getRepository(Sort);
 
-  async get(options) {
+  async list(options) {
     const { index, size, name, isEnable, orderBy } = options;
     let orderByName: string = "sort.createDate";
     let orderByMethod: "ASC" | "DESC" = "ASC";
@@ -16,15 +16,14 @@ export class AdminSortService {
       orderByName = `sort.${orderBy.name}`;
       orderByMethod = orderBy.by;
     }
-    const listAndCount = await this.repository
+    return await this.repository
       .createQueryBuilder("sort")
-      .where("name like :name", { name: `%${name}%` })
+      .where("sort.name like :name", { name: `%${name}%` })
       .andWhere(isEnable !== undefined ? `sort.isEnable=${isEnable}` : "1=1")
       .orderBy(orderByName, orderByMethod)
       .skip(index - 1)
       .take(size)
       .getManyAndCount();
-    return listAndCount;
   }
 
   async save(options) {

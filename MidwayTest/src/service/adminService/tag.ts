@@ -7,7 +7,7 @@ export class AdminTagService {
 
   repository = getRepository(Tag);
 
-  async get(options) {
+  async list(options) {
     const { index, size, name, isEnable, orderBy, sortIdsArr } = options;
     let orderByName: string = "tag.createDate";
     let orderByMethod: "ASC" | "DESC" = "ASC";
@@ -15,7 +15,7 @@ export class AdminTagService {
       orderByName = `tag.${orderBy.name}`;
       orderByMethod = orderBy.by;
     }
-    const listAndCount = await this.repository
+    return await this.repository
       .createQueryBuilder("tag")
       .innerJoinAndSelect("tag.sort", "sort", sortIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .where("tag.name like :name", { name: `%${name}%` })
@@ -24,7 +24,6 @@ export class AdminTagService {
       .skip(index - 1)
       .take(size)
       .getManyAndCount();
-    return listAndCount;
   }
 
   async save(options) {

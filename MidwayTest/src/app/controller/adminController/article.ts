@@ -7,17 +7,22 @@ export class AdminArticleController {
   @inject()
   adminArticleService;
 
-  // @get("/list")
-  // async getArticleList(ctx):Promise<void>{
-  //   const articleList=this.userService.getArticleList();
-  //   ctx.body=articleList;
-  // }
+  @post("/list")
+  async list(ctx): Promise<void> {
+    //user form ssession
+    const user = { id: 1 };
+    const { conditionQuery: { title = "", orderBy = {}, category = {} }, index = 1, size = 10 } = ctx.request.body;
+    const [list, count] = await this.adminArticleService.list({ title, orderBy, index, size, category, user });
+    ctx.body = { list, count };
+  }
 
 
   @post("/insert")
   @post("/update")
   async save(ctx): Promise<void> {
-    const { id, title, abstract, isTop, category, user, tags, content } = ctx.request.body;
+    //user form ssession
+    const user = {};
+    const { id, title, abstract, isTop, category, tags, content } = ctx.request.body;
     const flag = await this.adminArticleService.save({ id, title, abstract, isTop, category, user, tags, content });
     const action = id ? "更新" : "添加";
     if (!flag) {

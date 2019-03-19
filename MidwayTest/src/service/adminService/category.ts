@@ -7,7 +7,7 @@ export class AdminCategoryService {
 
   repository = getRepository(Category);
 
-  async get(options) {
+  async list(options) {
     const { index, size, name, isEnable, orderBy, sortIdsArr } = options;
     let orderByName: string = "category.createDate";
     let orderByMethod: "ASC" | "DESC" = "ASC";
@@ -15,7 +15,7 @@ export class AdminCategoryService {
       orderByName = `category.${orderBy.name}`;
       orderByMethod = orderBy.by;
     }
-    const listAndCount = await this.repository
+    return await this.repository
       .createQueryBuilder("category")
       .innerJoinAndSelect("category.sort", "sort", sortIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .where("category.name like :name", { name: `%${name}%` })
@@ -24,7 +24,6 @@ export class AdminCategoryService {
       .skip(index - 1)
       .take(size)
       .getManyAndCount();
-    return listAndCount;
   }
 
   async save(options) {

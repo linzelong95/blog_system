@@ -23,10 +23,10 @@ export class User {
     @OneToMany(type => Article, article => article.user)
     articles: Article[];
 
-    @OneToMany(type => Reply, reply => reply.user)
-    replies: Reply[];
+    @OneToMany(type => Reply, reply => reply.from)
+    froms: Reply[];
 
-    @OneToMany(type => Reply, reply => reply.toId)
-    toIds: Reply[];
+    @OneToMany(type => Reply, reply => reply.to)
+    tos: Reply[];
 
 }

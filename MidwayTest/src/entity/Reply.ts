@@ -23,12 +23,13 @@ export class Reply {
     @CreateDateColumn()
     createDate: string;
 
-    @ManyToOne(type => User, user => user.replies)
-    user: User;
+    @ManyToOne(type => User, user => user.froms)
+    @JoinColumn({ name: "fromId" })
+    from: User;
 
-    @ManyToOne(type => User, user => user.toIds)
+    @ManyToOne(type => User, user => user.tos)
     @JoinColumn({ name: "toId" })
-    toId: User;
+    to: User;
 
     @ManyToOne(type => Article, article => article.replies, { onDelete: "CASCADE", onUpdate: "CASCADE" })
     article: Article;

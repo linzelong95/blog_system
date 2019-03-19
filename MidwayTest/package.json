@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "egg-cors": "^2.2.0",
+    "egg-passport": "^2.0.1",
     "midway": "^1.0.0",
     "mysql": "^2.16.0",
+    "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.15"
   },
