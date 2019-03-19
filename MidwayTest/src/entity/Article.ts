@@ -17,7 +17,7 @@ export class Article {
   @Column()
   abstract: string;
 
-  @Column()
+  @Column({ default: 1 })
   isEnable: number;
 
   @CreateDateColumn()
@@ -26,7 +26,7 @@ export class Article {
   @UpdateDateColumn()
   updateDate: string;
 
-  @Column()
+  @Column({ default: 0 })
   isTop: number;
 
   @OneToOne(type => Content, content => content.article, { cascade: true })

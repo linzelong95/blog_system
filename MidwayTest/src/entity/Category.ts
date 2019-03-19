@@ -14,7 +14,7 @@ export class Category {
     @Column({default:1})
     isEnable: number;
 
-    @Column()
+    @Column({default:0})
     isUsed: number;
 
     @CreateDateColumn()

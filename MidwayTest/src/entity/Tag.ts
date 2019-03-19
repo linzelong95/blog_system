@@ -11,10 +11,10 @@ export class Tag {
     @Column()
     name: string;
 
-    @Column()
+    @Column({ default: 1 })
     isEnable: number;
 
-    @Column()
+    @Column({ default: 0 })
     isUsed: number;
 
     @CreateDateColumn()
