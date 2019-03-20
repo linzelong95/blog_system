@@ -5,8 +5,12 @@ export= {
     enable:true,
     package:"egg-cors"
   },
-  passport:{
-    enable:true,
-    package:"egg-passport"
-  }
+  // passport:{
+  //   enable:true,
+  //   package:"egg-passport"
+  // },
+  // passportLocal:{
+  //   enable:true,
+  //   package:"egg-passport-local"
+  // }
 };

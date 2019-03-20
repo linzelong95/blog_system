@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "captchapng": "^0.0.1",
     "egg-cors": "^2.2.0",
     "egg-passport": "^2.0.1",
+    "egg-passport-local": "^1.2.1",
+    "koa-passport": "^4.1.1",
     "midway": "^1.0.0",
     "mysql": "^2.16.0",
     "passport-local": "^1.0.0",
