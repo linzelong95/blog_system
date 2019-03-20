@@ -10,8 +10,8 @@ export class AdminCategoryController {
   @post("/list")
   async list(ctx): Promise<void> {
     const { conditionQuery: { isEnable, name = "", orderBy = {}, sortIdsArr = [] }, index = 1, size = 10 } = ctx.request.body;
-    const [list, count] = await this.adminCategoryService.list({ isEnable, name, orderBy, index, size, sortIdsArr });
-    ctx.body = { list, count };
+    const [list, total] = await this.adminCategoryService.list({ isEnable, name, orderBy, index, size, sortIdsArr });
+    ctx.body = { list, total };
   }
 
   @post("/insert")

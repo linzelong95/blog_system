@@ -12,10 +12,17 @@ export class AdminArticleController {
     //user form ssession
     const user = { id: 1 };
     const { conditionQuery: { title = "", orderBy = {}, category = {} }, index = 1, size = 10 } = ctx.request.body;
-    const [list, count] = await this.adminArticleService.list({ title, orderBy, index, size, category, user });
-    ctx.body = { list, count };
+    const [list, total] = await this.adminArticleService.list({ title, orderBy, index, size, category, user });
+    ctx.body = { list, total };
   }
 
+
+  @post("/content")
+  async content(ctx){
+    const {id}=ctx.request.body;
+    const content = await this.adminArticleService.content({ id });
+    ctx.body={"list":content};
+  }
 
   @post("/insert")
   @post("/update")

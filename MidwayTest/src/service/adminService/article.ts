@@ -32,6 +32,11 @@ export class AdminArticleService {
       .getManyAndCount();
   }
 
+  async content(options) {
+    const { id } = options;
+    return await getRepository(Content).find({ article: id });
+  }
+
   async save(options) {
     const { content, id } = options;
     const contentEntity = id ? await getRepository(Content).findOne({ article: id }) : {};

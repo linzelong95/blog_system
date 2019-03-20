@@ -18,6 +18,7 @@ export class AdminSortService {
     }
     return await this.repository
       .createQueryBuilder("sort")
+      .leftJoinAndSelect("sort.categories","categories")
       .where("sort.name like :name", { name: `%${name}%` })
       .andWhere(isEnable !== undefined ? `sort.isEnable=${isEnable}` : "1=1")
       .orderBy(orderByName, orderByMethod)

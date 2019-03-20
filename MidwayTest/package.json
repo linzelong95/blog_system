@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "await-stream-ready": "^1.0.1",
     "captchapng": "^0.0.1",
     "egg-cors": "^2.2.0",
-    "egg-passport": "^2.0.1",
-    "egg-passport-local": "^1.2.1",
     "koa-passport": "^4.1.1",
     "midway": "^1.0.0",
     "mysql": "^2.16.0",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
+    "stream-wormhole": "^1.1.0",
     "typeorm": "^0.2.15"
   },
   "devDependencies": {

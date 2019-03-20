@@ -9,10 +9,7 @@ import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
-const {
-  AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT },
-  AdminCateAPI,
-} = UrlEnum;
+const { AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT }, AdminSortAPI } = UrlEnum;
 
 @connect(({ articleManagement, loading }) => ({
   articleManagement,
@@ -34,16 +31,12 @@ class ArticleManagement extends React.Component {
 
   componentDidMount = () => this.request({ index: 1, size: 6 });
 
-  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+  componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
 
   componentWillReceiveProps = nextProps => {
     const { selectedItems } = this.state;
-    const {
-      articleManagement: { list = [] },
-    } = nextProps;
-    const allSelectedFlag = !list.length
-      ? false
-      : list.every(listItem => selectedItems.some(i => i.id === listItem.id));
+    const { articleManagement: { list = [] } } = nextProps;
+    const allSelectedFlag = !list.length ? false : list.every(listItem => selectedItems.some(i => i.id === listItem.id));
     this.setState({ allSelectedFlag });
   };
 
@@ -56,24 +49,18 @@ class ArticleManagement extends React.Component {
     if (payload.netUrl !== LIST.url) this.cleanSelectedItem();
   };
 
-  handleShowALL = () =>
-    this.setState({ conditionQuery: {}, temporaryCondition: {} }, () => {
-      this.request({ index: 1 });
-      this.inputSearch.input.state.value = '';
-    });
+  handleShowALL = () => this.setState({ conditionQuery: {}, temporaryCondition: {} }, () => {
+    this.request({ index: 1 });
+    this.inputSearch.input.state.value = '';
+  });
 
   handlePageChange = (index, size) => this.request({ index, size });
 
-  handleOnSearch = val =>
-    this.setState(
-      oldState => ({
-        conditionQuery: { ...oldState.conditionQuery, title: val.replace(/(^\s*)|(\s*$)/g, '') },
-      }),
-      () => this.request({ index: 1 })
-    );
+  handleOnSearch = val => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, title: val.replace(/(^\s*)|(\s*$)/g, '') } }), () =>
+    this.request({ index: 1 })
+  );
 
-  toggleEditorialPanel = () =>
-    this.setState(oldState => ({ editorialPanelVisible: !oldState.editorialPanelVisible }));
+  toggleEditorialPanel = () => this.setState(oldState => ({ editorialPanelVisible: !oldState.editorialPanelVisible }));
 
   cleanSelectedItem = () => this.setState({ selectedItems: [], allSelectedFlag: false });
 
@@ -84,9 +71,7 @@ class ArticleManagement extends React.Component {
 
   handleItems = (action, item) => {
     const { selectedItems } = this.state;
-    const {
-      articleManagement: { lang },
-    } = this.props;
+    const { articleManagement: { lang } } = this.props;
     const { url: netUrl, desc, actionTip } = action;
     let content = '';
     let items = [];
@@ -125,42 +110,29 @@ class ArticleManagement extends React.Component {
   };
 
   toggleShowSorter = () => {
-    const {
-      articleManagement: { list = [] },
-    } = this.props;
+    const { articleManagement: { list = [] } } = this.props;
     if (!list.length) return;
     this.setState(oldState => ({ showSorterFlag: !oldState.showSorterFlag }));
   };
 
   sort = e => {
     if (e === 'default') {
-      this.setState(
-        oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: {} } }),
-        () => this.request({ index: 1 })
+      this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: {} } }), () =>
+        this.request({ index: 1 })
       );
-      this.showSorterFlag();
+      this.toggleShowSorter();
       return;
     }
     const { id: name } = e.currentTarget;
-    const {
-      conditionQuery: { orderBy = {} },
-    } = this.state;
-    this.setState(
-      oldState => ({
-        conditionQuery: {
-          ...oldState.conditionQuery,
-          orderBy: { name, by: orderBy.by === 'asc' ? 'desc' : 'asc' },
-        },
-      }),
-      () => this.request({ index: 1 })
+    const { conditionQuery: { orderBy = {} } } = this.state;
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' } } }), () =>
+      this.request({ index: 1 })
     );
   };
 
   toggleSelectOne = item => {
     const { selectedItems } = this.state;
-    const {
-      articleManagement: { list = [] },
-    } = this.props;
+    const { articleManagement: { list = [] } } = this.props;
     const newSelectedItems = selectedItems.some(i => i.id === item.id)
       ? selectedItems.filter(i => i.id !== item.id)
       : [...selectedItems, item];
@@ -184,14 +156,11 @@ class ArticleManagement extends React.Component {
     this.setState({ allSelectedFlag: !allSelectedFlag, selectedItems: newSelectedItems });
   };
 
-  readArticle = item => {
-    const callback = res => {
-      const formItem = item;
-      formItem.content = res.list[0].content;
-      this.setState({ formItem, drawerVisible: true });
-    };
-    this.request({ netUrl: CONTENT.url, id: item.id }, callback);
-  };
+  readArticle = item => this.request({ netUrl: CONTENT.url, id: item.id }, (res) => {
+    const formItem = item;
+    formItem.content = res.list[0].content;
+    this.setState({ formItem, drawerVisible: true });
+  });
 
   onCloseDrawer = () => {
     this.cleanSelectedItem();
@@ -202,10 +171,8 @@ class ArticleManagement extends React.Component {
     this.setState(oldState => ({ filterModalVisible: !oldState.filterModalVisible }));
 
   showFilterModal = () => {
-    const callback = res => this.setState({ categoryOptions: res.list });
-    this.request(
-      { netUrl: AdminCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true },
-      callback
+    this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 999 }, (res) =>
+      this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
     );
     this.toggleFilterModal();
   };
@@ -218,47 +185,31 @@ class ArticleManagement extends React.Component {
     this.toggleFilterModal();
     let filterflag = false;
     if (method === 'exit') {
-      const {
-        conditionQuery: { filteredSortArr = [] },
-      } = this.state;
+      const { conditionQuery: { filteredSortArr = [] } } = this.state;
       filterflag = filteredSortArr.length > 0;
-      this.setState(oldState => ({
-        temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, filterflag },
-      }));
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, filterflag } }));
       return;
     }
-    const {
-      temporaryCondition: { filteredSortArr = [] },
-    } = this.state;
+    const { temporaryCondition: { filteredSortArr = [] } } = this.state;
     filterflag = filteredSortArr.length > 0;
-    const category = { sort: [], child: [] };
+    const category = { sortIdsArr: [], cateIdsArr: [] };
     filteredSortArr.forEach(item => {
       const arr = item.split('-');
       if (arr.length === 1) {
-        category.sort.push(parseInt(arr.pop(), 10));
-      } else if (!category.sort.includes(parseInt(arr[0], 10))) {
-        category.child.push(parseInt(arr.pop(), 10));
+        category.sortIdsArr.push(parseInt(arr.pop(), 10));
+      } else if (!category.sortIdsArr.includes(parseInt(arr[0], 10))) {
+        category.cateIdsArr.push(parseInt(arr.pop(), 10));
       }
     });
-    this.setState(
-      oldState => ({
-        conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr },
-        temporaryCondition: { ...oldState.temporaryCondition, filterflag },
-      }),
-      () => this.request({ index: 1 })
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr }, temporaryCondition: { ...oldState.temporaryCondition, filterflag } }), () =>
+      this.request({ index: 1 })
     );
   };
 
-  conditionTreeSelect = filteredSortArr =>
-    this.setState(oldState => ({
-      temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr },
-    }));
+  conditionTreeSelect = filteredSortArr => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
 
   render() {
-    const {
-      articleManagement: { total = 6, list = [], size = 6, index = 1 },
-      loading,
-    } = this.props;
+    const { articleManagement: { total = 6, list = [], size = 6, index = 1 }, loading } = this.props;
     const {
       allSelectedFlag,
       selectedItems,
@@ -322,7 +273,7 @@ class ArticleManagement extends React.Component {
                       type={
                         conditionQuery.orderBy &&
                           conditionQuery.orderBy.name === 'title' &&
-                          conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -330,7 +281,7 @@ class ArticleManagement extends React.Component {
                   </Tag>
                   <Tag
                     color="magenta"
-                    id="create_time"
+                    id="createDate"
                     style={{ marginLeft: '5px' }}
                     onClick={this.sort}
                   >
@@ -338,8 +289,8 @@ class ArticleManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                          conditionQuery.orderBy.name === 'create_time' &&
-                          conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'createDate' &&
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -347,7 +298,7 @@ class ArticleManagement extends React.Component {
                   </Tag>
                   <Tag
                     color="magenta"
-                    id="modified_time"
+                    id="updateDate"
                     style={{ marginLeft: '5px' }}
                     onClick={this.sort}
                   >
@@ -355,8 +306,8 @@ class ArticleManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                          conditionQuery.orderBy.name === 'modified_time' &&
-                          conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'updateDate' &&
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -476,7 +427,7 @@ class ArticleManagement extends React.Component {
                     <Tag color="purple">
                       <Icon type="tag" />
                       &nbsp;
-                      {item.sort_name},{item.category_name}
+                      {item.category.sort.name},{item.category.name}
                     </Tag>
                   }
                   actions={[
@@ -497,24 +448,24 @@ class ArticleManagement extends React.Component {
                         onClick={() => this.handleItems(TOP, item)}
                       />
                     ) : (
-                      <Icon
-                        type="arrow-down"
-                        style={{ color: 'black', width: '60px' }}
-                        onClick={() => this.handleItems(UNTOP, item)}
-                      />
+                        <Icon
+                          type="arrow-down"
+                          style={{ color: 'black', width: '60px' }}
+                          onClick={() => this.handleItems(UNTOP, item)}
+                        />
                       ),
-                    item.disabled === 0 ? (
+                    item.isEnable === 1 ? (
                       <Icon
                         type="lock"
                         style={{ color: '#4169E1', width: '60px' }}
                         onClick={() => this.handleItems(LOCK, item)}
                       />
                     ) : (
-                      <Icon
-                        type="unlock"
-                        style={{ color: 'black', width: '60px' }}
-                        onClick={() => this.handleItems(UNLOCK, item)}
-                      />
+                        <Icon
+                          type="unlock"
+                          style={{ color: 'black', width: '60px' }}
+                          onClick={() => this.handleItems(UNLOCK, item)}
+                        />
                       ),
                     <Icon
                       type="eye"
@@ -532,12 +483,7 @@ class ArticleManagement extends React.Component {
                 >
                   <div style={{ marginBottom: '5px', fontSize: '12px' }}>
                     <Ellipsis lines={1}>
-                      标签：
-                      {item.label&&item.label.length>0 ? (
-                        item.label.map(i => <Tag color="volcano">{i.name}</Tag>)
-                      ) : (
-                        <Tag color="volcano">无</Tag>
-                        )}
+                      标签：{item.tags && item.tags.length > 0 ? item.tags.map(i => <Tag color="volcano">{i.name}</Tag>) : <Tag color="volcano">无</Tag>}
                     </Ellipsis>
                   </div>
                   <Ellipsis lines={2} style={{ height: '40px' }}>
@@ -548,12 +494,12 @@ class ArticleManagement extends React.Component {
                     <div style={{ float: 'left' }}>
                       <Icon type="clock-circle" />
                       &nbsp;
-                      {timeFormat(Number(new Date(item.create_time)))}
+                      {timeFormat(Number(new Date(item.createDate)))}
                     </div>
                     <div style={{ float: 'right' }}>
                       <Icon type="edit" />
                       &nbsp;
-                      {timeFormat(Number(new Date(item.modified_time)))}
+                      {timeFormat(Number(new Date(item.updateDate)))}
                     </div>
                   </div>
                   {item.is_top === 1 && (
@@ -602,14 +548,14 @@ class ArticleManagement extends React.Component {
                   title={item.name}
                   key={`${item.id}`}
                   selectable={false}
-                  disabled={item.disabled}
+                  disabled={item.isEnable === 0}
                 >
-                  {item.children.map(i => (
+                  {item.categories.map(i => (
                     <Tree.TreeNode
                       title={i.name}
                       key={`${item.id}-${i.id}`}
                       selectable={false}
-                      disabled={item.disabled === 0 ? i.disabled : true}
+                      disabled={item.isEnable === 1 ? i.isEnable === 0 : true}
                     />
                   ))}
                 </Tree.TreeNode>

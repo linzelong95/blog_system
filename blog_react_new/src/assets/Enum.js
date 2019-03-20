@@ -805,9 +805,9 @@ const UrlEnum = {
     DELETE: { url: "/api/user/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
     INSERT: { url: "/api/user/comment/insert", desc: { zh_CN: "添加", en_US: "insert" } },
   },
-  UserLabelAPI: {
-    BASE_URL: "/user/label",
-    LIST: { url: "/api/user/label/list", desc: { zh_CN: "获取标签列表", en_US: "getList" } },
+  UserTagAPI: {
+    BASE_URL: "/user/tag",
+    LIST: { url: "/api/user/tag/list", desc: { zh_CN: "获取标签列表", en_US: "getList" } },
   },
 
 
@@ -854,15 +854,15 @@ const UrlEnum = {
     INSERT:{url: "/api/admin/sort/insert", desc: { zh_CN: "添加", en_US: "insert" }},
     UPDATE:{url: "/api/admin/sort/update", desc: { zh_CN: "更新", en_US: "update" }},
   },
-  AdminLabelAPI: {
-    BASE_URL: "/admin/label",
-    LIST: { url: "/api/admin/label/list", desc: { zh_CN: "获取标签列表", en_US: "getList" } },
-    DELETE: { url: "/api/admin/label/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
-    FORM: { url: `/api/admin/label/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
-    LOCK: { url: `/api/admin/label/lock`, desc: { zh_CN: "锁定", en_US: "lock" }, actionTip: { zh_CN: "将被锁定，锁定后可以解锁和删除，但不可编辑！", en_US: "will be lock,and then  can be released  or deleted, but can not be edited!" } },
-    UNLOCK: { url: `/api/admin/label/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
-    INSERT:{url: "/api/admin/label/insert", desc: { zh_CN: "添加", en_US: "insert" }},
-    UPDATE:{url: "/api/admin/label/update", desc: { zh_CN: "更新", en_US: "update" }},
+  AdminTagAPI: {
+    BASE_URL: "/admin/tag",
+    LIST: { url: "/api/admin/tag/list", desc: { zh_CN: "获取标签列表", en_US: "getList" } },
+    DELETE: { url: "/api/admin/tag/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    FORM: { url: `/api/admin/tag/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
+    LOCK: { url: `/api/admin/tag/lock`, desc: { zh_CN: "锁定", en_US: "lock" }, actionTip: { zh_CN: "将被锁定，锁定后可以解锁和删除，但不可编辑！", en_US: "will be lock,and then  can be released  or deleted, but can not be edited!" } },
+    UNLOCK: { url: `/api/admin/tag/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
+    INSERT:{url: "/api/admin/tag/insert", desc: { zh_CN: "添加", en_US: "insert" }},
+    UPDATE:{url: "/api/admin/tag/update", desc: { zh_CN: "更新", en_US: "update" }},
   },
 }
 

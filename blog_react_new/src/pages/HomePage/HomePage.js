@@ -7,11 +7,7 @@ import { adminType, imgPrefix } from '@/defaultSettings';
 import { timeFormat, getRandomColor } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 
-const {
-  UserArticleAPI: { LIST },
-  UserCateAPI,
-  UserLabelAPI
-} = UrlEnum;
+const { UserArticleAPI: { LIST }, UserSortAPI, UserTagAPI } = UrlEnum;
 
 
 @connect(({ articleManagement, loading }) => ({
@@ -32,12 +28,12 @@ class HomePage extends React.Component {
 
   componentDidMount = () => {
     this.request({ index: 1, size: 6 });
-    this.request({ size: 5, conditionQuery: { orderBy: { name: "create_time", by: "desc" } } }, (res) => this.setState({ timelines: res.list }));
-    this.request({ netUrl: UserLabelAPI.LIST.url, index: 1, size: 100 }, (res) =>
+    this.request({ size: 5, conditionQuery: { orderBy: { name: "createDate", by: "DESC" } } }, (res) => this.setState({ timelines: res.list }));
+    this.request({ netUrl: UserTagAPI.LIST.url, index: 1, size: 100 }, (res) =>
       this.setState({ labelOptions: res.list })
     );
-    this.request({ netUrl: UserCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true }, (res) =>
-      this.setState({ categoryOptions: res.list })
+    this.request({ netUrl: UserSortAPI.LIST.url, index: 1, size: 999 }, (res) =>
+      this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
     );
   }
 
@@ -51,51 +47,35 @@ class HomePage extends React.Component {
     this.props.dispatch({ type: 'articleManagement/handleArticles', payload, callback });
   };
 
-  handleShowALL = () =>
-    this.setState({ conditionQuery: {}, temporaryCondition: {} }, () => {
-      this.request({ index: 1 });
-      this.inputSearch.input.state.value = '';
-    });
+  handleShowALL = () => this.setState({ conditionQuery: {}, temporaryCondition: {} }, () => {
+    this.request({ index: 1 });
+    this.inputSearch.input.state.value = '';
+  });
 
   handlePageChange = (index, size) => this.request({ index, size });
 
-  handleOnSearch = val =>
-    this.setState(
-      oldState => ({
-        conditionQuery: { ...oldState.conditionQuery, title: val.replace(/(^\s*)|(\s*$)/g, '') },
-      }),
-      () => this.request({ index: 1 })
-    );
+  handleOnSearch = val => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, title: val.replace(/(^\s*)|(\s*$)/g, '') } }), () =>
+    this.request({ index: 1 })
+  );
 
   toggleShowSorter = () => {
-    const {
-      articleManagement: { list = [] },
-    } = this.props;
+    const { articleManagement: { list = [] } } = this.props;
     if (!list.length) return;
     this.setState(oldState => ({ showSorterFlag: !oldState.showSorterFlag }));
   };
 
   sort = e => {
     if (e === 'default') {
-      this.setState(
-        oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: {} } }),
-        () => this.request({ index: 1 })
+      this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: {} } }), () =>
+        this.request({ index: 1 })
       );
-      this.showSorterFlag();
+      this.toggleShowSorter();
       return;
     }
     const { id: name } = e.currentTarget;
-    const {
-      conditionQuery: { orderBy = {} },
-    } = this.state;
-    this.setState(
-      oldState => ({
-        conditionQuery: {
-          ...oldState.conditionQuery,
-          orderBy: { name, by: orderBy.by === 'asc' ? 'desc' : 'asc' },
-        },
-      }),
-      () => this.request({ index: 1 })
+    const { conditionQuery: { orderBy = {} } } = this.state;
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' } } }), () =>
+      this.request({ index: 1 })
     );
   };
 
@@ -110,41 +90,28 @@ class HomePage extends React.Component {
     if (method !== "noModal") this.toggleFilterModal();
     let filterflag = false;
     if (method === 'exit') {
-      const {
-        conditionQuery: { filteredSortArr = [], labelIds = [] },
-      } = this.state;
+      const { conditionQuery: { filteredSortArr = [], labelIds = [] }, } = this.state;
       filterflag = filteredSortArr.length > 0 || labelIds.length;
-      this.setState(oldState => ({
-        temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, labelIds, filterflag },
-      }));
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, labelIds, filterflag } }));
       return;
     }
-    const {
-      temporaryCondition: { filteredSortArr = [], labelIds = [] },
-    } = this.state;
+    const { temporaryCondition: { filteredSortArr = [], labelIds = [] } } = this.state;
     filterflag = filteredSortArr.length > 0 || labelIds.length > 0;
-    const category = { sort: [], child: [] };
+    const category = { sortIdsArr: [], cateIdsArr: [] };
     filteredSortArr.forEach(item => {
       const arr = item.split('-');
       if (arr.length === 1) {
-        category.sort.push(parseInt(arr.pop(), 10));
-      } else if (!category.sort.includes(parseInt(arr[0], 10))) {
-        category.child.push(parseInt(arr.pop(), 10));
+        category.sortIdsArr.push(parseInt(arr.pop(), 10));
+      } else if (!category.sortIdsArr.includes(parseInt(arr[0], 10))) {
+        category.cateIdsArr.push(parseInt(arr.pop(), 10));
       }
     });
-    this.setState(
-      oldState => ({
-        conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr, labelIds },
-        temporaryCondition: { ...oldState.temporaryCondition, filterflag },
-      }),
-      () => this.request({ index: 1 })
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr, labelIds }, temporaryCondition: { ...oldState.temporaryCondition, filterflag } }), () =>
+      this.request({ index: 1 })
     );
   };
 
-  conditionTreeSelect = filteredSortArr =>
-    this.setState(oldState => ({
-      temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr },
-    }));
+  conditionTreeSelect = filteredSortArr => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
 
   labelChange = (id, checked) => {
     const { temporaryCondition: { labelIds = [] } } = this.state;
@@ -208,7 +175,7 @@ class HomePage extends React.Component {
                       type={
                         conditionQuery.orderBy &&
                           conditionQuery.orderBy.name === 'title' &&
-                          conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -216,7 +183,7 @@ class HomePage extends React.Component {
                   </Tag>
                   <Tag
                     color="magenta"
-                    id="create_time"
+                    id="createDate"
                     style={{ marginLeft: '5px' }}
                     onClick={this.sort}
                   >
@@ -224,8 +191,8 @@ class HomePage extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                          conditionQuery.orderBy.name === 'create_time' &&
-                          conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'createDate' &&
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -233,7 +200,7 @@ class HomePage extends React.Component {
                   </Tag>
                   <Tag
                     color="magenta"
-                    id="modified_time"
+                    id="updateDate"
                     style={{ marginLeft: '5px' }}
                     onClick={this.sort}
                   >
@@ -241,8 +208,8 @@ class HomePage extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                          conditionQuery.orderBy.name === 'modified_time' &&
-                          conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'updateDate' &&
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -298,13 +265,13 @@ class HomePage extends React.Component {
                       <span>
                         <Icon type="edit" />
                         &nbsp;
-                        {timeFormat(Number(new Date(item.modified_time)))}
+                        {timeFormat(Number(new Date(item.updateDate)))}
                       </span>,
                       <Icon type="star-o" />,
                       <Icon type="like-o" />,
                       <Icon type="message" />,
                       <div>
-                        {item.label.map(i => (
+                        {item.tags.map(i => (
                           <Tag color="volcano">{i.name}</Tag>
                         ))}
                       </div>,
@@ -353,7 +320,7 @@ class HomePage extends React.Component {
                           &nbsp;&nbsp;
                           <Tag color="purple">
                             <Icon type="tag" />
-                            {item.sort_name},{item.category_name}
+                            {item.category.sort.name},{item.category.name}
                           </Tag>
                         </a>
                       }
@@ -402,7 +369,7 @@ class HomePage extends React.Component {
                 <Timeline mode="alternate">
                   {timelines.map(i => (
                     <Timeline.Item color={getRandomColor()}>
-                      <b>{timeFormat(Number(new Date(i.modified_time)))}</b>
+                      <b>{timeFormat(Number(new Date(i.updateDate)))}</b>
                       <a
                         href={`${window.location.origin}/${adminType}/article/${i.id}`}
                         target="_blank"
@@ -474,20 +441,19 @@ class HomePage extends React.Component {
                 defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
                 checkedKeys={temporaryCondition.filteredSortArr || []}
               >
-
                 {categoryOptions.map(item => (
                   <Tree.TreeNode
                     title={item.name}
                     key={`${item.id}`}
                     selectable={false}
-                    disabled={item.disabled}
+                    disabled={item.isEnable === 0}
                   >
-                    {item.children.map(i => (
+                    {item.categories.map(i => (
                       <Tree.TreeNode
                         title={i.name}
                         key={`${item.id}-${i.id}`}
                         selectable={false}
-                        disabled={item.disabled === 0 ? i.disabled : true}
+                        disabled={item.isEnable === 1 ? i.isEnable === 0 : true}
                       />
                     ))}
                   </Tree.TreeNode>
@@ -496,7 +462,7 @@ class HomePage extends React.Component {
             )}
             {filterSort === 'selectedByLabel' && (
               <Row>
-                <Col span={3} style={{marginTop:"5px"}}>请选择：</Col>
+                <Col span={3} style={{ marginTop: "5px" }}>请选择：</Col>
                 <Col span={21}>
                   {labelOptions.map(item => (
                     <Tag.CheckableTag

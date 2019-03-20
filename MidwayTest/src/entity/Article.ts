@@ -17,6 +17,9 @@ export class Article {
   @Column()
   abstract: string;
 
+  @Column()
+  imageUrl: string;
+
   @Column({ default: 1 })
   isEnable: number;
 

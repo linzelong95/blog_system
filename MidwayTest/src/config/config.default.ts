@@ -20,5 +20,11 @@ export = (appInfo: any) => {
     credentials: true
   }
 
+  config.multipart={
+    mode:"stream",
+    fileSize:"10mb",
+    whitelist:[".png",".jpg",".jpeg",".gif"]
+  }
+
   return config;
 };

@@ -60,14 +60,14 @@ export class AccountController {
 
   @post("/getcaptcha")
   async getcaptcha(ctx) {
-    const cap = Math.random() * 9000 + 1000;
+    const cap: number = Math.floor(Math.random() * 10000);
     const p = new captchapng(80, 30, cap);
-    p.color(255, 255, 2, 3);
-    p.color(255, 80, 80, 255);
+    p.color(0, 0, 0, 0);
+    p.color(80, 80, 80, 255);
     const base64 = p.getBase64();
     if (!base64) {
       ctx.status = 400;
-      ctx.body = { message: "获取验证码失败", flag: false };
+      ctx.body = { errMsg: "获取验证码失败" };
     } else {
       ctx.session.cap = cap;
       ctx.status = 200;
