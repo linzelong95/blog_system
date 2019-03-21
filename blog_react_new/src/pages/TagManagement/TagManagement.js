@@ -6,13 +6,13 @@ import EditorialForm from './EditorialForm';
 import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 
-const { AdminLabelAPI: { LIST, DELETE, LOCK, UNLOCK, FORM },AdminSortAPI } = UrlEnum;
+const { AdminTagAPI: { LIST, DELETE, LOCK, UNLOCK, FORM }, AdminSortAPI } = UrlEnum;
 
 @connect(({ articleManagement, loading }) => ({
   articleManagement,
   loading: loading.models.articleManagement,
 }))
-class LabelManagement extends React.Component {
+class TagManagement extends React.Component {
   state = {
     conditionQuery: {},
     editorialPanelVisible: false,
@@ -25,13 +25,19 @@ class LabelManagement extends React.Component {
 
   componentDidMount = () => {
     this.request({ index: 1, size: 10 });
-    this.request(
-      { netUrl: AdminSortAPI.LIST.url, index: 1, size: 100 },
-      res => this.setState({ categoryOptions: res.list })
+    this.request({ netUrl: AdminSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, res =>
+      // 是否需要disabled字段，待确定
+      this.setState({
+        categoryOptions: res.list.map(i => {
+          const newSort = { ...i };
+          newSort.disabled = !i.isEnable;
+          return newSort;
+        })
+      })
     );
   }
 
-  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+  componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
 
   request = (params, callback) => {
     const { conditionQuery } = this.state;
@@ -60,16 +66,12 @@ class LabelManagement extends React.Component {
   handleTableChange = (pagination, filters, sorter) => {
     const { current: index, pageSize: size } = pagination;
     const { columnKey, order } = sorter;
-    const { disabled: disabledArr, sort_id:sortIdArr } = filters;
-    const disabled =
-      disabledArr && disabledArr.length > 0 ? parseInt(disabledArr[0], 10) : undefined;
-    const sortIds =sortIdArr&&sortIdArr.length > 0 ? sortIdArr.map(i => parseInt(i, 10)):[];
+    const { isEnable: isEnableArr, sort } = filters;
+    const isEnable = isEnableArr && isEnableArr.length > 0 ? parseInt(isEnableArr[0], 10) : undefined;
+    const sortIdsArr = sort && sort.length > 0 ? sort.map(i => parseInt(i, 10)) : [];
     const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'desc' : 'asc' } : {};
     this.setState(
-      oldState => ({
-        filters,
-        conditionQuery: { ...oldState.conditionQuery, orderBy, disabled, sortIds },
-      }),
+      oldState => ({ filters, conditionQuery: { ...oldState.conditionQuery, orderBy, isEnable, sortIdsArr } }),
       () => this.request({ index, size })
     );
   };
@@ -129,14 +131,9 @@ class LabelManagement extends React.Component {
     Modal.confirm({ title, content, okText, cancelText, onCancel, onOk });
   };
 
-  handleOnSearch = val =>
-    this.setState(
-      oldState => ({
-        conditionQuery: { ...oldState.conditionQuery, name: val.replace(/(^\s*)|(\s*$)/g, '') },
-      }),
-      () => this.request({ index: 1 })
-    );
-
+  handleOnSearch = val => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, name: val.replace(/(^\s*)|(\s*$)/g, '') } }), () =>
+    this.request({ index: 1 })
+  );
 
   render() {
     const {
@@ -156,16 +153,16 @@ class LabelManagement extends React.Component {
       { title: '名称', dataIndex: 'name', sorter: true, width: '15%' },
       {
         title: '所属',
-        dataIndex: 'sort_id',
+        dataIndex: 'sort',
         sorter: true,
         width: '15%',
         filters: categoryOptions.map(i => ({ text: i.name, value: i.id })),
-        filteredValue: filters.sort_id || null,
-        render: (_, item) => <span>{item.sort_name}</span>,
+        filteredValue: filters.sort ? filters.sort.id : null,
+        render: (val) => <span>{val.name}</span>,
       },
       {
         title: '创建时间',
-        dataIndex: 'create_time',
+        dataIndex: 'createDate',
         sorter: true,
         width: '20%',
         render: val => (
@@ -178,7 +175,7 @@ class LabelManagement extends React.Component {
       },
       {
         title: '修改时间',
-        dataIndex: 'modified_time',
+        dataIndex: 'updateDate',
         sorter: true,
         width: '20%',
         render: val => (
@@ -191,13 +188,13 @@ class LabelManagement extends React.Component {
       },
       {
         title: '状态',
-        dataIndex: 'disabled',
+        dataIndex: 'isEnable',
         width: '10%',
         sorter: true,
-        filters: [{ text: '不可用', value: 1 }, { text: '可用', value: 0 }],
+        filters: [{ text: '不可用', value: 0 }, { text: '可用', value: 1 }],
         filterMultiple: false,
-        filteredValue: filters.disabled || null,
-        render: val => <Tag color="blue">{val === 0 ? '可用' : '不可用'}</Tag>,
+        filteredValue: filters.isEnable || null,
+        render: val => <Tag color="blue">{val === 1 ? '可用' : '不可用'}</Tag>,
       },
       {
         title: '操作',
@@ -219,7 +216,7 @@ class LabelManagement extends React.Component {
               onClick={() => this.handleItems(DELETE, item)}
               style={{ color: 'red', marginLeft: '10px' }}
             />
-            {item.disabled === 0 && (
+            {item.isEnable === 1 && (
               <Button
                 icon="lock"
                 size="small"
@@ -228,7 +225,7 @@ class LabelManagement extends React.Component {
                 style={{ color: '#A020F0', marginLeft: '10px' }}
               />
             )}
-            {item.disabled === 1 && (
+            {item.isEnable === 0 && (
               <Button
                 icon="unlock"
                 size="small"
@@ -352,4 +349,4 @@ class LabelManagement extends React.Component {
     );
   }
 }
-export default LabelManagement;
+export default TagManagement;

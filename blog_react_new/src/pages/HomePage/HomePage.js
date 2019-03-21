@@ -20,7 +20,7 @@ class HomePage extends React.Component {
     showSorterFlag: false,
     filterModalVisible: false,
     categoryOptions: [],
-    labelOptions: [],
+    tagOptions: [],
     temporaryCondition: {},
     filterSort: 'selectedByCate',
     timelines: []
@@ -29,10 +29,8 @@ class HomePage extends React.Component {
   componentDidMount = () => {
     this.request({ index: 1, size: 6 });
     this.request({ size: 5, conditionQuery: { orderBy: { name: "createDate", by: "DESC" } } }, (res) => this.setState({ timelines: res.list }));
-    this.request({ netUrl: UserTagAPI.LIST.url, index: 1, size: 100 }, (res) =>
-      this.setState({ labelOptions: res.list })
-    );
-    this.request({ netUrl: UserSortAPI.LIST.url, index: 1, size: 999 }, (res) =>
+    this.request({ netUrl: UserTagAPI.LIST.url,conditionQuery:{isEnable:1}, index: 1, size: 999 }, (res) =>this.setState({ tagOptions: res.list }));
+    this.request({ netUrl: UserSortAPI.LIST.url,conditionQuery:{isEnable:1}, index: 1, size: 999 }, (res) =>
       this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
     );
   }
@@ -90,13 +88,13 @@ class HomePage extends React.Component {
     if (method !== "noModal") this.toggleFilterModal();
     let filterflag = false;
     if (method === 'exit') {
-      const { conditionQuery: { filteredSortArr = [], labelIds = [] }, } = this.state;
-      filterflag = filteredSortArr.length > 0 || labelIds.length;
-      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, labelIds, filterflag } }));
+      const { conditionQuery: { filteredSortArr = [], tagIdsArr = [] }, } = this.state;
+      filterflag = filteredSortArr.length > 0 || tagIdsArr.length;
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, tagIdsArr, filterflag } }));
       return;
     }
-    const { temporaryCondition: { filteredSortArr = [], labelIds = [] } } = this.state;
-    filterflag = filteredSortArr.length > 0 || labelIds.length > 0;
+    const { temporaryCondition: { filteredSortArr = [], tagIdsArr = [] } } = this.state;
+    filterflag = filteredSortArr.length > 0 || tagIdsArr.length > 0;
     const category = { sortIdsArr: [], cateIdsArr: [] };
     filteredSortArr.forEach(item => {
       const arr = item.split('-');
@@ -106,18 +104,18 @@ class HomePage extends React.Component {
         category.cateIdsArr.push(parseInt(arr.pop(), 10));
       }
     });
-    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr, labelIds }, temporaryCondition: { ...oldState.temporaryCondition, filterflag } }), () =>
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr, tagIdsArr }, temporaryCondition: { ...oldState.temporaryCondition, filterflag } }), () =>
       this.request({ index: 1 })
     );
   };
 
   conditionTreeSelect = filteredSortArr => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
 
-  labelChange = (id, checked) => {
-    const { temporaryCondition: { labelIds = [] } } = this.state;
-    const newlabelIds = checked ? [...labelIds, id] : labelIds.filter(i => i !== id);
+  handleTagSelect = (id, checked) => {
+    const { temporaryCondition: { tagIdsArr = [] } } = this.state;
+    const newlabelIds = checked ? [...tagIdsArr, id] : tagIdsArr.filter(i => i !== id);
     this.setState(oldState => ({
-      temporaryCondition: { ...oldState.temporaryCondition, labelIds: newlabelIds },
+      temporaryCondition: { ...oldState.temporaryCondition, tagIdsArr: newlabelIds },
     }));
   }
 
@@ -133,7 +131,7 @@ class HomePage extends React.Component {
       showSorterFlag,
       filterModalVisible,
       categoryOptions,
-      labelOptions,
+      tagOptions,
       conditionQuery,
       temporaryCondition,
       timelines
@@ -290,7 +288,7 @@ class HomePage extends React.Component {
                     }
                     style={{ position: 'relative', overflow: 'hidden' }}
                   >
-                    {item.is_top === 1 && (
+                    {item.isTop === 1 && (
                       <div
                         style={{
                           position: 'absolute',
@@ -349,11 +347,11 @@ class HomePage extends React.Component {
               <div>
                 <Divider style={{ margin: "25px 0px 10px 0px" }}><Icon type="tags" style={{ color: "purple" }} /></Divider>
                 {
-                  labelOptions.map(i => (
+                  tagOptions.map(i => (
                     <Tag
                       onClick={() => {
                         this.setState(oldState => ({
-                          temporaryCondition: { ...oldState.temporaryCondition, labelIds: [i.id] },
+                          temporaryCondition: { ...oldState.temporaryCondition, tagIdsArr: [i.id] },
                         }), () => this.filterRequest("noModal"))
                       }}
                       color={getRandomColor()}
@@ -420,7 +418,7 @@ class HomePage extends React.Component {
                 </Radio.Button>
                 <Radio.Button value="selectedByLabel">
                   <Badge
-                    dot={temporaryCondition.labelIds && temporaryCondition.labelIds.length > 0}
+                    dot={temporaryCondition.tagIdsArr && temporaryCondition.tagIdsArr.length > 0}
                   >
                     &nbsp;按标签&nbsp;&nbsp;
                   </Badge>
@@ -464,11 +462,11 @@ class HomePage extends React.Component {
               <Row>
                 <Col span={3} style={{ marginTop: "5px" }}>请选择：</Col>
                 <Col span={21}>
-                  {labelOptions.map(item => (
+                  {tagOptions.map(item => (
                     <Tag.CheckableTag
                       key={item.id}
-                      checked={temporaryCondition.labelIds && temporaryCondition.labelIds.includes(item.id)}
-                      onChange={(checked) => this.labelChange(item.id, checked)}
+                      checked={temporaryCondition.tagIdsArr && temporaryCondition.tagIdsArr.includes(item.id)}
+                      onChange={(checked) => this.handleTagSelect(item.id, checked)}
                       style={{ marginTop: "5px" }}
                     >
                       {item.name}

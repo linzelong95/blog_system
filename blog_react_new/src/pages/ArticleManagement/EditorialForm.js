@@ -38,7 +38,18 @@ class EditorialForm extends React.PureComponent {
   componentDidMount = () => {
     const { formItem = {}, request } = this.props;
     request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 999 }, res =>
-      this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
+      this.setState({
+        categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0).map(i => {
+          const newSort = { ...i };
+          newSort.disabled = !i.isEnable;
+          newSort.categories = i.categories.map(v => {
+            const newCategories = { ...v };
+            newCategories.disabled = !v.isEnable;
+            return newCategories;
+          });
+          return newSort;
+        })
+      })
     );
     if (formItem.id) {
       request({ netUrl: CONTENT.url, id: formItem.id }, res => {
@@ -50,7 +61,7 @@ class EditorialForm extends React.PureComponent {
 
   formatInitialFormData = (formItem, extraObj) => {
     const { category, content, imageUrl, tags } = formItem;
-    const tagSelectedItems=tags.map(i=>({...i,sort:category.sort}));
+    const tagSelectedItems = tags.map(i => ({ ...i, sort: category.sort }));
     const fileList = imageUrl ? [{ uid: -1, url: `${imgPrefix}${imageUrl}` }] : [];
     const initialFormData = { ...formItem, category: [category.sort.id, category.id] };
     this.setState(oldState => ({
@@ -74,6 +85,7 @@ class EditorialForm extends React.PureComponent {
     form.validateFields((err, values) => {
       if (err) return;
       const { fileList, tagContainer: { selectedItems: tags } } = this.state;
+      const { category } = values;
       const imageUrls = [];
       fileList.forEach(i => {
         if (i.url) {
@@ -84,7 +96,7 @@ class EditorialForm extends React.PureComponent {
       });
       const netUrl = id ? UPDATE.url : INSERT.url;
       const imageUrl = imageUrls[0];
-      request({ ...values, id, netUrl, imageUrl, tags, category: { id: values.category.slice(0, 1) } });
+      request({ ...values, id, netUrl, imageUrl, tags, category: { id: category[category.length - 1] } });
       toggleEditorialPanel();
       cleanFormItem();
       form.resetFields();
@@ -116,9 +128,15 @@ class EditorialForm extends React.PureComponent {
   getList = (payload) => {
     const { index = 1, size = 6, query = "" } = payload;
     const { request } = this.props;
-    request({ ...payload, isEnable: 1, index, size }, (res) =>
-      this.setState(oldState => ({ tagContainer: { ...oldState.tagContainer, ...res, index, size, query } }))
-    );
+    request({ ...payload, isEnable: 1, index, size }, (res) => {
+      const { list: preList, total } = res;
+      const list = preList.map(i => {
+        const newItem = { ...i };
+        newItem.disabled = !i.isEnable;
+        return newItem;
+      })
+      this.setState(oldState => ({ tagContainer: { ...oldState.tagContainer, total, list, index, size, query } }))
+    });
   }
 
   categoryChange = (option) => {
@@ -134,7 +152,7 @@ class EditorialForm extends React.PureComponent {
     const tagTable = {
       COLUMNS: [
         { title: '名称', dataIndex: 'name', sorter: true, width: '15%' },
-        { title: '所属', dataIndex: 'sort', sorter: true, width: '15%', render: (val) => <span>{val?val.name:""}</span> },
+        { title: '所属', dataIndex: 'sort', sorter: true, width: '15%', render: (val) => <span>{val ? val.name : ""}</span> },
         { title: '创建时间', dataIndex: 'createDate', sorter: true, width: '20%', render: val => <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(val)))}</span> },
         { title: '修改时间', dataIndex: 'updateDate', sorter: true, width: '20%', render: val => <span><Icon type="edit" />&nbsp;{timeFormat(Number(new Date(val)))}</span> },
         { title: '状态', dataIndex: 'isEnable', width: '10%', sorter: true, render: val => <Tag color="blue">{val === 1 ? '可用' : '不可用'}</Tag> }

@@ -23,7 +23,7 @@ export class Category {
     @UpdateDateColumn()
     updateDate: string;
 
-    @ManyToOne(type => Sort, sort => sort.categories)
+    @ManyToOne(type => Sort, sort => sort.categories,{ onDelete: "CASCADE", onUpdate: "CASCADE" })
     sort: Sort;
 
     @OneToMany(type => Article, article => article.category)

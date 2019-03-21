@@ -800,10 +800,14 @@ const UrlEnum = {
     BASE_URL: "/user/cate",
     LIST: { url: "/api/user/cate/list", desc: { zh_CN: "获取分类列表", en_US: "getList" } },
   },
-  UserCommentAPI: {
-    LIST: { url: "/api/user/comment/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
-    DELETE: { url: "/api/user/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
-    INSERT: { url: "/api/user/comment/insert", desc: { zh_CN: "添加", en_US: "insert" } },
+  UserSortAPI: {
+    BASE_URL: "/user/sort",
+    LIST: { url: "/api/user/sort/list", desc: { zh_CN: "获取分类列表", en_US: "getList" } },
+  },
+  UserReplyAPI: {
+    LIST: { url: "/api/user/reply/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
+    DELETE: { url: "/api/user/reply/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    INSERT: { url: "/api/user/reply/insert", desc: { zh_CN: "添加", en_US: "insert" } },
   },
   UserTagAPI: {
     BASE_URL: "/user/tag",
@@ -824,15 +828,15 @@ const UrlEnum = {
     LOCK: { url: `/api/admin/article/lock`, desc: { zh_CN: "锁定", en_US: "lock" }, actionTip: { zh_CN: "将被锁定，锁定后可以解锁和删除，但不可编辑！", en_US: "will be lock,and then  can be released  or deleted, but can not be edited!" } },
     UNLOCK: { url: `/api/admin/article/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
   },
-  AdminCommentAPI: {
-    BASE_URL: "/admin/comment",
-    LIST: { url: "/api/admin/comment/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
-    DELETE: { url: "/api/admin/comment/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
-    INSERT: { url: "/api/admin/comment/insert", desc: { zh_CN: "添加", en_US: "insert" } },
-    TOP: { url: `/api/admin/comment/top`, desc: { zh_CN: "置顶", en_US: "up" }, actionTip: { zh_CN: "将被置顶，置顶后，在评论显示的状态下可取消置顶！", en_US: "will be stuck,and then can be downed when being shown!" } },
-    UNTOP: { url: `/api/admin/comment/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
-    SHOW: { url: "/api/admin/comment/show", desc: { zh_CN: "显示", en_US: "show" }, actionTip: { zh_CN: "将被展示，展示后可重新隐藏！", en_US: "will be shown,and then can be hidden after being shown!" } },
-    UNSHOW: { url: "/api/admin/comment/unshow", desc: { zh_CN: "隐藏", en_US: "hide" }, actionTip: { zh_CN: "将被隐藏，隐藏后可重新设置显示！", en_US: "will be hidden,and then can be shown after being hidden!" } },
+  AdminReplyAPI: {
+    BASE_URL: "/admin/reply",
+    LIST: { url: "/api/admin/reply/list", desc: { zh_CN: "获取一级列表", en_US: "getList" } },
+    DELETE: { url: "/api/admin/reply/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    INSERT: { url: "/api/admin/reply/insert", desc: { zh_CN: "添加", en_US: "insert" } },
+    TOP: { url: `/api/admin/reply/top`, desc: { zh_CN: "置顶", en_US: "up" }, actionTip: { zh_CN: "将被置顶，置顶后，在评论显示的状态下可取消置顶！", en_US: "will be stuck,and then can be downed when being shown!" } },
+    UNTOP: { url: `/api/admin/reply/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
+    SHOW: { url: "/api/admin/reply/show", desc: { zh_CN: "显示", en_US: "show" }, actionTip: { zh_CN: "将被展示，展示后可重新隐藏！", en_US: "will be shown,and then can be hidden after being shown!" } },
+    UNSHOW: { url: "/api/admin/reply/unshow", desc: { zh_CN: "隐藏", en_US: "hide" }, actionTip: { zh_CN: "将被隐藏，隐藏后可重新设置显示！", en_US: "will be hidden,and then can be shown after being hidden!" } },
   },
   AdminCateAPI: {
     BASE_URL: "/admin/cate",

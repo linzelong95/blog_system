@@ -1,15 +1,24 @@
-import {provide,controller,get,inject} from "midway";
+import { provide, controller, post, inject } from "midway";
 
 @provide()
 @controller("/user/article")
-export class UserArticleController{
+export class UserArticleController {
 
   @inject()
   userArticleService;
-  
-  @get("/list")
-  async getArticleList(ctx):Promise<void>{
-    const articleList=this.userArticleService.getArticleList();
-    ctx.body=articleList;
+
+  @post("/list")
+  async list(ctx): Promise<void> {
+    const { conditionQuery: { title = "", orderBy = {}, category = {}, tagIdsArr = [], id }, index = 1, size = 10 } = ctx.request.body;
+    const [list, total] = await this.userArticleService.list({ id, title, orderBy, index, size, category, tagIdsArr });
+    ctx.body = { list, total };
   }
+
+  @post("/content")
+  async content(ctx) {
+    const { articleId } = ctx.request.body;
+    const content = await this.userArticleService.content({ articleId });
+    ctx.body = { "list": content };
+  }
+
 }

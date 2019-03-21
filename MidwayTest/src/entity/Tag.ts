@@ -23,7 +23,7 @@ export class Tag {
     @UpdateDateColumn()
     updateDate: string;
 
-    @ManyToOne(type => Sort, sort => sort.tags)
+    @ManyToOne(type => Sort, sort => sort.tags,{ onDelete: "CASCADE", onUpdate: "CASCADE" })
     sort: Sort;
 
     @ManyToMany(type => Article, article => article.tags)

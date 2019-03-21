@@ -66,11 +66,11 @@ export default [
         component: './CategoryManagement/CategoryManagement',
       },
       {
-        path: '/labelmanagement',
+        path: '/tagmanagement',
         icon: 'idcard',
-        name: 'LabelManagement',
+        name: 'TagManagement',
         authority: ['admin'],
-        component: './LabelManagement/LabelManagement',
+        component: './TagManagement/TagManagement',
       },
       {
         icon: 'idcard',

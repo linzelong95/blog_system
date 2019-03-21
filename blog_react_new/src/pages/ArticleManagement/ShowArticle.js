@@ -6,9 +6,7 @@ import ShowMarkdown from '@/components/CustomShowMarkDown';
 import { UrlEnum } from '@/assets/Enum';
 import { timeFormat } from '@/utils/utils';
 
-const {
-  AdminCommentAPI: { LIST, DELETE, INSERT, SHOW, UNSHOW },
-} = UrlEnum;
+const {AdminReplyAPI: { LIST, DELETE, INSERT, SHOW, UNSHOW }} = UrlEnum;
 
 @connect(({ global }) => ({
   currentUser: global.currentUser,
@@ -18,56 +16,40 @@ class ShowArticle extends React.Component {
   state = {
     reviewBoxVisible: false,
     clientHeight: document.documentElement.clientHeight,
-    commentObj: { total: 0, list: [] },
+    replyObj: { total: 0, list: [] },
     conditionQuery: {},
   };
 
   componentDidMount = () => {
     window.addEventListener('resize', this.onWindowResize);
-    this.getCommentList();
+    this.getReplyList();
   };
 
   componentWillUnmount = () => {
     window.removeEventListener('resize', this.onWindowResize);
   };
 
-  getCommentList = () => {
-    const {
-      request,
-      item: { id },
-    } = this.props;
+  getReplyList = () => {
+    const { request, item: { id } } = this.props;
     const { conditionQuery: con } = this.state;
-    const conditionQuery = { ...con, aids: [id] };
-    request({ netUrl: LIST.url, conditionQuery, prettyFormat: true }, commentObj =>
-      this.setState({ commentObj, conditionQuery })
+    const conditionQuery = { ...con, articleIdsArr: [id] };
+    request({ netUrl: LIST.url, conditionQuery, prettyFormat: true }, replyObj =>
+      this.setState({ replyObj, conditionQuery })
     );
   };
 
-  commentSort = e => {
+  replySort = e => {
     const { id: name } = e.currentTarget;
-    const {
-      conditionQuery: { orderBy = {} },
-    } = this.state;
-    this.setState(
-      oldState => ({
-        conditionQuery: {
-          ...oldState.conditionQuery,
-          orderBy: { name, by: orderBy.by === 'asc' ? 'desc' : 'asc' },
-        },
-      }),
-      () => this.getCommentList()
+    const { conditionQuery: { orderBy = {} } } = this.state;
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' } } }), () =>
+      this.getReplyList()
     );
   };
 
   onWindowResize = () => this.setState({ clientHeight: document.documentElement.clientHeight });
 
-  handleWriteComment = val => {
-    const {
-      request,
-      form,
-      item: { id: aid, author_id },
-      currentUser,
-    } = this.props;
+  handleWriteReply = val => {
+    const { request, form, item: { id: articleId }, currentUser } = this.props;
     if (val === 'reset') {
       form.resetFields();
       return;
@@ -79,36 +61,32 @@ class ShowArticle extends React.Component {
     form.validateFields((err, values) => {
       if (err) return;
       const { to } = values;
-      const from_id = currentUser.id;
+      const fromId = currentUser.id;
       const netUrl = INSERT.url;
-      const to_id = to.key;
-      request({ ...values, aid, from_id, to_id, author_id, netUrl }, () => {
+      const toId = to.key;
+      request({ ...values, articleId, fromId, toId, netUrl }, () => {
         this.toggleReviewBox();
-        this.getCommentList();
+        this.getReplyList();
       });
       form.resetFields();
     });
   };
 
-  handleDealWithComment = (commentitem, action) => {
-    const {
-      form,
-      currentUser: { id: currentUserId },
-      request,
-    } = this.props;
+  handleDealWithReply = (replyItem, action) => {
+    const { form, currentUser: { id: currentUserId }, request } = this.props;
     if (!currentUserId) {
       Modal.error({ title: '登录后才可进行操作！' });
       return;
     }
-    const { from_id: to_id, from_name: to_name, id, pid: p, content } = commentitem;
+    const { from: { id: toId, nickName }, id, parentId: pid, reply } = replyItem;
     if (action && [DELETE.url, SHOW.url, UNSHOW.url].includes(action.url)) {
-      const items = [{ id, pid: p, name: content }];
-      request({ netUrl: action.url, items }, () => this.getCommentList());
+      const items = [{ id, parentId: pid, name: reply }];
+      request({ netUrl: action.url, items }, () => this.getReplyList());
       return;
     }
-    const pid = p > 0 ? p : id;
+    const parentId = pid > 0 ? pid : id;
     this.setState({ reviewBoxVisible: true }, () =>
-      form.setFieldsValue({ pid, to: { label: to_name, key: to_id } })
+      form.setFieldsValue({ parentId, to: { label: nickName, key: toId } })
     );
   };
 
@@ -117,26 +95,25 @@ class ShowArticle extends React.Component {
 
   render() {
     const { visible, item, onClose, form, loading } = this.props;
-    const { clientHeight, commentObj, reviewBoxVisible, conditionQuery } = this.state;
+    const { clientHeight, replyObj, reviewBoxVisible, conditionQuery } = this.state;
     const modalFormConfig = [
       {
         fieldId: 'to',
         label: '对象',
         fieldType: 'select',
         fieldProps: {
-          options: [{ key: item.author_id, label: '楼主' }],
+          options: [{ key: item.user.id, label: '楼主' }],
           labelInValue: true,
-          onChange: obj => console.log(obj),
         },
-        initialValue: { key: item.author_id, label: '楼主' },
+        initialValue: { key: item.user.id, label: '楼主' },
       },
       {
-        fieldId: 'content',
+        fieldId: 'reply',
         label: '内容',
         rules: [{ required: true, message: '内容不能为空' }],
         fieldType: 'textArea',
       },
-      { fieldId: 'pid', style: { display: 'none' }, fieldType: 'inputNumber', initialValue: 0 },
+      { fieldId: 'parentId', style: { display: 'none' }, fieldType: 'inputNumber', initialValue: 0 },
     ];
     return (
       <Drawer
@@ -146,9 +123,7 @@ class ShowArticle extends React.Component {
             {item.title}
             &nbsp;&nbsp;
             <Tag color="purple">
-              <Icon type="tag" />
-              &nbsp;
-              {item.sort_name},{item.category_name}
+              <Icon type="tag" />&nbsp;{item.category.sort.name},{item.category.name}
             </Tag>
           </div>
         }
@@ -164,7 +139,7 @@ class ShowArticle extends React.Component {
                 <span>
                   <Icon type="clock-circle" />
                   &nbsp;
-                  {timeFormat(Number(new Date(item.create_time)))}
+                  {timeFormat(Number(new Date(item.createDate)))}
                 </span>
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <span>
@@ -189,7 +164,7 @@ class ShowArticle extends React.Component {
                   {item.abstract}
                 </p>
               )}
-              <ShowMarkdown value={item.content} />
+              <ShowMarkdown value={item.reply} />
             </div>
           </Col>
           <Col span={8}>
@@ -212,11 +187,11 @@ class ShowArticle extends React.Component {
                     <Button
                       size="small"
                       style={{ marginRight: '10px' }}
-                      onClick={() => this.handleWriteComment('reset')}
+                      onClick={() => this.handleWriteReply('reset')}
                     >
                       重置
                     </Button>
-                    <Button size="small" type="primary" onClick={this.handleWriteComment}>
+                    <Button size="small" type="primary" onClick={this.handleWriteReply}>
                       发送
                     </Button>
                   </div>
@@ -225,23 +200,21 @@ class ShowArticle extends React.Component {
             </div>
             <div>
               <h2>
-                {commentObj.total || 0}
+                {replyObj.total || 0}
                 &nbsp;条评论&nbsp;
-                <Icon type="reload" style={{ color: '#1890FF' }} onClick={this.getCommentList} />
+                <Icon type="reload" style={{ color: '#1890FF' }} onClick={this.getReplyList} />
                 <Tag
                   color="magenta"
-                  id="create_time"
+                  id="createDate"
                   style={{ marginLeft: '10px' }}
-                  onClick={this.commentSort}
+                  onClick={this.replySort}
                 >
                   时间
                   <Icon
                     type={
                       conditionQuery.orderBy &&
-                      conditionQuery.orderBy.name === 'create_time' &&
-                      conditionQuery.orderBy.by === 'asc'
-                        ? 'up'
-                        : 'down'
+                        conditionQuery.orderBy.name === 'createDate' &&
+                        conditionQuery.orderBy.by === 'ASC' ? 'up' : 'down'
                     }
                   />
                 </Tag>
@@ -256,106 +229,34 @@ class ShowArticle extends React.Component {
                 <List
                   loading={loading}
                   itemLayout="horizontal"
-                  dataSource={commentObj.list || []}
+                  dataSource={replyObj.list || []}
                   renderItem={listItem => (
                     <Comment
                       actions={[
-                        <span>
-                          <Icon type="clock-circle" />
-                          &nbsp;
-                          {timeFormat(Number(new Date(listItem.create_time)))}
-                        </span>,
-                        <span>
-                          <a onClick={() => this.handleDealWithComment(listItem)}>回复</a>
-                        </span>,
-                        <span>
-                          <a
-                            onClick={() => this.handleDealWithComment(listItem, DELETE)}
-                            style={{ color: 'red' }}
-                          >
-                            删除
-                          </a>
-                        </span>,
-                        listItem.is_show === 0 ? (
-                          <span>
-                            <a
-                              onClick={() => this.handleDealWithComment(listItem, SHOW)}
-                              style={{ color: '#66CD00' }}
-                            >
-                              展示
-                            </a>
-                          </span>
-                        ) : (
-                          <span>
-                            <a
-                              onClick={() => this.handleDealWithComment(listItem, UNSHOW)}
-                              style={{ color: '#BF3EFF' }}
-                            >
-                              隐藏
-                            </a>
-                          </span>
-                        ),
+                        <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(listItem.createDate)))}</span>,
+                        <span><a onClick={() => this.handleDealWithReply(listItem)}>回复</a></span>,
+                        <span><a onClick={() => this.handleDealWithReply(listItem, DELETE)} style={{ color: 'red' }}>删除</a></span>,
+                        listItem.isApproved === 0 
+                          ? <span><a onClick={() => this.handleDealWithReply(listItem, SHOW)} style={{ color: '#66CD00' }}>展示</a></span>
+                          :<span><a onClick={() => this.handleDealWithReply(listItem, UNSHOW)} style={{ color: '#BF3EFF' }}>隐藏</a> </span>
                       ]}
-                      author={listItem.from_name}
+                      author={listItem.from.nickName}
                       avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                      content={
-                        <span style={{ color: listItem.is_show === 0 ? 'lightgray' : '' }}>
-                          {listItem.content}
-                        </span>
-                      }
+                      content={<span style={{ color: listItem.isApproved === 0 ? 'lightgray' : '' }}>{listItem.reply}</span>}
                     >
                       {listItem.children.map(i => (
                         <Comment
                           actions={[
-                            <span>
-                              <Icon type="clock-circle" />
-                              &nbsp;
-                              {timeFormat(Number(new Date(i.create_time)))}
-                            </span>,
-                            <span>
-                              <a
-                                onClick={() =>
-                                  this.handleDealWithComment({ ...i, pid: listItem.id })
-                                }
-                              >
-                                回复
-                              </a>
-                            </span>,
-                            <span>
-                              <a
-                                onClick={() => this.handleDealWithComment(i, DELETE)}
-                                style={{ color: 'red' }}
-                              >
-                                删除
-                              </a>
-                            </span>,
-                            i.is_show === 0 ? (
-                              <span>
-                                <a
-                                  onClick={() => this.handleDealWithComment(i, SHOW)}
-                                  style={{ color: '#66CD00' }}
-                                >
-                                  展示
-                                </a>
-                              </span>
-                            ) : (
-                              <span>
-                                <a
-                                  onClick={() => this.handleDealWithComment(i, UNSHOW)}
-                                  style={{ color: '#BF3EFF' }}
-                                >
-                                  隐藏
-                                </a>
-                              </span>
-                            ),
+                            <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(i.createDate)))}</span>,
+                            <span><a onClick={() => this.handleDealWithReply({ ...i, parentId: listItem.id })}>回复</a></span>,
+                            <span><a onClick={() => this.handleDealWithReply(i, DELETE)} style={{ color: 'red' }}>删除</a></span>,
+                            i.isApproved === 0
+                              ? <span><a onClick={() => this.handleDealWithReply(i, SHOW)} style={{ color: '#66CD00' }}>展示</a></span>
+                              : <span><a onClick={() => this.handleDealWithReply(i, UNSHOW)} style={{ color: '#BF3EFF' }}>隐藏</a></span>
                           ]}
-                          author={`${i.from_name} 回复@ ${i.to_name}`}
+                          author={`${i.from.nickName} 回复@ ${i.to.nickName}`}
                           avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                          content={
-                            <span style={{ color: i.is_show === 0 ? 'lightgray' : '' }}>
-                              {i.content}
-                            </span>
-                          }
+                          content={<span style={{ color: i.isApproved === 0 ? 'lightgray' : '' }}>{i.reply}</span>}
                         />
                       ))}
                     </Comment>

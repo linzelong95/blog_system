@@ -3,7 +3,7 @@ import { getRepository } from "typeorm";
 import { Reply } from "../../entity/Reply";
 
 @provide()
-export class AdminReplyService {
+export class UserReplyService {
 
   repository = getRepository(Reply);
 

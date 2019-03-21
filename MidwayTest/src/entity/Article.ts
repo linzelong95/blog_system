@@ -35,7 +35,7 @@ export class Article {
   @OneToOne(type => Content, content => content.article, { cascade: true })
   content: Content;
 
-  @ManyToOne(type => Category, category => category.articles)
+  @ManyToOne(type => Category, category => category.articles,{ onDelete: "CASCADE", onUpdate: "CASCADE" })
   category: Category;
 
   @ManyToOne(type => User, user => user.articles)

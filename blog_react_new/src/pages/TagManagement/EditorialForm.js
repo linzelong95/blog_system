@@ -5,7 +5,7 @@ import EditorialFormConfig from '@/pages/EditorialFormConfig';
 
 const { getModalForm } = EditorialFormConfig;
 const {
-  AdminLabelAPI: { INSERT, UPDATE },
+  AdminTagAPI: { INSERT, UPDATE },
   AdminSortAPI,
 } = UrlEnum;
 
@@ -18,14 +18,15 @@ class EditorialForm extends React.PureComponent {
 
   componentDidMount = () => {
     const { formItem = {}, request } = this.props;
-    const callback = res => this.setState({ categoryOptions: res.list });
-    request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 100, prettyFormat: true }, callback);
+    request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 999 }, res =>
+      this.setState({ categoryOptions: res.list })
+    );
     if (formItem.id) this.formatInitialFormData(formItem);
   };
 
   formatInitialFormData = (formItem, extraObj) => {
-    const { sort_id, sort_name } = formItem;
-    const initialFormData = { ...formItem, sort: { label: sort_name, key: sort_id } };
+    const { sort } = formItem;
+    const initialFormData = { ...formItem, sort: { label: sort.name, key: sort.id } };
     this.setState({ initialFormData, ...extraObj });
   };
 
@@ -52,7 +53,7 @@ class EditorialForm extends React.PureComponent {
       if (err) return;
       const { sort } = values;
       const netUrl = id ? UPDATE.url : INSERT.url;
-      request({ ...values, id, netUrl, sort_id: sort.key });
+      request({ ...values, id, netUrl, sortId: sort.key });
       toggleEditorialPanel();
       cleanFormItem();
       form.resetFields();
@@ -77,21 +78,21 @@ class EditorialForm extends React.PureComponent {
         rules: [{ required: true, message: '分类是必须的' }],
         fieldType: 'select',
         fieldProps: {
-          options: categoryOptions.map(i => ({ label: i.name, value: i.id, disabled: i.disabled })),
+          options: categoryOptions.map(i => ({ label: i.name, value: i.id, disabled: !i.isEnable })),
           labelInValue: true,
           style: { width: '86%' },
         },
         formItemLayout: { labelCol: { span: 6 } },
       },
       {
-        fieldId: 'disabled',
+        fieldId: 'isEnable',
         label: '状态',
         fieldType: 'select',
         fieldProps: {
-          options: [{ value: 1, label: '不可用' }, { value: 0, label: '可用' }],
+          options: [{ value: 0, label: '不可用' }, { value: 1, label: '可用' }],
           style: { width: '86%' },
         },
-        initialValue: 0,
+        initialValue: 1,
         formItemLayout: { labelCol: { span: 6 } },
       },
     ];

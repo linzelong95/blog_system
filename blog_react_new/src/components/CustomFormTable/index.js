@@ -147,7 +147,7 @@ class CustomFormTable extends React.PureComponent {
           <StandardTable
             number={selectedItems.length}
             cleanSelectedItem={this.cleanSelectedItem}
-            rowSelection={hasBaseTableRowSelection ? { selectedRowKeys, type, onChange: this.handleSelectRows } : undefined}
+            rowSelection={hasBaseTableRowSelection ? { selectedRowKeys, type, onChange: this.handleSelectRows ,getCheckboxProps:(record)=>({disabled:record.disabled})} : undefined}
             dataSource={list}
             columns={baseTableColumns}
             rowKey={record => record.id}

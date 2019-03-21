@@ -2,7 +2,7 @@ import { provide, controller, post, inject } from "midway";
 
 @provide()
 @controller("/admin/tag")
-export class AdmiTagController {
+export class AdminTagController {
 
   @inject()
   adminTagService;
@@ -17,8 +17,8 @@ export class AdmiTagController {
   @post("/insert")
   @post("/update")
   async save(ctx): Promise<void> {
-    const { id, name, isEnable, sort } = ctx.request.body;
-    const flag = await this.adminTagService.save({ id, name, isEnable, sort });
+    const { id, name, isEnable, sortId } = ctx.request.body;
+    const flag = await this.adminTagService.save({ id, name, isEnable, sort: { id: sortId } });
     const action = id ? "更新" : "添加";
     if (!flag) {
       ctx.status = 400;

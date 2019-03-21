@@ -156,10 +156,8 @@ class ArticleManagement extends React.Component {
     this.setState({ allSelectedFlag: !allSelectedFlag, selectedItems: newSelectedItems });
   };
 
-  readArticle = item => this.request({ netUrl: CONTENT.url, id: item.id }, (res) => {
-    const formItem = item;
-    formItem.content = res.list[0].content;
-    this.setState({ formItem, drawerVisible: true });
+  readArticle = item => this.request({ netUrl: CONTENT.url, articleId: item.id }, (res) => {
+    this.setState({ formItem:{...item,content:res.list[0].content}, drawerVisible: true });
   });
 
   onCloseDrawer = () => {
@@ -441,7 +439,7 @@ class ArticleManagement extends React.Component {
                       style={{ color: 'red', width: '60px' }}
                       onClick={() => this.handleItems(DELETE, item)}
                     />,
-                    item.is_top === 0 ? (
+                    item.isTop === 0 ? (
                       <Icon
                         type="arrow-up"
                         style={{ color: '#4169E1', width: '60px' }}
@@ -502,7 +500,7 @@ class ArticleManagement extends React.Component {
                       {timeFormat(Number(new Date(item.updateDate)))}
                     </div>
                   </div>
-                  {item.is_top === 1 && (
+                  {item.isTop === 1 && (
                     <div
                       style={{
                         position: 'absolute',

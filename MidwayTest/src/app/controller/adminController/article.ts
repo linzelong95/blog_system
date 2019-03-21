@@ -9,28 +9,25 @@ export class AdminArticleController {
 
   @post("/list")
   async list(ctx): Promise<void> {
-    //user form ssession
-    const user = { id: 1 };
+    const user = ctx.state.user;
     const { conditionQuery: { title = "", orderBy = {}, category = {} }, index = 1, size = 10 } = ctx.request.body;
     const [list, total] = await this.adminArticleService.list({ title, orderBy, index, size, category, user });
     ctx.body = { list, total };
   }
 
-
   @post("/content")
-  async content(ctx){
-    const {id}=ctx.request.body;
-    const content = await this.adminArticleService.content({ id });
-    ctx.body={"list":content};
+  async content(ctx) {
+    const { articleId } = ctx.request.body;
+    const content = await this.adminArticleService.content({ articleId });
+    ctx.body = { "list": content };
   }
 
   @post("/insert")
   @post("/update")
   async save(ctx): Promise<void> {
-    //user form ssession
-    const user = {};
-    const { id, title, abstract, isTop, category, tags, content } = ctx.request.body;
-    const flag = await this.adminArticleService.save({ id, title, abstract, isTop, category, user, tags, content });
+    const user = ctx.state.user;
+    const { id, title, abstract, isTop, category, tags, content, imageUrl } = ctx.request.body;
+    const flag = await this.adminArticleService.save({ id, title, abstract, isTop, category, user, tags, content, imageUrl });
     const action = id ? "更新" : "添加";
     if (!flag) {
       ctx.status = 400;

@@ -21,10 +21,7 @@ import ShowMarkdown from '@/components/CustomShowMarkDown';
 import { UrlEnum } from '@/assets/Enum';
 import { timeFormat } from '@/utils/utils';
 
-const {
-  UserArticleAPI: { LIST, CONTENT },
-  UserCommentAPI,
-} = UrlEnum;
+const { UserArticleAPI: { LIST, CONTENT }, UserReplyAPI } = UrlEnum;
 
 @connect(({ articleManagement, loading, global }) => ({
   articleManagement,
@@ -36,27 +33,21 @@ class HomePage extends React.Component {
   state = {
     reviewBoxVisible: false,
     reviewDrawerVisible: false,
-    commentObj: { total: 0, list: [] },
+    replyObj: { total: 0, list: [] },
     conditionQuery: {},
     item: {},
   };
 
   componentDidMount = () => {
-    const {
-      match: {
-        params: { id },
-      },
-    } = this.props;
+    const { match: { params: { id } } } = this.props;
     this.request({ id, conditionQuery: {} }, res => {
-      this.request({ netUrl: CONTENT.url, id, conditionQuery: {} }, response => {
-        const item = res.list[0];
-        item.content = response.list[0].content;
-        this.setState({ item });
+      this.request({ netUrl: CONTENT.url, conditionQuery: {}, articleId: id }, response => {
+        this.setState({ item: { ...res.list[0], content: response.list[0].content } });
       });
     });
   };
 
-  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+  componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
 
   request = (params, callback) => {
     const { conditionQuery: con } = this.state;
@@ -66,41 +57,26 @@ class HomePage extends React.Component {
     this.props.dispatch({ type: 'articleManagement/handleArticles', payload, callback });
   };
 
-  getCommentList = () => {
-    const {
-      match: {
-        params: { id },
-      },
-    } = this.props;
+  getReplyList = () => {
+    const { match: { params: { id } } } = this.props;
     const { conditionQuery: con } = this.state;
-    const conditionQuery = { ...con, aids: [id] };
-    this.request(
-      { netUrl: UserCommentAPI.LIST.url, conditionQuery, prettyFormat: true },
-      commentObj => this.setState({ commentObj, conditionQuery })
+    const conditionQuery = { ...con, articleIdsArr: [id] };
+    this.request({ netUrl: UserReplyAPI.LIST.url, conditionQuery, prettyFormat: true },
+      replyObj => this.setState({ replyObj, conditionQuery })
     );
   };
 
-  commentSort = e => {
+  replySort = e => {
     const { id: name } = e.currentTarget;
-    const {
-      conditionQuery: { orderBy = {} },
-    } = this.state;
-    this.setState(
-      oldState => ({
-        conditionQuery: {
-          ...oldState.conditionQuery,
-          orderBy: { name, by: orderBy.by === 'asc' ? 'desc' : 'asc' },
-        },
-      }),
-      () => this.getCommentList()
+    const {conditionQuery: { orderBy = {} }} = this.state;
+    this.setState(oldState => ({conditionQuery: {...oldState.conditionQuery, orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' }}}),() => 
+      this.getReplyList()
     );
   };
 
-  handleWriteComment = val => {
+  handleWriteReply = val => {
     const { form, currentUser } = this.props;
-    const {
-      item: { id: aid, author_id },
-    } = this.state;
+    const { item: { id: articleId } } = this.state;
     if (val === 'reset') {
       form.resetFields();
       return;
@@ -112,68 +88,67 @@ class HomePage extends React.Component {
     form.validateFields((err, values) => {
       if (err) return;
       const { to } = values;
-      const from_id = currentUser.id;
-      const netUrl = UserCommentAPI.INSERT.url;
-      const to_id = to.key;
-      this.request({ ...values, aid, from_id, to_id, author_id, netUrl }, () => {
+      const fromId = currentUser.id;
+      const netUrl = UserReplyAPI.INSERT.url;
+      const toId = to.key;
+      this.request({ ...values, articleId, fromId, toId, netUrl }, () => {
         this.toggleReviewBox();
-        this.getCommentList();
+        this.getReplyList();
         message.success('评论成功，审核通过后将得以展示！');
       });
       form.resetFields();
     });
   };
 
-  handleDealWithComment = (commentitem, action) => {
-    const {
-      form,
-      currentUser: { id: currentUserId },
-    } = this.props;
+  handleDealWithReply = (replyItem, action) => {
+    const { form, currentUser: { id: currentUserId } } = this.props;
     if (!currentUserId) {
       Modal.error({ title: '登录后才可进行操作！' });
       return;
     }
-    const { from_id: to_id, from_name: to_name, id, pid: p, content } = commentitem;
-    if (action && [UserCommentAPI.DELETE.url].includes(action.url)) {
-      const items = [{ id, pid: p, name: content }];
-      this.request({ netUrl: action.url, items }, () => this.getCommentList());
+    const { from: { id: toId, nickName }, id, parentId: pid, reply } = replyItem;
+    if (action && [UserReplyAPI.DELETE.url].includes(action.url)) {
+      const items = [{ id, parentId: pid, name: reply }];
+      this.request({ netUrl: action.url, items }, () => this.getReplyList());
       return;
     }
-    const pid = p > 0 ? p : id;
+    const parentId = pid > 0 ? pid : id;
     this.setState({ reviewBoxVisible: true }, () =>
-      form.setFieldsValue({ pid, to: { label: to_name, key: to_id } })
+      form.setFieldsValue({ parentId, to: { label: nickName, key: toId } })
     );
   };
 
-  toggleReviewBox = () =>
-    this.setState(oldState => ({ reviewBoxVisible: !oldState.reviewBoxVisible }));
+  toggleReviewBox = () => this.setState(oldState => ({ reviewBoxVisible: !oldState.reviewBoxVisible }));
 
   handlePageChange = (index, size) => this.request({ index, size });
 
   toggleShowReviewDrawer = () => {
     const { reviewDrawerVisible } = this.state;
-    if (!reviewDrawerVisible) this.getCommentList();
+    if (!reviewDrawerVisible) this.getReplyList();
     this.setState({ reviewDrawerVisible: !reviewDrawerVisible });
   };
 
   render() {
     const { form, currentUser, loading } = this.props;
-    const { commentObj, reviewBoxVisible, conditionQuery, item, reviewDrawerVisible } = this.state;
+    const { replyObj, reviewBoxVisible, conditionQuery, item, reviewDrawerVisible } = this.state;
     const modalFormConfig = [
       {
         fieldId: 'to',
         label: '对象',
         fieldType: 'select',
-        fieldProps: { options: [{ key: item.author_id, label: '楼主' }], labelInValue: true },
-        initialValue: { key: item.author_id, label: '楼主' },
+        fieldProps: {
+          options: [{ key: item.user && item.user.id, label: '楼主' }],
+          labelInValue: true,
+        },
+        initialValue: { key: item.user && item.user.id, label: '楼主' },
       },
       {
-        fieldId: 'content',
+        fieldId: 'reply',
         label: '内容',
         rules: [{ required: true, message: '内容不能为空' }],
         fieldType: 'textArea',
       },
-      { fieldId: 'pid', style: { display: 'none' }, fieldType: 'inputNumber', initialValue: 0 },
+      { fieldId: 'parentId', style: { display: 'none' }, fieldType: 'inputNumber', initialValue: 0 },
     ];
     return (
       <GridContent>
@@ -202,13 +177,13 @@ class HomePage extends React.Component {
                 <span>
                   <Icon type="clock-circle" />
                   &nbsp;
-                  {timeFormat(Number(new Date(item.create_time)))}
+                  {timeFormat(Number(new Date(item.createDate)))}
                 </span>
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <span>
                   <Icon type="edit" />
                   &nbsp;
-                  {timeFormat(Number(new Date(item.modified_time)))}
+                  {timeFormat(Number(new Date(item.updateTime)))}
                 </span>
               </div>
               {item.label && (
@@ -234,23 +209,21 @@ class HomePage extends React.Component {
             visible={reviewDrawerVisible}
             title={
               <div>
-                {commentObj.total || 0}
+                {replyObj.total || 0}
                 &nbsp;条评论&nbsp;
-                <Icon type="reload" style={{ color: '#1890FF' }} onClick={this.getCommentList} />
+                <Icon type="reload" style={{ color: '#1890FF' }} onClick={this.getReplyList} />
                 <Tag
                   color="purple"
-                  id="create_time"
+                  id="createDate"
                   style={{ marginLeft: '10px' }}
-                  onClick={this.commentSort}
+                  onClick={this.replySort}
                 >
                   时间
                   <Icon
                     type={
                       conditionQuery.orderBy &&
-                      conditionQuery.orderBy.name === 'create_time' &&
-                      conditionQuery.orderBy.by === 'asc'
-                        ? 'up'
-                        : 'down'
+                        conditionQuery.orderBy.name === 'createDate' &&
+                        conditionQuery.orderBy.by === 'ASC' ? 'up' : 'down'
                     }
                   />
                 </Tag>
@@ -302,11 +275,11 @@ class HomePage extends React.Component {
                     <Button
                       size="small"
                       style={{ marginRight: '10px' }}
-                      onClick={() => this.handleWriteComment('reset')}
+                      onClick={() => this.handleWriteReply('reset')}
                     >
                       重置
                     </Button>
-                    <Button size="small" type="primary" onClick={this.handleWriteComment}>
+                    <Button size="small" type="primary" onClick={this.handleWriteReply}>
                       发送
                     </Button>
                   </div>
@@ -317,7 +290,7 @@ class HomePage extends React.Component {
               <List
                 loading={loading}
                 itemLayout="horizontal"
-                dataSource={commentObj.list || []}
+                dataSource={replyObj.list || []}
                 renderItem={listItem => (
                   <Comment
                     key={listItem.id}
@@ -325,17 +298,15 @@ class HomePage extends React.Component {
                       <span>
                         <Icon type="clock-circle" />
                         &nbsp;
-                        {timeFormat(Number(new Date(listItem.create_time)))}
+                        {timeFormat(Number(new Date(listItem.createDate)))}
                       </span>,
                       <span>
-                        <a onClick={() => this.handleDealWithComment(listItem)}>回复</a>
+                        <a onClick={() => this.handleDealWithReply(listItem)}>回复</a>
                       </span>,
-                      currentUser.id === listItem.from_id && (
+                      currentUser.id === listItem.from.id && (
                         <span>
                           <a
-                            onClick={() =>
-                              this.handleDealWithComment(listItem, UserCommentAPI.DELETE)
-                            }
+                            onClick={() => this.handleDealWithReply(listItem, UserReplyAPI.DELETE)}
                             style={{ color: 'red' }}
                           >
                             删除
@@ -343,40 +314,21 @@ class HomePage extends React.Component {
                         </span>
                       ),
                     ]}
-                    author={listItem.from_name}
+                    author={listItem.from.nickName}
                     avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                    content={listItem.is_show ? listItem.content : '（该评论待审核）'}
+                    content={listItem.isApproved ? listItem.reply : '（该评论待审核）'}
                   >
                     {listItem.children.map(i => (
                       <Comment
                         key={i.id}
                         actions={[
-                          <span>
-                            <Icon type="clock-circle" />
-                            &nbsp;
-                            {timeFormat(Number(new Date(i.create_time)))}
-                          </span>,
-                          <span>
-                            <a
-                              onClick={() => this.handleDealWithComment({ ...i, pid: listItem.id })}
-                            >
-                              回复
-                            </a>
-                          </span>,
-                          currentUser.id === i.from_id && (
-                            <span>
-                              <a
-                                onClick={() => this.handleDealWithComment(i, UserCommentAPI.DELETE)}
-                                style={{ color: 'red' }}
-                              >
-                                删除
-                              </a>
-                            </span>
-                          ),
+                          <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(i.createDate)))}</span>,
+                          <span><a onClick={() => this.handleDealWithReply({ ...i, parentId: listItem.id })}>回复</a></span>,
+                          currentUser.id === i.from.id && <span><a onClick={() => this.handleDealWithReply(i, UserReplyAPI.DELETE)} style={{ color: 'red' }}>删除</a></span>
                         ]}
-                        author={`${i.from_name} 回复@ ${i.to_name}`}
+                        author={`${i.from.nickName} 回复@ ${i.to.nickName}`}
                         avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                        content={i.is_show ? i.content : '（该评论待审核）'}
+                        content={i.isApproved ? i.reply : '（该评论待审核）'}
                       />
                     ))}
                   </Comment>
