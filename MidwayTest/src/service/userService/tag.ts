@@ -11,7 +11,7 @@ export class UserTagService {
     const { index, size, name, isEnable, orderBy, sortIdsArr } = options;
     let orderByName: string = "tag.createDate";
     let orderByMethod: "ASC" | "DESC" = "ASC";
-    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sortId"].includes(orderBy.name)) {
+    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sort"].includes(orderBy.name)) {
       orderByName = `tag.${orderBy.name}`;
       orderByMethod = orderBy.by;
     }

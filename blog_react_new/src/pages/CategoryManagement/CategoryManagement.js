@@ -23,7 +23,7 @@ class CategoryManagement extends React.Component {
     formItem: {},
     categoryOptions: [],
     filters: {},
-    EditorialForm :SortEditorialForm
+    EditorialForm: SortEditorialForm
   };
 
   componentDidMount = () => this.request({ index: 1, size: 10 });
@@ -50,13 +50,13 @@ class CategoryManagement extends React.Component {
     this.setState({ formItem: {} });
   };
 
-  toggleEditorialPanel = (flag) =>{
-    const {editorialPanelVisible,tabKey}=this.state;
-    if(editorialPanelVisible){
-      this.setState({EditorialForm: tabKey==="cate"?CateEditorialForm:SortEditorialForm });
+  toggleEditorialPanel = (flag) => {
+    const { editorialPanelVisible, tabKey } = this.state;
+    if (editorialPanelVisible) {
+      this.setState({ EditorialForm: tabKey === "cate" ? CateEditorialForm : SortEditorialForm });
     }
-    if(flag==="son"){
-      this.setState({EditorialForm:CateEditorialForm});
+    if (flag === "son") {
+      this.setState({ EditorialForm: CateEditorialForm });
     }
     this.setState({ editorialPanelVisible: !editorialPanelVisible });
   }
@@ -67,10 +67,10 @@ class CategoryManagement extends React.Component {
     const { isEnable: isEnableArr, sort } = filters;
     const isEnable = isEnableArr && isEnableArr.length > 0 ? parseInt(isEnableArr[0], 10) : undefined;
     const sortIdsArr = sort && sort.length > 0 ? sort.map(i => parseInt(i, 10)) : [];
+    console.log(filters)
     const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'DESC' : 'ASC' } : {};
-    this.setState(
-      oldState => ({ filters, conditionQuery: { ...oldState.conditionQuery, orderBy, isEnable, sortIdsArr } }),
-      () => this.request({ index, size })
+    this.setState(oldState => ({ filters, conditionQuery: { ...oldState.conditionQuery, orderBy, isEnable, sortIdsArr } }), () =>
+      this.request({ index, size })
     );
   };
 
@@ -89,7 +89,7 @@ class CategoryManagement extends React.Component {
 
   handleChangeTabs = tabKey => {
     this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
-    this.setState({ tabKey, selectedRowKeys: [], selectedItems: [], conditionQuery: {}, filters: {},EditorialForm:tabKey==="cate"?CateEditorialForm:SortEditorialForm });
+    this.setState({ tabKey, selectedRowKeys: [], selectedItems: [], conditionQuery: {}, filters: {}, EditorialForm: tabKey === "cate" ? CateEditorialForm : SortEditorialForm });
     if (this.inputSearch && this.inputSearch.input) this.inputSearch.input.state.value = '';
     if (tabKey === 'cate') {
       this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 10 });
@@ -100,7 +100,7 @@ class CategoryManagement extends React.Component {
   };
 
   handleItems = (action, item) => {
-    const { selectedItems,tabKey } = this.state;
+    const { selectedItems, tabKey } = this.state;
     const { articleManagement: { lang } } = this.props;
     const { url: netUrl, desc, actionTip } = action;
     let content = '';
@@ -129,13 +129,13 @@ class CategoryManagement extends React.Component {
     const onCancel = () => this.cleanSelectedItem();
     const onOk = () => {
       if (netUrl.includes('/form')) {
-        this.setState({ formItem: item,EditorialForm:netUrl.includes('/cate/form')?CateEditorialForm:SortEditorialForm },()=>
+        this.setState({ formItem: item, EditorialForm: netUrl.includes('/cate/form') ? CateEditorialForm : SortEditorialForm }, () =>
           this.toggleEditorialPanel()
         );
         return;
       }
-      const callback=tabKey==="sort"&&netUrl.includes("/cate")?()=>this.request():undefined;
-      this.request({ netUrl, items },callback);
+      const callback = tabKey === "sort" && netUrl.includes("/cate") ? () => this.request() : undefined;
+      this.request({ netUrl, items }, callback);
     };
     Modal.confirm({ title, content, okText, cancelText, onCancel, onOk });
   };
@@ -168,10 +168,11 @@ class CategoryManagement extends React.Component {
       { key: 'cate', tab: '二级分类' },
     ];
     const sortColumn = [
-      { title: '名称', dataIndex: 'name', sorter: true, width: '20%' },
+      { title: '名称', dataIndex: 'name', key: "name", sorter: true, width: '20%' },
       {
         title: '创建时间',
-        dataIndex: 'createDate',
+        dataIndex: "createDate",
+        key: "createDate",
         sorter: true,
         width: '20%',
         render: val => (
@@ -185,6 +186,7 @@ class CategoryManagement extends React.Component {
       {
         title: '修改时间',
         dataIndex: 'updateDate',
+        key: "updateDate",
         sorter: true,
         width: '20%',
         render: val => (
@@ -198,16 +200,18 @@ class CategoryManagement extends React.Component {
       {
         title: '状态',
         dataIndex: 'isEnable',
+        key: "isEnable",
         sorter: true,
         width: '20%',
         filters: [{ text: '不可用', value: 0 }, { text: '可用', value: 1 }],
         filterMultiple: false,
         filteredValue: filters.isEnable || null,
-        render: val => <Tag color="blue">{val === 1 ? '可用' : '不可用'}</Tag>,
+        render: val => <Tag color={val === 1 ? "blue" : "gray"}>{val === 1 ? '可用' : '不可用'}</Tag>,
       },
       {
         title: '操作',
         dataIndex: 'action',
+        key: "action",
         width: '20%',
         render: (_, item) => (
           <Fragment>
@@ -248,10 +252,11 @@ class CategoryManagement extends React.Component {
       },
     ];
     const cateColumn = [
-      { title: '名称', dataIndex: 'name', sorter: true, width: '15%' },
+      { title: '名称', dataIndex: 'name', key: "name", sorter: true, width: '15%' },
       {
         title: '所属',
         dataIndex: 'sort',
+        key: "sort",
         sorter: true,
         width: '15%',
         filters: categoryOptions.map(i => ({ text: i.name, value: i.id })),
@@ -261,6 +266,7 @@ class CategoryManagement extends React.Component {
       {
         title: '创建时间',
         dataIndex: 'createDate',
+        key: "createDate",
         sorter: true,
         width: '20%',
         render: val => (
@@ -274,6 +280,7 @@ class CategoryManagement extends React.Component {
       {
         title: '修改时间',
         dataIndex: 'updateDate',
+        key: "updateDate",
         sorter: true,
         width: '20%',
         render: val => (
@@ -287,16 +294,18 @@ class CategoryManagement extends React.Component {
       {
         title: '状态',
         dataIndex: 'isEnable',
+        key: "isEnable",
         width: '10%',
         sorter: true,
         filters: [{ text: '不可用', value: 0 }, { text: '可用', value: 1 }],
         filterMultiple: false,
         filteredValue: filters.isEnable || null,
-        render: val => <Tag color="blue">{val === 1 ? '可用' : '不可用'}</Tag>,
+        render: val => <Tag color={val === 1 ? "blue" : "gray"}>{val === 1 ? '可用' : '不可用'}</Tag>,
       },
       {
         title: '操作',
         dataIndex: 'action',
+        key: "action",
         width: '20%',
         render: (_, item) => (
           <Fragment>
@@ -339,7 +348,7 @@ class CategoryManagement extends React.Component {
 
     const expandedRowRender = (record) =>
       <Table
-        columns={cateColumn.filter(i => i.dataIndex !== "sort").map(i => ({ ...i, width: "20%",align:"right" }))}
+        columns={cateColumn.filter(i => i.dataIndex !== "sort").map(i => ({ ...i, width: "20%", align: "right" }))}
         rowKey={item => item.id}
         onChange={this.handleTableChange}
         loading={loading}
@@ -354,7 +363,7 @@ class CategoryManagement extends React.Component {
           <Row type="flex" align="middle" style={{ marginBottom: '15px' }}>
             <Col xs={12} sm={13} md={15} lg={16} xl={17}>
               <Button icon="plus" type="primary" size="small" onClick={this.toggleEditorialPanel}>新增&nbsp;</Button>
-              {tabKey==="sort"&& <Button icon="plus" type="primary" size="small" style={{  marginLeft: '20px' }} onClick={()=>this.toggleEditorialPanel("son")}>新增子分类&nbsp;</Button>}
+              {tabKey === "sort" && <Button icon="plus" type="primary" size="small" style={{ marginLeft: '20px' }} onClick={() => this.toggleEditorialPanel("son")}>新增子分类&nbsp;</Button>}
               {selectedItems.length > 0 && (
                 <Fragment>
                   <Badge count={selectedItems.length} title="已选项数">
@@ -366,7 +375,7 @@ class CategoryManagement extends React.Component {
                       onClick={this.cleanSelectedItem}
                       style={{ marginLeft: '16px' }}
                     >
-                    清空&nbsp;
+                      清空&nbsp;
                     </Button>
                   </Badge>
                   <Tooltip title="一键删除">

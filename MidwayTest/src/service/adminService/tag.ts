@@ -11,7 +11,7 @@ export class AdminTagService {
     const { index, size, name, isEnable, orderBy, sortIdsArr } = options;
     let orderByName: string = "tag.createDate";
     let orderByMethod: "ASC" | "DESC" = "ASC";
-    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sortId"].includes(orderBy.name)) {
+    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sort"].includes(orderBy.name)) {
       orderByName = `tag.${orderBy.name}`;
       orderByMethod = orderBy.by;
     }
@@ -41,4 +41,33 @@ export class AdminTagService {
     }
     return flag;
   }
+
+  async lock(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Tag)
+      .set({isEnable:0})
+      .where("id in (:...ids)",{ids})
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
+  async unlock(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Tag)
+      .set({isEnable:1})
+      .where("id in (:...ids)",{ids})
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
 }

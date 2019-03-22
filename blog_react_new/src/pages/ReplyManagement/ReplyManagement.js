@@ -28,7 +28,7 @@ import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
 const {
-  AdminReplyAPI: { LIST, DELETE, SHOW, UNSHOW, TOP, UNTOP },
+  AdminReplyAPI: { LIST, DELETE, APPROVE, DISAPPROVE, TOP, UNTOP },
   AdminSortAPI,
   AdminArticleAPI,
 } = UrlEnum;
@@ -257,9 +257,9 @@ class ReplyManagement extends React.Component {
     const isApproved = commonFilterArr.includes('isApproved') ? 1 : undefined;
     const isTop = commonFilterArr.includes('isTop') ? 1 : undefined;
     const isRoot = (() => {
-      if (commonFilterArr.includes('isParent') && commonFilterArr.includes('isSon ')) return undefined;
-      if (commonFilterArr.includes('isParent')) return 0;
-      return 1;
+      if (commonFilterArr.includes('isParent') && !commonFilterArr.includes('isSon')) return 1;
+      if (!commonFilterArr.includes('isParent')&& commonFilterArr.includes('isSon')) return 0;
+      return undefined;
     })();
     this.setState(
       oldState => ({
@@ -470,7 +470,7 @@ class ReplyManagement extends React.Component {
                       icon="eye-invisible"
                       size="small"
                       shape="circle"
-                      onClick={() => this.handleItems(UNSHOW)}
+                      onClick={() => this.handleItems(DISAPPROVE)}
                       style={{ color: 'green', marginLeft: '10px' }}
                     />
                   </Tooltip>
@@ -479,7 +479,7 @@ class ReplyManagement extends React.Component {
                       icon="eye"
                       size="small"
                       shape="circle"
-                      onClick={() => this.handleItems(SHOW)}
+                      onClick={() => this.handleItems(APPROVE)}
                       style={{ color: '#A020F0', marginLeft: '10px' }}
                     />
                   </Tooltip>
@@ -536,9 +536,9 @@ class ReplyManagement extends React.Component {
                   <Button
                     size="small"
                     type="primary"
-                    onClick={() => this.handleItems(item.isApproved ? UNSHOW : SHOW, item)}
+                    onClick={() => this.handleItems(item.isApproved ? DISAPPROVE : APPROVE, item)}
                   >
-                    {item.isApproved ? '隐藏' : '显示'}
+                    {item.isApproved ? '隐藏' : '过审'}
                   </Button>,
                   <Button
                     size="small"
@@ -567,7 +567,7 @@ class ReplyManagement extends React.Component {
                     <span>
                       《{item.article.title}》{item.parentId === 0 && <Tag color="cyan">父</Tag>}
                       {item.isTop === 1 && <Tag color="magenta">已置顶</Tag>}
-                      {item.isApproved === 1 && <Tag color="orange">已显示</Tag>}
+                      {item.isApproved===0 && <Tag color="orange">待审核</Tag>}
                     </span>
                   }
                   description={
@@ -581,7 +581,7 @@ class ReplyManagement extends React.Component {
                       <span style={{ color: 'black', fontWeight: 'bold' }}>回复&nbsp;</span>
                       <span style={{ color: '#A0522D', fontWeight: 'bold' }}>
                         <i>
-                          {item.parentId === 0 ? '该文' : `@${item.to.name}`}
+                          {item.parentId === 0 ? '该文' : `@${item.to.nickName}`}
                           &nbsp;
                         </i>
                         :
@@ -615,7 +615,7 @@ class ReplyManagement extends React.Component {
                   { label: '置顶', value: 'isTop' },
                   { label: '显示', value: 'isApproved' },
                   { label: '父评论', value: 'isParent' },
-                  { label: '子评论', value: 'isSon ' },
+                  { label: '子评论', value: 'isSon' },
                 ]}
                 value={temporaryCondition.commonFilterArr}
                 onChange={this.commonFilterConditionSelect}

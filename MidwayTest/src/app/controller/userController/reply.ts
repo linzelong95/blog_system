@@ -49,8 +49,12 @@ export class UserReplyController {
   @post("/delete")
   async delete(ctx): Promise<void> {
     const { items } = ctx.request.body;
-    const ids = items.map(i => i.id);
-    const flag = await this.userReplyService.delete(ids);
+    const idsArr = items.map(i => i.id);
+    const parentIdsArr = [];
+    items.forEach(i => {
+        if (i.parentId === 0) parentIdsArr.push(i.id);
+    });
+    const flag = await this.userReplyService.delete({idsArr,parentIdsArr});
     if (!flag) {
       ctx.status = 400;
       ctx.body = { message: `删除失败`, flag };

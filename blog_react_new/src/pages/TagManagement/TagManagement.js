@@ -69,7 +69,7 @@ class TagManagement extends React.Component {
     const { isEnable: isEnableArr, sort } = filters;
     const isEnable = isEnableArr && isEnableArr.length > 0 ? parseInt(isEnableArr[0], 10) : undefined;
     const sortIdsArr = sort && sort.length > 0 ? sort.map(i => parseInt(i, 10)) : [];
-    const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'desc' : 'asc' } : {};
+    const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'DESC' : 'ASC' } : {};
     this.setState(
       oldState => ({ filters, conditionQuery: { ...oldState.conditionQuery, orderBy, isEnable, sortIdsArr } }),
       () => this.request({ index, size })
@@ -150,19 +150,21 @@ class TagManagement extends React.Component {
     } = this.state;
 
     const tagColumn = [
-      { title: '名称', dataIndex: 'name', sorter: true, width: '15%' },
+      { title: '名称', dataIndex: 'name', key: "name", sorter: true, width: '15%' },
       {
         title: '所属',
         dataIndex: 'sort',
+        key: "sort",
         sorter: true,
         width: '15%',
         filters: categoryOptions.map(i => ({ text: i.name, value: i.id })),
-        filteredValue: filters.sort ? filters.sort.id : null,
+        filteredValue: filters.sort || null,
         render: (val) => <span>{val.name}</span>,
       },
       {
         title: '创建时间',
         dataIndex: 'createDate',
+        key: "createDate",
         sorter: true,
         width: '20%',
         render: val => (
@@ -176,6 +178,7 @@ class TagManagement extends React.Component {
       {
         title: '修改时间',
         dataIndex: 'updateDate',
+        key: "updateDate",
         sorter: true,
         width: '20%',
         render: val => (
@@ -189,16 +192,18 @@ class TagManagement extends React.Component {
       {
         title: '状态',
         dataIndex: 'isEnable',
+        key: "isEnable",
         width: '10%',
         sorter: true,
         filters: [{ text: '不可用', value: 0 }, { text: '可用', value: 1 }],
         filterMultiple: false,
         filteredValue: filters.isEnable || null,
-        render: val => <Tag color="blue">{val === 1 ? '可用' : '不可用'}</Tag>,
+        render: val => <Tag color={val === 1 ? "blue" : "gray"}>{val === 1 ? '可用' : '不可用'}</Tag>,
       },
       {
         title: '操作',
         dataIndex: 'action',
+        key: "action",
         width: '20%',
         render: (_, item) => (
           <Fragment>

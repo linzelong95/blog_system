@@ -59,8 +59,8 @@ export default {
           return;
         }
       }
-      yield put(routerRedux.replace(redirect || '/articlemanagement'));
-      // yield put(routerRedux.replace(redirect || '/index'));
+      // yield put(routerRedux.replace(redirect || '/articlemanagement'));
+      yield put(routerRedux.replace(redirect || '/index'));
     },
     // *login({ payload, autoLoginMark }, { call, put,select }) {
     //   const {lang}=yield select(models=>models.common);

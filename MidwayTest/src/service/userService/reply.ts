@@ -36,9 +36,15 @@ export class UserReplyService {
     return flag;
   }
 
-  async delete(ids: number[]) {
+  async delete(options) {
+    const {idsArr,parentIdsArr}=options;
     let flag = true;
-    const result = await this.repository.delete(ids);
+    const result = await this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(Reply)
+      .where(`id in (${idsArr.join(",")}) ${parentIdsArr.length>0?`or parentId in (${parentIdsArr.join(",")})`:""}`)
+      .execute();
     if (!result.raw.affectedRows) {
       flag = false;
     }

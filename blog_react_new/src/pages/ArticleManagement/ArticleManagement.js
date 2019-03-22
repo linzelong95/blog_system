@@ -18,7 +18,7 @@ const { AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT
 class ArticleManagement extends React.Component {
   state = {
     conditionQuery: { title: '', category: {}, orderBy: {} },
-    showSorterFlag: false, // 是否显示排序按钮
+    showSorterFlag: false, 
     selectedItems: [],
     allSelectedFlag: false,
     editorialPanelVisible: false,
@@ -157,7 +157,7 @@ class ArticleManagement extends React.Component {
   };
 
   readArticle = item => this.request({ netUrl: CONTENT.url, articleId: item.id }, (res) => {
-    this.setState({ formItem:{...item,content:res.list[0].content}, drawerVisible: true });
+    this.setState({ formItem: { ...item, content: res.list[0].content }, drawerVisible: true });
   });
 
   onCloseDrawer = () => {
@@ -271,9 +271,7 @@ class ArticleManagement extends React.Component {
                       type={
                         conditionQuery.orderBy &&
                           conditionQuery.orderBy.name === 'title' &&
-                          conditionQuery.orderBy.by === 'DESC'
-                          ? 'down'
-                          : 'up'
+                          conditionQuery.orderBy.by === 'DESC' ? 'down' : 'up'
                       }
                     />
                   </Tag>
@@ -288,9 +286,7 @@ class ArticleManagement extends React.Component {
                       type={
                         conditionQuery.orderBy &&
                           conditionQuery.orderBy.name === 'createDate' &&
-                          conditionQuery.orderBy.by === 'DESC'
-                          ? 'down'
-                          : 'up'
+                          conditionQuery.orderBy.by === 'DESC' ? 'down' : 'up'
                       }
                     />
                   </Tag>
@@ -305,9 +301,7 @@ class ArticleManagement extends React.Component {
                       type={
                         conditionQuery.orderBy &&
                           conditionQuery.orderBy.name === 'updateDate' &&
-                          conditionQuery.orderBy.by === 'DESC'
-                          ? 'down'
-                          : 'up'
+                          conditionQuery.orderBy.by === 'DESC' ? 'down' : 'up'
                       }
                     />
                   </Tag>
@@ -414,69 +408,23 @@ class ArticleManagement extends React.Component {
               current: index,
             }}
             renderItem={item => (
-              <List.Item>
+              <List.Item style={{ background: "lightgray" }}>
                 <Card
-                  title={
-                    <Tooltip title={item.title}>
-                      <span>{item.title}</span>
-                    </Tooltip>
-                  }
-                  extra={
-                    <Tag color="purple">
-                      <Icon type="tag" />
-                      &nbsp;
-                      {item.category.sort.name},{item.category.name}
-                    </Tag>
-                  }
+                  title={<Tooltip title={item.title}><span>{item.title}</span></Tooltip>}
+                  extra={<Tag color="purple"><Icon type="tag" />&nbsp;{item.category.sort.name},{item.category.name}</Tag>}
                   actions={[
-                    <Icon
-                      type="form"
-                      style={{ color: 'green', width: '60px' }}
-                      onClick={() => this.handleItems(FORM, item)}
-                    />,
-                    <Icon
-                      type="delete"
-                      style={{ color: 'red', width: '60px' }}
-                      onClick={() => this.handleItems(DELETE, item)}
-                    />,
-                    item.isTop === 0 ? (
-                      <Icon
-                        type="arrow-up"
-                        style={{ color: '#4169E1', width: '60px' }}
-                        onClick={() => this.handleItems(TOP, item)}
-                      />
-                    ) : (
-                        <Icon
-                          type="arrow-down"
-                          style={{ color: 'black', width: '60px' }}
-                          onClick={() => this.handleItems(UNTOP, item)}
-                        />
-                      ),
-                    item.isEnable === 1 ? (
-                      <Icon
-                        type="lock"
-                        style={{ color: '#4169E1', width: '60px' }}
-                        onClick={() => this.handleItems(LOCK, item)}
-                      />
-                    ) : (
-                        <Icon
-                          type="unlock"
-                          style={{ color: 'black', width: '60px' }}
-                          onClick={() => this.handleItems(UNLOCK, item)}
-                        />
-                      ),
-                    <Icon
-                      type="eye"
-                      style={{ color: '#A52A2A', width: '60px' }}
-                      onClick={() => this.readArticle(item)}
-                    />,
+                    <Icon type="form" style={{ color: 'green', width: '60px' }} onClick={() => this.handleItems(FORM, item)} />,
+                    <Icon type="delete" style={{ color: 'red', width: '60px' }} onClick={() => this.handleItems(DELETE, item)} />,
+                    item.isTop === 0
+                      ? <Icon type="arrow-up" style={{ color: '#4169E1', width: '60px' }} onClick={() => this.handleItems(TOP, item)} />
+                      : <Icon type="arrow-down" style={{ color: 'black', width: '60px' }} onClick={() => this.handleItems(UNTOP, item)} />,
+                    item.isEnable === 1
+                      ? <Icon type="lock" style={{ color: '#4169E1', width: '60px' }} onClick={() => this.handleItems(LOCK, item)} />
+                      : <Icon type="unlock" style={{ color: 'black', width: '60px' }} onClick={() => this.handleItems(UNLOCK, item)} />,
+                    <Icon type="eye" style={{ color: '#A52A2A', width: '60px' }} onClick={() => this.readArticle(item)} />,
                   ]}
                   className={styles.eachChild}
-                  style={{
-                    position: 'relative',
-                    overflow: 'hidden',
-                    background: selectedItems.some(i => i.id === item.id) && '#FFFFE0',
-                  }}
+                  style={{ position: 'relative', overflow: 'hidden', background: selectedItems.some(i => i.id === item.id) && '#FFFFE0' || !item.isEnable && "#fafafa" }}
                   onClick={() => this.toggleSelectOne(item)}
                 >
                   <div style={{ marginBottom: '5px', fontSize: '12px' }}>
@@ -526,12 +474,8 @@ class ArticleManagement extends React.Component {
             onCancel={() => this.filterRequest('exit')}
             footer={[
               <Button onClick={() => this.filterRequest('exit')}>不更改并退出</Button>,
-              <Button type="danger" onClick={() => this.filterRequest('clear')}>
-                清空
-              </Button>,
-              <Button type="primary" onClick={this.filterRequest}>
-                确定
-              </Button>,
+              <Button type="danger" onClick={() => this.filterRequest('clear')}>清空</Button>,
+              <Button type="primary" onClick={this.filterRequest}>确定</Button>,
             ]}
           >
             <Tree
@@ -560,7 +504,7 @@ class ArticleManagement extends React.Component {
               ))}
             </Tree>
           </Modal>
-          {drawerVisible && (
+          {drawerVisible &&
             <ShowArticle
               loading={loading}
               visible={drawerVisible}
@@ -568,8 +512,8 @@ class ArticleManagement extends React.Component {
               onClose={this.onCloseDrawer}
               request={this.request}
             />
-          )}
-          {editorialPanelVisible && (
+          }
+          {editorialPanelVisible &&
             <EditorialForm
               editorialPanelVisible={editorialPanelVisible}
               toggleEditorialPanel={this.toggleEditorialPanel}
@@ -577,7 +521,7 @@ class ArticleManagement extends React.Component {
               formItem={formItem}
               request={this.request}
             />
-          )}
+          }
         </Card>
       </GridContent>
     );

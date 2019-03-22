@@ -68,30 +68,31 @@ class HomePage extends React.Component {
 
   replySort = e => {
     const { id: name } = e.currentTarget;
-    const {conditionQuery: { orderBy = {} }} = this.state;
-    this.setState(oldState => ({conditionQuery: {...oldState.conditionQuery, orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' }}}),() => 
+    const { conditionQuery: { orderBy = {} } } = this.state;
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' } } }), () =>
       this.getReplyList()
     );
   };
 
   handleWriteReply = val => {
-    const { form, currentUser } = this.props;
-    const { item: { id: articleId } } = this.state;
+    const { form, currentUser: { id: currentUserId } } = this.props;
+    const { item: { id: articleId, user: { id: authorId } } } = this.state;
     if (val === 'reset') {
       form.resetFields();
       return;
     }
-    if (!currentUser.id) {
+    if (!currentUserId) {
       Modal.error({ title: '请登录后再评论！' });
       return;
     }
     form.validateFields((err, values) => {
       if (err) return;
       const { to } = values;
-      const fromId = currentUser.id;
+      const fromId = currentUserId;
       const netUrl = UserReplyAPI.INSERT.url;
       const toId = to.key;
-      this.request({ ...values, articleId, fromId, toId, netUrl }, () => {
+      const isApproved = authorId === currentUserId ? 1 : 0;
+      this.request({ ...values, isApproved, articleId, fromId, toId, netUrl }, () => {
         this.toggleReviewBox();
         this.getReplyList();
         message.success('评论成功，审核通过后将得以展示！');

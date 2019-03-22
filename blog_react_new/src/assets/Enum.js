@@ -835,8 +835,8 @@ const UrlEnum = {
     INSERT: { url: "/api/admin/reply/insert", desc: { zh_CN: "添加", en_US: "insert" } },
     TOP: { url: `/api/admin/reply/top`, desc: { zh_CN: "置顶", en_US: "up" }, actionTip: { zh_CN: "将被置顶，置顶后，在评论显示的状态下可取消置顶！", en_US: "will be stuck,and then can be downed when being shown!" } },
     UNTOP: { url: `/api/admin/reply/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
-    SHOW: { url: "/api/admin/reply/show", desc: { zh_CN: "显示", en_US: "show" }, actionTip: { zh_CN: "将被展示，展示后可重新隐藏！", en_US: "will be shown,and then can be hidden after being shown!" } },
-    UNSHOW: { url: "/api/admin/reply/unshow", desc: { zh_CN: "隐藏", en_US: "hide" }, actionTip: { zh_CN: "将被隐藏，隐藏后可重新设置显示！", en_US: "will be hidden,and then can be shown after being hidden!" } },
+    APPROVE: { url: "/api/admin/reply/approve", desc: { zh_CN: "过审", en_US: "approve" }, actionTip: { zh_CN: "将被审核通过！", en_US: "will be shown,and then can be hidden after being shown!" } },
+    DISAPPROVE: { url: "/api/admin/reply/disapprove", desc: { zh_CN: "拒审", en_US: "disapprove" }, actionTip: { zh_CN: "将被拒审！", en_US: "will be hidden,and then can be shown after being hidden!" } },
   },
   AdminCateAPI: {
     BASE_URL: "/admin/cate",

@@ -11,7 +11,7 @@ export class AdminCategoryService {
     const { index, size, name, isEnable, orderBy, sortIdsArr, id } = options;
     let orderByName: string = "category.createDate";
     let orderByMethod: "ASC" | "DESC" = "ASC";
-    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sortId"].includes(orderBy.name)) {
+    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sort"].includes(orderBy.name)) {
       orderByName = `category.${orderBy.name}`;
       orderByMethod = orderBy.by;
     }
@@ -42,4 +42,33 @@ export class AdminCategoryService {
     }
     return flag;
   }
+
+  async lock(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Category)
+      .set({isEnable:0})
+      .where("id in (:...ids)",{ids})
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
+  async unlock(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Category)
+      .set({isEnable:1})
+      .where("id in (:...ids)",{ids})
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
 }
