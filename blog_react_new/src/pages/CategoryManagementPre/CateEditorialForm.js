@@ -5,7 +5,7 @@ import EditorialFormConfig from '@/pages/EditorialFormConfig';
 
 const { getModalForm } = EditorialFormConfig;
 const {
-  AdminTagAPI: { INSERT, UPDATE },
+  AdminCateAPI: { INSERT, UPDATE },
   AdminSortAPI,
 } = UrlEnum;
 

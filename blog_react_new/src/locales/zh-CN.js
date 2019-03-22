@@ -288,7 +288,7 @@ export default {
   
   'menu.HomePage': '首页',
   'menu.ArticleManagement': '文章管理',
-  'menu.CommentManagement': '评论管理',
+  'menu.ReplyManagement': '评论管理',
   'menu.CategoryManagement': '分类管理',
   'menu.TagManagement': '标签管理',
   'menu.Center': '个人信息',

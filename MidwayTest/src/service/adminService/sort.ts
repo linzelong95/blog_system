@@ -9,7 +9,7 @@ export class AdminSortService {
   repository = getRepository(Sort);
 
   async list(options) {
-    const { index, size, name, isEnable, orderBy } = options;
+    const { index, size, name, isEnable, isCateEnable, orderBy } = options;
     let orderByName: string = "sort.createDate";
     let orderByMethod: "ASC" | "DESC" = "ASC";
     if (orderBy.name && ["name", "createDate", "updateDate", "isEnable"].includes(orderBy.name)) {
@@ -18,7 +18,7 @@ export class AdminSortService {
     }
     return await this.repository
       .createQueryBuilder("sort")
-      .leftJoinAndSelect("sort.categories","categories")
+      .leftJoinAndSelect("sort.categories", "categories", isCateEnable !== undefined ? `categories.isEnable=${isCateEnable}` : "1=1")
       .where("sort.name like :name", { name: `%${name}%` })
       .andWhere(isEnable !== undefined ? `sort.isEnable=${isEnable}` : "1=1")
       .orderBy(orderByName, orderByMethod)

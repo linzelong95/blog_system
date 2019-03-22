@@ -8,7 +8,7 @@ export class AdminCategoryService {
   repository = getRepository(Category);
 
   async list(options) {
-    const { index, size, name, isEnable, orderBy, sortIdsArr } = options;
+    const { index, size, name, isEnable, orderBy, sortIdsArr, id } = options;
     let orderByName: string = "category.createDate";
     let orderByMethod: "ASC" | "DESC" = "ASC";
     if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sortId"].includes(orderBy.name)) {
@@ -19,6 +19,7 @@ export class AdminCategoryService {
       .createQueryBuilder("category")
       .innerJoinAndSelect("category.sort", "sort", sortIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .where("category.name like :name", { name: `%${name}%` })
+      .andWhere(id ? `category.id=${id}` : "1=1")
       .andWhere(isEnable !== undefined ? `category.isEnable=${isEnable}` : "1=1")
       .orderBy(orderByName, orderByMethod)
       .skip(index - 1)

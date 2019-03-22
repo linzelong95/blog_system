@@ -35,7 +35,8 @@ export class AdminReplyController {
   @post("/insert")
   @post("/update")
   async save(ctx): Promise<void> {
-    const { id, reply, parentId = 0, fromId, toId, articleId, isApproved = 1 } = ctx.request.body;
+    const {user:{id:userId}}=ctx.state;
+    const { id, reply, parentId = 0, fromId=userId, toId=userId, articleId, isApproved = 1 } = ctx.request.body;
     const flag = await this.adminReplyService.save({ id, reply, parentId, from: { id: fromId }, to: { id: toId }, isApproved, article: { id: articleId } });
     const action = id ? "更新" : "添加";
     if (!flag) {

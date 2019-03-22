@@ -28,8 +28,8 @@ import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
 const {
-  AdminCommentAPI: { LIST, DELETE, SHOW, UNSHOW, TOP, UNTOP },
-  AdminCateAPI,
+  AdminReplyAPI: { LIST, DELETE, SHOW, UNSHOW, TOP, UNTOP },
+  AdminSortAPI,
   AdminArticleAPI,
 } = UrlEnum;
 
@@ -47,10 +47,10 @@ const initArticleContainer = {
   articleManagement,
   loading: loading.models.articleManagement,
 }))
-class CommentManagement extends React.Component {
+class ReplyManagement extends React.Component {
   state = {
     conditionQuery: { title: '', category: {}, orderBy: {} },
-    showSorterFlag: false, 
+    showSorterFlag: false,
     selectedItems: [],
     allSelectedFlag: false,
     editorialPanelVisible: false,
@@ -64,7 +64,7 @@ class CommentManagement extends React.Component {
 
   componentDidMount = () => this.request({ index: 1, size: 6 });
 
-  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+  componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
 
   componentWillReceiveProps = nextProps => {
     const { selectedItems } = this.state;
@@ -99,7 +99,7 @@ class CommentManagement extends React.Component {
   handleOnSearch = val =>
     this.setState(
       oldState => ({
-        conditionQuery: { ...oldState.conditionQuery, content: val.replace(/(^\s*)|(\s*$)/g, '') },
+        conditionQuery: { ...oldState.conditionQuery, reply: val.replace(/(^\s*)|(\s*$)/g, '') },
       }),
       () => this.request({ index: 1 })
     );
@@ -123,11 +123,11 @@ class CommentManagement extends React.Component {
     let content = '';
     let items = [];
     if (item) {
-      const { id, content: con, pid } = item;
-      items = [{ id, name: con, pid }];
+      const { id, reply, parentId } = item;
+      items = [{ id, name: reply, parentId }];
       content = `【${items[0].name}】${actionTip[lang]}`;
     } else {
-      items = selectedItems.map(v => ({ id: v.id, name: v.content, pid: v.pid }));
+      items = selectedItems.map(v => ({ id: v.id, name: v.reply, parentId: v.parentId }));
       content =
         lang === 'zh_CN'
           ? `注意：【${items[0].name}......】等多个所选项${actionTip[lang]}`
@@ -178,7 +178,7 @@ class CommentManagement extends React.Component {
       oldState => ({
         conditionQuery: {
           ...oldState.conditionQuery,
-          orderBy: { name, by: orderBy.by === 'asc' ? 'desc' : 'asc' },
+          orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' },
         },
       }),
       () => this.request({ index: 1 })
@@ -217,10 +217,8 @@ class CommentManagement extends React.Component {
     this.setState(oldState => ({ filterModalVisible: !oldState.filterModalVisible }));
 
   showFilterModal = () => {
-    const callback = res => this.setState({ categoryOptions: res.list });
-    this.request(
-      { netUrl: AdminCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true },
-      callback
+    this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 999 }, (res) =>
+      this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
     );
     this.toggleFilterModal();
   };
@@ -246,21 +244,21 @@ class CommentManagement extends React.Component {
       temporaryCondition: { filteredSortArr = [], articleArr = [], commonFilterArr = [] },
     } = this.state;
     filterflag = filteredSortArr.length || articleArr.length || commonFilterArr.length;
-    const category = { sort: [], child: [] };
+    const category = { sortIdsArr: [], cateIdsArr: [] };
     filteredSortArr.forEach(item => {
       const arr = item.split('-');
       if (arr.length === 1) {
-        category.sort.push(parseInt(arr.pop(), 10));
-      } else if (!category.sort.includes(parseInt(arr[0], 10))) {
-        category.child.push(parseInt(arr.pop(), 10));
+        category.sortIdsArr.push(parseInt(arr.pop(), 10));
+      } else if (!category.sortIdsArr.includes(parseInt(arr[0], 10))) {
+        category.cateIdsArr.push(parseInt(arr.pop(), 10));
       }
     });
-    const aids = articleArr.map(i => i.key);
-    const is_show = commonFilterArr.includes('is_show') ? 1 : undefined;
-    const is_top = commonFilterArr.includes('is_top') ? 1 : undefined;
-    const pid_field = (() => {
-      if (commonFilterArr.includes('pid_root') && commonFilterArr.includes('pid_son')) return -1;
-      if (commonFilterArr.includes('pid_root')) return 0;
+    const articleIdsArr = articleArr.map(i => i.key);
+    const isApproved = commonFilterArr.includes('isApproved') ? 1 : undefined;
+    const isTop = commonFilterArr.includes('isTop') ? 1 : undefined;
+    const isRoot = (() => {
+      if (commonFilterArr.includes('isParent') && commonFilterArr.includes('isSon ')) return undefined;
+      if (commonFilterArr.includes('isParent')) return 0;
       return 1;
     })();
     this.setState(
@@ -268,10 +266,10 @@ class CommentManagement extends React.Component {
         conditionQuery: {
           ...oldState.conditionQuery,
           category,
-          aids,
-          is_show,
-          is_top,
-          pid_field,
+          articleIdsArr,
+          isApproved,
+          isTop,
+          isRoot,
           filteredSortArr,
           articleArr,
           commonFilterArr,
@@ -383,8 +381,8 @@ class CommentManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'create_time' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'create_time' &&
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -392,7 +390,7 @@ class CommentManagement extends React.Component {
                   </Tag>
                   <Tag
                     color="magenta"
-                    id="is_show"
+                    id="isApproved"
                     style={{ marginLeft: '5px' }}
                     onClick={this.sort}
                   >
@@ -400,8 +398,8 @@ class CommentManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'is_show' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'isApproved' &&
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -409,7 +407,7 @@ class CommentManagement extends React.Component {
                   </Tag>
                   <Tag
                     color="magenta"
-                    id="is_top"
+                    id="isTop"
                     style={{ marginLeft: '5px' }}
                     onClick={this.sort}
                   >
@@ -417,8 +415,8 @@ class CommentManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                        conditionQuery.orderBy.name === 'is_top' &&
-                        conditionQuery.orderBy.by === 'desc'
+                          conditionQuery.orderBy.name === 'isTop' &&
+                          conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
                       }
@@ -538,16 +536,16 @@ class CommentManagement extends React.Component {
                   <Button
                     size="small"
                     type="primary"
-                    onClick={() => this.handleItems(item.is_show ? UNSHOW : SHOW, item)}
+                    onClick={() => this.handleItems(item.isApproved ? UNSHOW : SHOW, item)}
                   >
-                    {item.is_show ? '隐藏' : '显示'}
+                    {item.isApproved ? '隐藏' : '显示'}
                   </Button>,
                   <Button
                     size="small"
                     type="primary"
-                    onClick={() => this.handleItems(item.is_top ? UNTOP : TOP, item)}
+                    onClick={() => this.handleItems(item.isTop ? UNTOP : TOP, item)}
                   >
-                    {item.is_top ? '取置' : '置顶'}
+                    {item.isTop ? '取置' : '置顶'}
                   </Button>,
                 ]}
               >
@@ -567,29 +565,29 @@ class CommentManagement extends React.Component {
                   }
                   title={
                     <span>
-                      《{item.title}》{item.pid === 0 && <Tag color="cyan">父</Tag>}
-                      {item.is_top === 1 && <Tag color="magenta">已置顶</Tag>}
-                      {item.is_show === 1 && <Tag color="orange">已显示</Tag>}
+                      《{item.article.title}》{item.parentId === 0 && <Tag color="cyan">父</Tag>}
+                      {item.isTop === 1 && <Tag color="magenta">已置顶</Tag>}
+                      {item.isApproved === 1 && <Tag color="orange">已显示</Tag>}
                     </span>
                   }
                   description={
                     <span>
                       <span style={{ color: 'green', fontWeight: 'bold' }}>
                         <i>
-                          {item.from_name}
+                          {item.from.nickName}
                           &nbsp;
                         </i>
                       </span>
                       <span style={{ color: 'black', fontWeight: 'bold' }}>回复&nbsp;</span>
                       <span style={{ color: '#A0522D', fontWeight: 'bold' }}>
                         <i>
-                          {item.pid === 0 ? '该文' : `@${item.to_name}`}
+                          {item.parentId === 0 ? '该文' : `@${item.to.name}`}
                           &nbsp;
                         </i>
                         :
                       </span>
                       &nbsp;
-                      {`“${item.content}”`}
+                      {`“${item.reply}”`}
                     </span>
                   }
                 />
@@ -614,10 +612,10 @@ class CommentManagement extends React.Component {
             <div style={{ textAlign: 'center' }}>
               <Checkbox.Group
                 options={[
-                  { label: '置顶', value: 'is_top' },
-                  { label: '显示', value: 'is_show' },
-                  { label: '父评论', value: 'pid_root' },
-                  { label: '子评论', value: 'pid_son' },
+                  { label: '置顶', value: 'isTop' },
+                  { label: '显示', value: 'isApproved' },
+                  { label: '父评论', value: 'isParent' },
+                  { label: '子评论', value: 'isSon ' },
                 ]}
                 value={temporaryCondition.commonFilterArr}
                 onChange={this.commonFilterConditionSelect}
@@ -669,14 +667,14 @@ class CommentManagement extends React.Component {
                     title={item.name}
                     key={`${item.id}`}
                     selectable={false}
-                    disabled={item.disabled}
+                    disabled={item.isEnable === 0}
                   >
-                    {item.children.map(i => (
+                    {item.categories.map(i => (
                       <Tree.TreeNode
                         title={i.name}
                         key={`${item.id}-${i.id}`}
                         selectable={false}
-                        disabled={item.disabled === 0 ? i.disabled : true}
+                        disabled={item.isEnable === 1 ? i.isEnable === 0 : true}
                       />
                     ))}
                   </Tree.TreeNode>
@@ -742,4 +740,4 @@ class CommentManagement extends React.Component {
     );
   }
 }
-export default CommentManagement;
+export default ReplyManagement;

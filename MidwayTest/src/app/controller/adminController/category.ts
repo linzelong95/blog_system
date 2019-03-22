@@ -9,16 +9,16 @@ export class AdminCategoryController {
 
   @post("/list")
   async list(ctx): Promise<void> {
-    const { conditionQuery: { isEnable, name = "", orderBy = {}, sortIdsArr = [] }, index = 1, size = 10 } = ctx.request.body;
-    const [list, total] = await this.adminCategoryService.list({ isEnable, name, orderBy, index, size, sortIdsArr });
+    const { conditionQuery: { isEnable, name = "", orderBy = {}, sortIdsArr = [], id }, index = 1, size = 10 } = ctx.request.body;
+    const [list, total] = await this.adminCategoryService.list({ isEnable, name, orderBy, index, size, sortIdsArr, id });
     ctx.body = { list, total };
   }
 
   @post("/insert")
   @post("/update")
   async save(ctx): Promise<void> {
-    const { id, name, isEnable, sort } = ctx.request.body;
-    const flag = await this.adminCategoryService.save({ id, name, isEnable, sort });
+    const { id, name, isEnable, sortId } = ctx.request.body;
+    const flag = await this.adminCategoryService.save({ id, name, isEnable, sort: { id: sortId } });
     const action = id ? "更新" : "添加";
     if (!flag) {
       ctx.status = 400;

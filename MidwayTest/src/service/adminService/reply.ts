@@ -17,6 +17,9 @@ export class AdminReplyService {
     }
     return await this.repository
       .createQueryBuilder("reply")
+      .innerJoinAndSelect("reply.article","article")
+      .innerJoin("article.category","category")
+      .innerJoin("category.sort","sort")
       .leftJoinAndSelect("reply.from", "fromUser")
       .leftJoinAndSelect("reply.to", "toUser")
       .where("reply.reply like :reply", { reply: `%${reply}%` })

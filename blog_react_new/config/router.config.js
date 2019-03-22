@@ -52,11 +52,11 @@ export default [
         component: './ArticleManagement/ArticleManagement',
       },
       {
-        path: '/commentmanagement',
+        path: '/replymanagement',
         icon: 'idcard',
-        name: 'CommentManagement',
+        name: 'ReplyManagement',
         authority: ['admin'],
-        component: './CommentManagement/CommentManagement',
+        component: './ReplyManagement/ReplyManagement',
       },
       {
         path: '/categorymanagement',

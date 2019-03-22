@@ -8,7 +8,7 @@ export class UserReplyService {
   repository = getRepository(Reply);
 
   async list(options) {
-    const { reply, orderBy, index, size, articleIdsArr, isTop, isApproved, isRoot, category: { sortIdsArr = [], cateIdsArr = [] } } = options;
+    const { reply, orderBy, index, size, articleIdsArr, isTop, isApproved } = options;
     let orderByName: string = "reply.isTop";
     let orderByMethod: "ASC" | "DESC" = "DESC";
     if (orderBy.name && ["createDate", "isApproved", "isTop"].includes(orderBy.name)) {
@@ -23,10 +23,6 @@ export class UserReplyService {
       .andWhere(articleIdsArr.length? `reply.article in (${articleIdsArr.join(",")})` : "1=1")
       .andWhere(isApproved !== undefined ? `reply.isApproved=${isApproved}` : "1=1")
       .andWhere(isTop !== undefined ? `reply.isTop=${isTop}` : "1=1")
-      .andWhere(isRoot !== undefined ? isRoot ? "reply.parentId>0" : "reply.parentId=0" : "1=1")
-      .andWhere(sortIdsArr.length && !cateIdsArr.length? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
-      .andWhere(!sortIdsArr.length && cateIdsArr.length? `category.id in (${cateIdsArr.join(",")})` : "1=1")
-      .andWhere(sortIdsArr.length && cateIdsArr.length? `sort.id in (${sortIdsArr.join(",")}) or category.id in (${cateIdsArr.join(",")})` : "1=1")
       .orderBy(orderByName, orderByMethod)
       .skip(index - 1)
       .take(size)

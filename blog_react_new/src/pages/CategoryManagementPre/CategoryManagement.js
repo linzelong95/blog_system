@@ -23,25 +23,25 @@ class CategoryManagement extends React.Component {
     formItem: {},
     categoryOptions: [],
     filters: {},
-    EditorialForm :SortEditorialForm
   };
 
   componentDidMount = () => this.request({ index: 1, size: 10 });
 
-  componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+  componentWillUnmount=()=>this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
 
   request = (params, callback) => {
     const { conditionQuery, tabKey } = this.state;
-    const netUrl = tabKey === 'cate' ? AdminCateAPI.LIST.url : AdminSortAPI.LIST.url;
+    const netUrl = tabKey === 'sort' ? AdminSortAPI.LIST.url : AdminCateAPI.LIST.url;
     const payload = { netUrl, conditionQuery, ...params };
     this.props.dispatch({ type: 'articleManagement/handleArticles', payload, callback });
     if (payload.netUrl !== netUrl) this.cleanSelectedItem();
   };
 
-  handleShowALL = () => this.setState({ conditionQuery: {}, filters: {} }, () => {
-    this.request({ index: 1 });
-    this.inputSearch.input.state.value = '';
-  });
+  handleShowALL = () =>
+    this.setState({ conditionQuery: {}, filters: {} }, () => {
+      this.request({ index: 1 });
+      this.inputSearch.input.state.value = '';
+    });
 
   cleanSelectedItem = () => this.setState({ selectedRowKeys: [], selectedItems: [] });
 
@@ -50,16 +50,8 @@ class CategoryManagement extends React.Component {
     this.setState({ formItem: {} });
   };
 
-  toggleEditorialPanel = (flag) =>{
-    const {editorialPanelVisible,tabKey}=this.state;
-    if(editorialPanelVisible){
-      this.setState({EditorialForm: tabKey==="cate"?CateEditorialForm:SortEditorialForm });
-    }
-    if(flag==="son"){
-      this.setState({EditorialForm:CateEditorialForm});
-    }
-    this.setState({ editorialPanelVisible: !editorialPanelVisible });
-  }
+  toggleEditorialPanel = () =>
+    this.setState(oldState => ({ editorialPanelVisible: !oldState.editorialPanelVisible }));
 
   handleTableChange = (pagination, filters, sorter) => {
     const { current: index, pageSize: size } = pagination;
@@ -67,7 +59,7 @@ class CategoryManagement extends React.Component {
     const { isEnable: isEnableArr, sort } = filters;
     const isEnable = isEnableArr && isEnableArr.length > 0 ? parseInt(isEnableArr[0], 10) : undefined;
     const sortIdsArr = sort && sort.length > 0 ? sort.map(i => parseInt(i, 10)) : [];
-    const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'DESC' : 'ASC' } : {};
+    const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'desc' : 'asc' } : {};
     this.setState(
       oldState => ({ filters, conditionQuery: { ...oldState.conditionQuery, orderBy, isEnable, sortIdsArr } }),
       () => this.request({ index, size })
@@ -89,19 +81,40 @@ class CategoryManagement extends React.Component {
 
   handleChangeTabs = tabKey => {
     this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
-    this.setState({ tabKey, selectedRowKeys: [], selectedItems: [], conditionQuery: {}, filters: {},EditorialForm:tabKey==="cate"?CateEditorialForm:SortEditorialForm });
+    this.setState({
+      tabKey,
+      selectedRowKeys: [],
+      selectedItems: [],
+      conditionQuery: {},
+      filters: {},
+    });
     if (this.inputSearch && this.inputSearch.input) this.inputSearch.input.state.value = '';
-    if (tabKey === 'cate') {
-      this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 10 });
-      this.request({ netUrl: AdminSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, res => this.setState({ categoryOptions: res.list }));
-    } else {
+    if (tabKey === 'sort') {
       this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 10 });
+    } else if (tabKey === 'cate') {
+      this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 10 });
+      this.request({ netUrl: AdminSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, res =>
+        // 是否需要disabled字段，待确定
+        this.setState({
+          categoryOptions: res.list.map(i => {
+            const newSort = { ...i };
+            newSort.disabled = !i.isEnable;
+            return newSort;
+          })
+        })
+      );
+    } else if (tabKey === 'all') {
+      this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 100, allCateAndSort: true });
+    } else {
+      this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 100, prettyFormat: true });
     }
   };
 
   handleItems = (action, item) => {
-    const { selectedItems,tabKey } = this.state;
-    const { articleManagement: { lang } } = this.props;
+    const { selectedItems } = this.state;
+    const {
+      articleManagement: { lang },
+    } = this.props;
     const { url: netUrl, desc, actionTip } = action;
     let content = '';
     let items = [];
@@ -129,13 +142,11 @@ class CategoryManagement extends React.Component {
     const onCancel = () => this.cleanSelectedItem();
     const onOk = () => {
       if (netUrl.includes('/form')) {
-        this.setState({ formItem: item,EditorialForm:netUrl.includes('/cate/form')?CateEditorialForm:SortEditorialForm },()=>
-          this.toggleEditorialPanel()
-        );
+        this.setState({ formItem: item });
+        this.toggleEditorialPanel();
         return;
       }
-      const callback=tabKey==="sort"&&netUrl.includes("/cate")?()=>this.request():undefined;
-      this.request({ netUrl, items },callback);
+      this.request({ netUrl, items });
     };
     Modal.confirm({ title, content, okText, cancelText, onCancel, onOk });
   };
@@ -147,6 +158,22 @@ class CategoryManagement extends React.Component {
       }),
       () => this.request({ index: 1 })
     );
+
+  getDataSource = data => {
+    const { tabKey } = this.state;
+    const dataSource = [];
+    data.forEach(i => {
+      const { children } = i;
+      const item = { ...i };
+      delete item.children;
+      if (children && children.length > 0) {
+        const childs = i.children ? i.children.map(c => ({ ...c, id: `${i.id}-${c.id}` })) : [];
+        item.children = tabKey === 'using' ? childs.filter(cc => cc.isUsed) : childs;
+      }
+      dataSource.push(item);
+    });
+    return dataSource;
+  };
 
   render() {
     const {
@@ -161,11 +188,13 @@ class CategoryManagement extends React.Component {
       filters,
       selectedRowKeys,
       tabKey,
-      EditorialForm
     } = this.state;
+    const EditorialForm = tabKey === 'sort' ? SortEditorialForm : CateEditorialForm;
     const tabList = [
-      { key: 'sort', tab: '所有分类' },
+      { key: 'sort', tab: '一级分类' },
       { key: 'cate', tab: '二级分类' },
+      { key: 'all', tab: '所有分类【览】' },
+      { key: 'using', tab: '在用分类 【览】' },
     ];
     const sortColumn = [
       { title: '名称', dataIndex: 'name', sorter: true, width: '20%' },
@@ -256,7 +285,7 @@ class CategoryManagement extends React.Component {
         width: '15%',
         filters: categoryOptions.map(i => ({ text: i.name, value: i.id })),
         filteredValue: filters.sort || null,
-        render: (val) => <span>{val.name}</span>,
+        render: (_, item) => <span>{item.sort_name}</span>,
       },
       {
         title: '创建时间',
@@ -336,111 +365,125 @@ class CategoryManagement extends React.Component {
         ),
       },
     ];
-
-    const expandedRowRender = (record) =>
-      <Table
-        columns={cateColumn.filter(i => i.dataIndex !== "sort").map(i => ({ ...i, width: "20%",align:"right" }))}
-        rowKey={item => item.id}
-        onChange={this.handleTableChange}
-        loading={loading}
-        dataSource={record.categories}
-        pagination={false}
-        showHeader={false}
-      />
+    const cateAndSortColumn = [
+      { title: '名称', dataIndex: 'name', width: '30%' },
+      {
+        title: '可用状态',
+        dataIndex: 'isEnable',
+        width: '30%',
+        render: val => <Tag color="blue">{val === 1 ? '可用' : '不可用'}</Tag>,
+      },
+      {
+        title: '使用状态',
+        dataIndex: 'isUsed',
+        width: '30%',
+        filteredValue: filters.disabled || null,
+        render: val => <Tag color="blue">{val === 0 ? '暂未使用' : '正在使用'}</Tag>,
+      },
+    ];
 
     return (
       <PageHeaderLayout tabList={tabList} onTabChange={this.handleChangeTabs}>
         <Card>
-          <Row type="flex" align="middle" style={{ marginBottom: '15px' }}>
-            <Col xs={12} sm={13} md={15} lg={16} xl={17}>
-              <Button icon="plus" type="primary" size="small" onClick={this.toggleEditorialPanel}>新增&nbsp;</Button>
-              {tabKey==="sort"&& <Button icon="plus" type="primary" size="small" style={{  marginLeft: '20px' }} onClick={()=>this.toggleEditorialPanel("son")}>新增子分类&nbsp;</Button>}
-              {selectedItems.length > 0 && (
-                <Fragment>
-                  <Badge count={selectedItems.length} title="已选项数">
-                    &nbsp;
-                    <Button
-                      icon="reload"
-                      type="primary"
-                      size="small"
-                      onClick={this.cleanSelectedItem}
-                      style={{ marginLeft: '16px' }}
-                    >
-                    清空&nbsp;
-                    </Button>
-                  </Badge>
-                  <Tooltip title="一键删除">
-                    <Button
-                      icon="delete"
-                      size="small"
-                      shape="circle"
-                      onClick={() =>
-                        this.handleItems(
-                          tabKey === 'sort' ? AdminSortAPI.DELETE : AdminCateAPI.DELETE
-                        )
-                      }
-                      style={{ color: 'red', marginLeft: '20px' }}
-                    />
-                  </Tooltip>
-                  <Tooltip title="一键解锁">
-                    <Button
-                      icon="unlock"
-                      size="small"
-                      shape="circle"
-                      onClick={() =>
-                        this.handleItems(
-                          tabKey === 'sort' ? AdminSortAPI.UNLOCK : AdminCateAPI.UNLOCK
-                        )
-                      }
-                      style={{ color: 'green', marginLeft: '10px' }}
-                    />
-                  </Tooltip>
-                  <Tooltip title="一键锁定">
-                    <Button
-                      icon="lock"
-                      size="small"
-                      shape="circle"
-                      onClick={() =>
-                        this.handleItems(
-                          tabKey === 'sort' ? AdminSortAPI.LOCK : AdminCateAPI.LOCK
-                        )
-                      }
-                      style={{ color: '#A020F0', marginLeft: '10px' }}
-                    />
-                  </Tooltip>
-                </Fragment>
-              )}
-            </Col>
-            <Col xs={2} sm={2} md={1} lg={1} xl={1}>
-              <Tooltip title="默认展示">
-                <Button
-                  type="primary"
-                  icon="home"
-                  shape="circle"
-                  size="small"
-                  onClick={this.handleShowALL}
+          {(tabKey === 'sort' || tabKey === 'cate') && (
+            <Row type="flex" align="middle" style={{ marginBottom: '15px' }}>
+              <Col xs={12} sm={13} md={15} lg={16} xl={17}>
+                <Button icon="plus" type="primary" size="small" onClick={this.toggleEditorialPanel}>
+                  新增&nbsp;
+                </Button>
+                {selectedItems.length > 0 && (
+                  <Fragment>
+                    <Badge count={selectedItems.length} title="已选项数">
+                      &nbsp;
+                      <Button
+                        icon="reload"
+                        type="primary"
+                        size="small"
+                        onClick={this.cleanSelectedItem}
+                        style={{ marginLeft: '16px' }}
+                      >
+                        清空&nbsp;
+                      </Button>
+                    </Badge>
+                    <Tooltip title="一键删除">
+                      <Button
+                        icon="delete"
+                        size="small"
+                        shape="circle"
+                        onClick={() =>
+                          this.handleItems(
+                            tabKey === 'sort' ? AdminSortAPI.DELETE : AdminCateAPI.DELETE
+                          )
+                        }
+                        style={{ color: 'red', marginLeft: '20px' }}
+                      />
+                    </Tooltip>
+                    <Tooltip title="一键解锁">
+                      <Button
+                        icon="unlock"
+                        size="small"
+                        shape="circle"
+                        onClick={() =>
+                          this.handleItems(
+                            tabKey === 'sort' ? AdminSortAPI.UNLOCK : AdminCateAPI.UNLOCK
+                          )
+                        }
+                        style={{ color: 'green', marginLeft: '10px' }}
+                      />
+                    </Tooltip>
+                    <Tooltip title="一键锁定">
+                      <Button
+                        icon="lock"
+                        size="small"
+                        shape="circle"
+                        onClick={() =>
+                          this.handleItems(
+                            tabKey === 'sort' ? AdminSortAPI.LOCK : AdminCateAPI.LOCK
+                          )
+                        }
+                        style={{ color: '#A020F0', marginLeft: '10px' }}
+                      />
+                    </Tooltip>
+                  </Fragment>
+                )}
+              </Col>
+              <Col xs={2} sm={2} md={1} lg={1} xl={1}>
+                <Tooltip title="默认展示">
+                  <Button
+                    type="primary"
+                    icon="home"
+                    shape="circle"
+                    size="small"
+                    onClick={this.handleShowALL}
+                  />
+                </Tooltip>
+              </Col>
+              <Col xs={10} sm={9} md={8} lg={7} xl={6}>
+                <Input.Search
+                  placeholder="请输入名称"
+                  onSearch={this.handleOnSearch}
+                  enterButton
+                  allowClear
+                  ref={inputSearch => {
+                    this.inputSearch = inputSearch;
+                  }}
                 />
-              </Tooltip>
-            </Col>
-            <Col xs={10} sm={9} md={8} lg={7} xl={6}>
-              <Input.Search
-                placeholder="请输入名称"
-                onSearch={this.handleOnSearch}
-                enterButton
-                allowClear
-                ref={inputSearch => {
-                  this.inputSearch = inputSearch;
-                }}
-              />
-            </Col>
-          </Row>
+              </Col>
+            </Row>
+          )}
           <Table
-            columns={tabKey === 'cate' ? cateColumn : sortColumn}
+            columns={
+              tabKey === 'sort' ? sortColumn : tabKey === 'cate' ? cateColumn : cateAndSortColumn
+            }
             rowKey={item => item.id}
             onChange={this.handleTableChange}
-            rowSelection={{ selectedRowKeys, onChange: this.handleSelectRows }}
+            rowSelection={
+              tabKey === 'all' || tabKey === 'using'
+                ? undefined
+                : { selectedRowKeys, onChange: this.handleSelectRows }
+            }
             loading={loading}
-            dataSource={list}
+            dataSource={this.getDataSource(list)}
             pagination={{
               showQuickJumper: true,
               showSizeChanger: true,
@@ -448,7 +491,6 @@ class CategoryManagement extends React.Component {
               total,
               pageSize: size,
             }}
-            expandedRowRender={tabKey === "sort" ? (record) => expandedRowRender(record) : undefined}
           />
           {editorialPanelVisible && (
             <EditorialForm
@@ -457,7 +499,6 @@ class CategoryManagement extends React.Component {
               cleanFormItem={this.cleanFormItem}
               formItem={formItem}
               request={this.request}
-              tabKey={tabKey}
             />
           )}
         </Card>

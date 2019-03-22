@@ -5,7 +5,7 @@ import EditorialFormConfig from '@/pages/EditorialFormConfig';
 
 const { getModalForm } = EditorialFormConfig;
 const {
-  AdminCommentAPI: { INSERT },
+  AdminReplyAPI: { INSERT },
   AdminArticleAPI,
 } = UrlEnum;
 const initArticleContainer = {
@@ -45,9 +45,9 @@ class EditorialForm extends React.PureComponent {
     }
     form.validateFields((err, values) => {
       if (err) return;
-      const { aid } = values;
+      const { article } = values;
       const netUrl = INSERT.url;
-      request({ ...values, id, netUrl, aid: aid.key });
+      request({ ...values, id, netUrl, articleId: article.key });
       toggleEditorialPanel();
       cleanFormItem();
       form.resetFields();
@@ -93,7 +93,7 @@ class EditorialForm extends React.PureComponent {
     const { articlecontainer } = this.state;
     const modalFormConfig = [
       {
-        fieldId: 'aid',
+        fieldId: 'article',
         label: '文章',
         rules: [{ required: true, message: '文章是必须的' }],
         fieldType: 'select',
@@ -104,7 +104,7 @@ class EditorialForm extends React.PureComponent {
         formItemLayout: { labelCol: { span: 6 } },
       },
       {
-        fieldId: 'is_top',
+        fieldId: 'isTop',
         label: '是否置顶',
         rules: [{ required: true, message: '该项是必须的' }],
         fieldType: 'select',
@@ -116,7 +116,7 @@ class EditorialForm extends React.PureComponent {
         formItemLayout: { labelCol: { span: 6 } },
       },
       {
-        fieldId: 'content',
+        fieldId: 'reply',
         label: '评论内容',
         rules: [{ required: true, message: '评论内容是必须的' }],
         fieldProps: { style: { width: '86%' }, autosize: true },
