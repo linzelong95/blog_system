@@ -37,7 +37,6 @@ export class AccountController {
     const user = await getRepository(User).create({
       account,
       password,
-      roleName: "user",
       nickName: account
     });
     await getRepository(User).save(user);

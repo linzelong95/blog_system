@@ -8,7 +8,7 @@ export class Tag {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ unique: true })
     name: string;
 
     @Column({ default: 1 })
@@ -23,7 +23,7 @@ export class Tag {
     @UpdateDateColumn()
     updateDate: string;
 
-    @ManyToOne(type => Sort, sort => sort.tags,{ onDelete: "CASCADE", onUpdate: "CASCADE" })
+    @ManyToOne(type => Sort, sort => sort.tags, { onDelete: "CASCADE", onUpdate: "CASCADE" })
     sort: Sort;
 
     @ManyToMany(type => Article, article => article.tags)
