@@ -560,21 +560,13 @@ class ReplyManagement extends React.Component {
                   description={
                     <span>
                       <span style={{ color: 'green', fontWeight: 'bold' }}>
-                        <i>
-                          {item.from.nickName}
-                          &nbsp;
-                        </i>
+                        <i>{item.from.nickName}&nbsp;</i>
                       </span>
-                      <span style={{ color: 'black', fontWeight: 'bold' }}>回复&nbsp;</span>
+                      回复&nbsp;
                       <span style={{ color: '#A0522D', fontWeight: 'bold' }}>
-                        <i>
-                          {item.parentId === 0 ? '该文' : `@${item.to.nickName}`}
-                          &nbsp;
-                        </i>
-                        :
+                        <i>{item.parentId === 0 ? '该文' : item.to.nickName}&nbsp;</i>:
                       </span>
-                      &nbsp;
-                      {`“${item.reply}”`}
+                      &nbsp;<b style={{ color: "black" }}>{`“${item.reply}”`}</b>
                     </span>
                   }
                 />
