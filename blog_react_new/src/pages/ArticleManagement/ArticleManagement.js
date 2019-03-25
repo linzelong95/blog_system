@@ -5,6 +5,7 @@ import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
 import EditorialForm from './EditorialForm';
 import ShowArticle from './ShowArticle';
+import { imgPrefix } from '@/defaultSettings';
 import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
@@ -394,7 +395,7 @@ class ArticleManagement extends React.Component {
           </Row>
           <List
             loading={loading}
-            grid={{ gutter: 16, sm: 2, md: 3, xl: 3, xxl: 3 }}
+            grid={{ gutter: 16, sm: 1, md: 2, xl: 3, xxl: 3 }}
             dataSource={list}
             pagination={{
               showQuickJumper: true,
@@ -408,10 +409,9 @@ class ArticleManagement extends React.Component {
               current: index,
             }}
             renderItem={item => (
-              <List.Item style={{ background: "lightgray" }}>
+              <List.Item style={{ background: "lightgray",borderRadius:"5px" }}>
                 <Card
-                  title={<Tooltip title={item.title}><span>{item.title}</span></Tooltip>}
-                  extra={<Tag color="purple"><Icon type="tag" />&nbsp;{item.category.sort.name},{item.category.name}</Tag>}
+                  cover={<img alt="example" src={`${imgPrefix}${item.imageUrl}`||"https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"} />}
                   actions={[
                     <Icon type="form" style={{ color: 'green', width: '60px' }} onClick={() => this.handleItems(FORM, item)} />,
                     <Icon type="delete" style={{ color: 'red', width: '60px' }} onClick={() => this.handleItems(DELETE, item)} />,
@@ -427,27 +427,34 @@ class ArticleManagement extends React.Component {
                   style={{ position: 'relative', overflow: 'hidden', background: selectedItems.some(i => i.id === item.id) && '#FFFFE0' || !item.isEnable && "#fafafa" }}
                   onClick={() => this.toggleSelectOne(item)}
                 >
-                  <div style={{ marginBottom: '5px', fontSize: '12px' }}>
-                    <Ellipsis lines={1}>
-                      标签：{item.tags && item.tags.length > 0 ? item.tags.map(i => <Tag color="volcano">{i.name}</Tag>) : <Tag color="volcano">无</Tag>}
-                    </Ellipsis>
-                  </div>
-                  <Ellipsis lines={2} style={{ height: '40px' }}>
-                    摘要：
-                    {item.abstract ? item.abstract : '无'}
-                  </Ellipsis>
-                  <div style={{ marginTop: '5px', fontSize: '12px' }}>
-                    <div style={{ float: 'left' }}>
-                      <Icon type="clock-circle" />
-                      &nbsp;
-                      {timeFormat(Number(new Date(item.createDate)))}
-                    </div>
-                    <div style={{ float: 'right' }}>
-                      <Icon type="edit" />
-                      &nbsp;
-                      {timeFormat(Number(new Date(item.updateDate)))}
-                    </div>
-                  </div>
+                  <Card.Meta
+                    title={<Tooltip title={item.title}><span>{item.title}</span></Tooltip>}
+                    description={
+                      <Fragment>
+                        <div style={{ marginBottom: '5px', fontSize: '12px' }}>
+                          <Ellipsis lines={1}>
+                            标签：{item.tags && item.tags.length > 0 ? item.tags.map(i => <Tag color="volcano">{i.name}</Tag>) : <Tag color="volcano">无</Tag>}
+                          </Ellipsis>
+                        </div>
+                        <Ellipsis lines={2} style={{ height: '40px' }}>
+                          摘要：
+                          {item.abstract ? item.abstract : '无'}
+                        </Ellipsis>
+                        <div style={{ marginTop: '5px', fontSize: '12px' }}>
+                          <div style={{ float: 'left' }}>
+                            <Icon type="clock-circle" />
+                            &nbsp;
+                            {timeFormat(Number(new Date(item.createDate)))}
+                          </div>
+                          <div style={{ float: 'right' }}>
+                            <Icon type="edit" />
+                            &nbsp;
+                            {timeFormat(Number(new Date(item.updateDate)))}
+                          </div>
+                        </div>
+                      </Fragment>
+                    }
+                  />
                   {item.isTop === 1 && (
                     <div
                       style={{
@@ -464,6 +471,9 @@ class ArticleManagement extends React.Component {
                       <span style={{ color: 'yellow' }}>置顶</span>
                     </div>
                   )}
+                  <Tag color="purple" style={{position:"absolute",top:"0px",left:"0px"}}>
+                    <Icon type="tag" />&nbsp;{item.category.sort.name},{item.category.name}
+                  </Tag>
                 </Card>
               </List.Item>
             )}

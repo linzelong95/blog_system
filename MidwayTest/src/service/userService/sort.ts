@@ -22,7 +22,7 @@ export class UserSortService {
       .where("sort.name like :name", { name: `%${name}%` })
       .andWhere(isEnable !== undefined ? `sort.isEnable=${isEnable}` : "1=1")
       .orderBy(orderByName, orderByMethod)
-      .skip(index - 1)
+      .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
   }

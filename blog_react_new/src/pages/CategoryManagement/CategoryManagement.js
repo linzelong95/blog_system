@@ -67,7 +67,6 @@ class CategoryManagement extends React.Component {
     const { isEnable: isEnableArr, sort } = filters;
     const isEnable = isEnableArr && isEnableArr.length > 0 ? parseInt(isEnableArr[0], 10) : undefined;
     const sortIdsArr = sort && sort.length > 0 ? sort.map(i => parseInt(i, 10)) : [];
-    console.log(filters)
     const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'DESC' : 'ASC' } : {};
     this.setState(oldState => ({ filters, conditionQuery: { ...oldState.conditionQuery, orderBy, isEnable, sortIdsArr } }), () =>
       this.request({ index, size })

@@ -29,8 +29,8 @@ class HomePage extends React.Component {
   componentDidMount = () => {
     this.request({ index: 1, size: 6 });
     this.request({ size: 5, conditionQuery: { orderBy: { name: "createDate", by: "DESC" } } }, (res) => this.setState({ timelines: res.list }));
-    this.request({ netUrl: UserTagAPI.LIST.url,conditionQuery:{isEnable:1}, index: 1, size: 999 }, (res) =>this.setState({ tagOptions: res.list }));
-    this.request({ netUrl: UserSortAPI.LIST.url,conditionQuery:{isEnable:1}, index: 1, size: 999 }, (res) =>
+    this.request({ netUrl: UserTagAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, (res) => this.setState({ tagOptions: res.list }));
+    this.request({ netUrl: UserSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, (res) =>
       this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
     );
   }
@@ -280,8 +280,8 @@ class HomePage extends React.Component {
                         height={110}
                         alt="logo"
                         src={
-                          item.image_url
-                            ? `${imgPrefix}${item.image_url}`
+                          item.imageUrl
+                            ? `${imgPrefix}${item.imageUrl}`
                             : 'https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png'
                         }
                       />
@@ -305,9 +305,7 @@ class HomePage extends React.Component {
                       </div>
                     )}
                     <List.Item.Meta
-                      avatar={
-                        <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-                      }
+                      avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
                       title={
                         <a
                           href={`${window.location.origin}/${adminType}/article/${item.id}`}

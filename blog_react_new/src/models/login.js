@@ -42,7 +42,7 @@ export default {
       yield put({ type: 'save', payload: {loginStatus:true} });
       yield put({type: 'global/save',payload:{currentUser:response}});
       // yield put({type: 'global/fetchNotices'});
-      setAuthority('admin');
+      setAuthority(response.roleName);
       reloadAuthorized();
       const currentPageUrl=window.location.href;
       if(!currentPageUrl.includes("/user/login") && !currentPageUrl.includes("/exception")) return;

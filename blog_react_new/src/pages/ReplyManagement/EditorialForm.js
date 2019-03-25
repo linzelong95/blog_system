@@ -22,11 +22,21 @@ const initArticleContainer = {
 class EditorialForm extends React.PureComponent {
   state = {
     articlecontainer: initArticleContainer,
+    initialFormData: {},
   };
 
-  handleSetState = (obj, func) => this.setState({ ...obj }, () => func);
+  componentDidMount = () => {
+    const { formItem = {} } = this.props;
+    if (formItem.id) this.formatInitialFormData(formItem);
+  };
 
-  handleGetState = val => this.state[val];
+  formatInitialFormData = (formItem, extraObj) => {
+    const { id, from, reply: preReply, article: art } = formItem;
+    const article = { key: art.id, label: art.title };
+    const to = { key: from.id, label: from.nickName };
+    const initialFormData = { id, to, preReply, article };
+    this.setState({ initialFormData, ...extraObj });
+  };
 
   toggleEdit = obj => {
     const {
@@ -34,7 +44,7 @@ class EditorialForm extends React.PureComponent {
       request,
       cleanFormItem,
       toggleEditorialPanel,
-      formItem: { id },
+      formItem: { id, parentId: pid },
     } = this.props;
     if (obj === 'cancel') {
       form.resetFields();
@@ -45,9 +55,11 @@ class EditorialForm extends React.PureComponent {
     }
     form.validateFields((err, values) => {
       if (err) return;
-      const { article } = values;
+      const { article, to } = values;
       const netUrl = INSERT.url;
-      request({ ...values, id, netUrl, articleId: article.key });
+      const parentId = pid === 0 ? id : pid;
+      const toId = to && to.key;
+      request({ ...values, netUrl, parentId, toId, articleId: article.key });
       toggleEditorialPanel();
       cleanFormItem();
       form.resetFields();
@@ -90,7 +102,7 @@ class EditorialForm extends React.PureComponent {
 
   render() {
     const { form, editorialPanelVisible } = this.props;
-    const { articlecontainer } = this.state;
+    const { articlecontainer, initialFormData } = this.state;
     const modalFormConfig = [
       {
         fieldId: 'article',
@@ -98,7 +110,30 @@ class EditorialForm extends React.PureComponent {
         rules: [{ required: true, message: '文章是必须的' }],
         fieldType: 'select',
         fieldProps: {
-          ...this.getSelectorConfig({ container: articlecontainer }),
+          ...this.getSelectorConfig({ container: articlecontainer, disabled: initialFormData.id !== undefined }),
+          style: { width: '86%' },
+        },
+        formItemLayout: { labelCol: { span: 6 } },
+      },
+      initialFormData.id !== undefined && {
+        fieldId: 'to',
+        label: '评论人',
+        rules: [{ required: true, message: '评论人是必须的' }],
+        fieldType: 'select',
+        fieldProps: {
+          options: [],
+          labelInValue: true,
+          disabled: true,
+          style: { width: '86%' },
+        },
+        formItemLayout: { labelCol: { span: 6 } },
+      },
+      initialFormData.id !== undefined && {
+        fieldId: 'preReply',
+        label: '内容',
+        fieldType: "node",
+        fieldNode: <span>{initialFormData.preReply}</span>,
+        fieldProps: {
           style: { width: '86%' },
         },
         formItemLayout: { labelCol: { span: 6 } },
@@ -117,20 +152,21 @@ class EditorialForm extends React.PureComponent {
       },
       {
         fieldId: 'reply',
-        label: '评论内容',
+        label: '回复',
         rules: [{ required: true, message: '评论内容是必须的' }],
-        fieldProps: { style: { width: '86%' }, autosize: true },
+        fieldProps: { style: { width: '86%' }, autosize: true, rows: 2 },
         fieldType: 'textArea',
         formItemLayout: { labelCol: { span: 6 } },
       },
     ];
     return getModalForm({
+      initialFormData,
       editorialPanelVisible,
       toggleEdit: this.toggleEdit,
       form,
       modalFormConfig,
       INSERT,
-      UPDATE: INSERT,
+      UPDATE:INSERT,
       width: 600,
     });
   }

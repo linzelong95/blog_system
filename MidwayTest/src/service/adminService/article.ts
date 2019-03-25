@@ -28,7 +28,7 @@ export class AdminArticleService {
       .andWhere(!sortIdsArr.length && cateIdsArr.length ? `category.id in (${cateIdsArr.join(",")})` : "1=1")
       .andWhere(sortIdsArr.length && cateIdsArr.length ? `sort.id in (${sortIdsArr.join(",")}) or category.id in (${cateIdsArr.join(",")})` : "1=1")
       .orderBy(orderByName, orderByMethod)
-      .skip(index - 1)
+      .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
   }
@@ -55,4 +55,61 @@ export class AdminArticleService {
     }
     return flag;
   }
+
+  async lock(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Article)
+      .set({ isEnable: 0 })
+      .where("id in (:...ids)", { ids })
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
+  async unlock(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Article)
+      .set({ isEnable: 1 })
+      .where("id in (:...ids)", { ids })
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
+  async top(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Article)
+      .set({ isTop: 1 })
+      .where("id in (:...ids)", { ids })
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
+  async untop(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Article)
+      .set({ isTop: 0 })
+      .where("id in (:...ids)", { ids })
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
 }

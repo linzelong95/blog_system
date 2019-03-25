@@ -15,6 +15,7 @@ export class AdminCategoryService {
       orderByName = `category.${orderBy.name}`;
       orderByMethod = orderBy.by;
     }
+    console.log("category",index,size)
     return await this.repository
       .createQueryBuilder("category")
       .innerJoinAndSelect("category.sort", "sort", sortIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
@@ -22,7 +23,7 @@ export class AdminCategoryService {
       .andWhere(id ? `category.id=${id}` : "1=1")
       .andWhere(isEnable !== undefined ? `category.isEnable=${isEnable}` : "1=1")
       .orderBy(orderByName, orderByMethod)
-      .skip(index - 1)
+      .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
   }

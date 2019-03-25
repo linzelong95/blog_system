@@ -21,7 +21,7 @@ export class UserTagService {
       .where("tag.name like :name", { name: `%${name}%` })
       .andWhere(isEnable !== undefined ? `tag.isEnable=${isEnable}` : "1=1")
       .orderBy(orderByName, orderByMethod)
-      .skip(index - 1)
+      .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
   }

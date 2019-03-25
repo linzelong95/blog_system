@@ -56,15 +56,15 @@ module.exports = (options, app) => {
   app.use(passport.initialize());
   app.use(passport.session());
   app.passport = passport;
-  app.use(async (ctx, next) => {
-    const limitedUrls = ['/admin/', '/user/comment/delete','/user/comment/insert'];
-    if (limitedUrls.some(i => ctx.originalUrl.includes(i)) && !ctx.isAuthenticated()) {
-      ctx.status = 401;
-      ctx.body = { errMsg: '用户未登录,将为您跳转到首页，请根据需要登录' };
-      return;
-    }
-    await next();
-  });
+  // app.use(async (ctx, next) => {
+  //   const limitedUrls = ['/admin/', '/user/comment/delete','/user/comment/insert'];
+  //   if (limitedUrls.some(i => ctx.originalUrl.includes(i)) && !ctx.isAuthenticated()) {
+  //     ctx.status = 401;
+  //     ctx.body = { errMsg: '用户未登录,将为您跳转到首页，请根据需要登录' };
+  //     return;
+  //   }
+  //   await next();
+  // });
   return async (ctx: any, next: any) => {
     await next();
   }

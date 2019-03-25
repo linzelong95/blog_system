@@ -15,13 +15,14 @@ export class AdminTagService {
       orderByName = `tag.${orderBy.name}`;
       orderByMethod = orderBy.by;
     }
+    console.log(index,size)
     return await this.repository
       .createQueryBuilder("tag")
       .innerJoinAndSelect("tag.sort", "sort", sortIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .where("tag.name like :name", { name: `%${name}%` })
       .andWhere(isEnable !== undefined ? `tag.isEnable=${isEnable}` : "1=1")
       .orderBy(orderByName, orderByMethod)
-      .skip(index - 1)
+      .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
   }

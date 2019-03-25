@@ -24,7 +24,7 @@ export class UserReplyService {
       .andWhere(isApproved !== undefined ? `reply.isApproved=${isApproved}` : "1=1")
       .andWhere(isTop !== undefined ? `reply.isTop=${isTop}` : "1=1")
       .orderBy(orderByName, orderByMethod)
-      .skip(index - 1)
+      .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
   }

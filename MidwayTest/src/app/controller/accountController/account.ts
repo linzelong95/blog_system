@@ -59,7 +59,7 @@ export class AccountController {
 
   @post("/getcaptcha")
   async getcaptcha(ctx) {
-    const cap: number = Math.floor(Math.random() * 10000);
+    const cap: number = Math.floor(Math.random() * 9000 + 1000);
     const p = new captchapng(80, 30, cap);
     p.color(0, 0, 0, 0);
     p.color(80, 80, 80, 255);

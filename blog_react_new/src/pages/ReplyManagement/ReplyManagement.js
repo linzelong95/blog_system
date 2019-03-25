@@ -28,7 +28,7 @@ import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
 const {
-  AdminReplyAPI: { LIST, DELETE, APPROVE, DISAPPROVE, TOP, UNTOP },
+  AdminReplyAPI: { LIST, DELETE, APPROVE, DISAPPROVE, TOP, UNTOP, FORM },
   AdminSortAPI,
   AdminArticleAPI,
 } = UrlEnum;
@@ -62,7 +62,7 @@ class ReplyManagement extends React.Component {
     temporaryCondition: {},
   };
 
-  componentDidMount = () => this.request({ index: 1, size: 6 });
+  componentDidMount = () => this.request({ index: 1, size: 10 });
 
   componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
 
@@ -258,7 +258,7 @@ class ReplyManagement extends React.Component {
     const isTop = commonFilterArr.includes('isTop') ? 1 : undefined;
     const isRoot = (() => {
       if (commonFilterArr.includes('isParent') && !commonFilterArr.includes('isSon')) return 1;
-      if (!commonFilterArr.includes('isParent')&& commonFilterArr.includes('isSon')) return 0;
+      if (!commonFilterArr.includes('isParent') && commonFilterArr.includes('isSon')) return 0;
       return undefined;
     })();
     this.setState(
@@ -310,7 +310,7 @@ class ReplyManagement extends React.Component {
 
   render() {
     const {
-      articleManagement: { total = 6, list = [], size = 6, index = 1 },
+      articleManagement: { total = 10, list = [], size = 10, index = 1 },
       loading,
     } = this.props;
     const {
@@ -517,9 +517,9 @@ class ReplyManagement extends React.Component {
               showSizeChanger: true,
               onChange: this.handlePageChange,
               onShowSizeChange: this.handlePageChange,
-              pageSizeOptions: ["6", "12", "18", "24"],
+              pageSizeOptions: ["10", "20", "30", "40"],
               pageSize: size,
-              defaultPageSize: 6,
+              defaultPageSize: 10,
               total,
               current: index,
             }}
@@ -530,23 +530,10 @@ class ReplyManagement extends React.Component {
                 key={item.id}
                 actions={[
                   <span>{timeFormat(Number(new Date(item.create_time)))}</span>,
-                  <Button size="small" type="danger" onClick={() => this.handleItems(DELETE, item)}>
-                    删除
-                  </Button>,
-                  <Button
-                    size="small"
-                    type="primary"
-                    onClick={() => this.handleItems(item.isApproved ? DISAPPROVE : APPROVE, item)}
-                  >
-                    {item.isApproved ? '隐藏' : '过审'}
-                  </Button>,
-                  <Button
-                    size="small"
-                    type="primary"
-                    onClick={() => this.handleItems(item.isTop ? UNTOP : TOP, item)}
-                  >
-                    {item.isTop ? '取置' : '置顶'}
-                  </Button>,
+                  <Button size="small" type="danger" onClick={() => this.handleItems(DELETE, item)}>删除</Button>,
+                  <Button size="small" type="primary" onClick={() => this.handleItems(FORM, item)}>回复</Button>,
+                  <Button size="small" type="primary" onClick={() => this.handleItems(item.isApproved ? DISAPPROVE : APPROVE, item)}>{item.isApproved ? '隐藏' : '过审'}</Button>,
+                  <Button size="small" type="primary" onClick={() => this.handleItems(item.isTop ? UNTOP : TOP, item)}>{item.isTop ? '取置' : '置顶'}</Button>,
                 ]}
               >
                 <List.Item.Meta
@@ -567,7 +554,7 @@ class ReplyManagement extends React.Component {
                     <span>
                       《{item.article.title}》{item.parentId === 0 && <Tag color="cyan">父</Tag>}
                       {item.isTop === 1 && <Tag color="magenta">已置顶</Tag>}
-                      {item.isApproved===0 && <Tag color="orange">待审核</Tag>}
+                      {item.isApproved === 0 && <Tag color="orange">待审核</Tag>}
                     </span>
                   }
                   description={
