@@ -2,6 +2,8 @@ import { provide } from 'midway';
 import { getRepository } from "typeorm";
 import { Article } from "../../entity/Article";
 import { Content } from "../../entity/Content";
+import { OrderByCondition } from "../../interface";
+
 
 @provide()
 export class UserArticleService {
@@ -10,12 +12,9 @@ export class UserArticleService {
 
   async list(options) {
     const { id, index, size, title, orderBy, tagIdsArr, category: { sortIdsArr = [], cateIdsArr = [] } } = options;
-    let orderByName: string = "article.isTop";
-    let orderByMethod: "ASC" | "DESC" = "DESC";
-    if (orderBy.name && ["title", "createDate", "updateDate", "isTop"].includes(orderBy.name)) {
-      orderByName = `article.${orderBy.name}`;
-      orderByMethod = orderBy.by;
-    }
+    const orderByMap: OrderByCondition = { "article.isTop": "DESC" };
+    if (orderBy.name && ["title", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`article.${orderBy.name}`] = orderBy.by;
+    if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["article.createDate"] = "ASC";
     return await this.repository
       .createQueryBuilder("article")
       .innerJoinAndSelect("article.category", "category", "category.isEnable=1")
@@ -38,7 +37,7 @@ export class UserArticleService {
       .andWhere(sortIdsArr.length && !cateIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .andWhere(!sortIdsArr.length && cateIdsArr.length ? `category.id in (${cateIdsArr.join(",")})` : "1=1")
       .andWhere(sortIdsArr.length && cateIdsArr.length ? `sort.id in (${sortIdsArr.join(",")}) or category.id in (${cateIdsArr.join(",")})` : "1=1")
-      .orderBy(orderByName, orderByMethod)
+      .orderBy(orderByMap)
       .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();

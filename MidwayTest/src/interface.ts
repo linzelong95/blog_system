@@ -21,3 +21,7 @@ export interface IUserResult {
 export interface IUserService {
   getUser(options: IUserOptions): Promise<IUserResult>;
 }
+
+export interface OrderByCondition {
+  [columnName: string]: ("ASC" | "DESC")
+};

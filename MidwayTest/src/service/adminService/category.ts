@@ -1,6 +1,7 @@
 import { provide } from 'midway';
 import { getRepository } from "typeorm";
 import { Category } from "../../entity/Category";
+import { OrderByCondition } from "../../interface";
 
 @provide()
 export class AdminCategoryService {
@@ -9,20 +10,16 @@ export class AdminCategoryService {
 
   async list(options) {
     const { index, size, name, isEnable, orderBy, sortIdsArr, id } = options;
-    let orderByName: string = "category.createDate";
-    let orderByMethod: "ASC" | "DESC" = "ASC";
-    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sort"].includes(orderBy.name)) {
-      orderByName = `category.${orderBy.name}`;
-      orderByMethod = orderBy.by;
-    }
-    console.log("category",index,size)
+    const orderByMap: OrderByCondition = {};
+    if (orderBy.name && ["name", "isEnable", "sort", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`category.${orderBy.name}`] = orderBy.by;
+    if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["category.createDate"] = "ASC";
     return await this.repository
       .createQueryBuilder("category")
       .innerJoinAndSelect("category.sort", "sort", sortIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .where("category.name like :name", { name: `%${name}%` })
       .andWhere(id ? `category.id=${id}` : "1=1")
       .andWhere(isEnable !== undefined ? `category.isEnable=${isEnable}` : "1=1")
-      .orderBy(orderByName, orderByMethod)
+      .orderBy(orderByMap)
       .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
@@ -49,8 +46,8 @@ export class AdminCategoryService {
     const result = await this.repository
       .createQueryBuilder()
       .update(Category)
-      .set({isEnable:0})
-      .where("id in (:...ids)",{ids})
+      .set({ isEnable: 0 })
+      .where("id in (:...ids)", { ids })
       .execute();
     if (!result.raw.affectedRows) {
       flag = false;
@@ -63,8 +60,8 @@ export class AdminCategoryService {
     const result = await this.repository
       .createQueryBuilder()
       .update(Category)
-      .set({isEnable:1})
-      .where("id in (:...ids)",{ids})
+      .set({ isEnable: 1 })
+      .where("id in (:...ids)", { ids })
       .execute();
     if (!result.raw.affectedRows) {
       flag = false;

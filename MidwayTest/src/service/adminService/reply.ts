@@ -1,6 +1,7 @@
 import { provide } from 'midway';
 import { getRepository } from "typeorm";
 import { Reply } from "../../entity/Reply";
+import { OrderByCondition } from "../../interface";
 
 @provide()
 export class AdminReplyService {
@@ -9,12 +10,9 @@ export class AdminReplyService {
 
   async list(options) {
     const { reply, orderBy, index, size, articleIdsArr, isTop, isApproved, isRoot, category: { sortIdsArr = [], cateIdsArr = [] } } = options;
-    let orderByName: string = "reply.isTop";
-    let orderByMethod: "ASC" | "DESC" = "DESC";
-    if (orderBy.name && ["createDate", "isApproved", "isTop"].includes(orderBy.name)) {
-      orderByName = `reply.${orderBy.name}`;
-      orderByMethod = orderBy.by;
-    }
+    const orderByMap: OrderByCondition = { "reply.isTop": "DESC" };
+    if (orderBy.name && ["isApproved", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`reply.${orderBy.name}`] = orderBy.by;
+    if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["reply.createDate"] = "ASC";
     return await this.repository
       .createQueryBuilder("reply")
       .innerJoinAndSelect("reply.article", "article")
@@ -30,7 +28,7 @@ export class AdminReplyService {
       .andWhere(sortIdsArr.length && !cateIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .andWhere(!sortIdsArr.length && cateIdsArr.length ? `category.id in (${cateIdsArr.join(",")})` : "1=1")
       .andWhere(sortIdsArr.length && cateIdsArr.length ? `sort.id in (${sortIdsArr.join(",")}) or category.id in (${cateIdsArr.join(",")})` : "1=1")
-      .orderBy(orderByName, orderByMethod)
+      .orderBy(orderByMap)
       .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();

@@ -260,19 +260,11 @@ class HomePage extends React.Component {
                   <List.Item
                     key={item.id}
                     actions={[
-                      <span>
-                        <Icon type="edit" />
-                        &nbsp;
-                        {timeFormat(Number(new Date(item.updateDate)))}
-                      </span>,
+                      <span><Icon type="edit" />&nbsp;{timeFormat(Number(new Date(item.createDate)))}</span>,
                       <Icon type="star-o" />,
                       <Icon type="like-o" />,
                       <Icon type="message" />,
-                      <div>
-                        {item.tags.map(i => (
-                          <Tag color="volcano">{i.name}</Tag>
-                        ))}
-                      </div>,
+                      <span>{item.tags.map(i => (<Tag color="volcano">{i.name}</Tag>))}</span>,
                     ]}
                     extra={
                       <img

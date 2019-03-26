@@ -1,7 +1,7 @@
 import { provide } from 'midway';
 import { getRepository } from "typeorm";
 import { Sort } from "../../entity/Sort";
-
+import { OrderByCondition } from "../../interface";
 
 @provide()
 export class AdminSortService {
@@ -10,18 +10,15 @@ export class AdminSortService {
 
   async list(options) {
     const { index, size, name, isEnable, isCateEnable, orderBy } = options;
-    let orderByName: string = "sort.createDate";
-    let orderByMethod: "ASC" | "DESC" = "ASC";
-    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable"].includes(orderBy.name)) {
-      orderByName = `sort.${orderBy.name}`;
-      orderByMethod = orderBy.by;
-    }
+    const orderByMap: OrderByCondition = {};
+    if (orderBy.name && ["name", "isEnable", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`sort.${orderBy.name}`] = orderBy.by;
+    if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["sort.createDate"] = "ASC";
     return await this.repository
       .createQueryBuilder("sort")
       .leftJoinAndSelect("sort.categories", "categories", isCateEnable !== undefined ? `categories.isEnable=${isCateEnable}` : "1=1")
       .where("sort.name like :name", { name: `%${name}%` })
       .andWhere(isEnable !== undefined ? `sort.isEnable=${isEnable}` : "1=1")
-      .orderBy(orderByName, orderByMethod)
+      .orderBy(orderByMap)
       .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
@@ -48,8 +45,8 @@ export class AdminSortService {
     const result = await this.repository
       .createQueryBuilder()
       .update(Sort)
-      .set({isEnable:0})
-      .where("id in (:...ids)",{ids})
+      .set({ isEnable: 0 })
+      .where("id in (:...ids)", { ids })
       .execute();
     if (!result.raw.affectedRows) {
       flag = false;
@@ -62,8 +59,8 @@ export class AdminSortService {
     const result = await this.repository
       .createQueryBuilder()
       .update(Sort)
-      .set({isEnable:1})
-      .where("id in (:...ids)",{ids})
+      .set({ isEnable: 1 })
+      .where("id in (:...ids)", { ids })
       .execute();
     if (!result.raw.affectedRows) {
       flag = false;

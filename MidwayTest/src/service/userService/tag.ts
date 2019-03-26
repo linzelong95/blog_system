@@ -1,6 +1,7 @@
 import { provide } from 'midway';
 import { getRepository } from "typeorm";
 import { Tag } from "../../entity/Tag";
+import { OrderByCondition } from "../../interface";
 
 @provide()
 export class UserTagService {
@@ -9,18 +10,15 @@ export class UserTagService {
 
   async list(options) {
     const { index, size, name, isEnable, orderBy, sortIdsArr } = options;
-    let orderByName: string = "tag.createDate";
-    let orderByMethod: "ASC" | "DESC" = "ASC";
-    if (orderBy.name && ["name", "createDate", "updateDate", "isEnable", "sort"].includes(orderBy.name)) {
-      orderByName = `tag.${orderBy.name}`;
-      orderByMethod = orderBy.by;
-    }
+    const orderByMap: OrderByCondition = {};
+    if (orderBy.name && ["name", "isEnable", "sort", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`tag.${orderBy.name}`] = orderBy.by;
+    if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["tag.createDate"] = "ASC";
     return await this.repository
       .createQueryBuilder("tag")
       .innerJoinAndSelect("tag.sort", "sort", sortIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .where("tag.name like :name", { name: `%${name}%` })
       .andWhere(isEnable !== undefined ? `tag.isEnable=${isEnable}` : "1=1")
-      .orderBy(orderByName, orderByMethod)
+      .orderBy(orderByMap)
       .skip((index - 1) * size)
       .take(size)
       .getManyAndCount();
