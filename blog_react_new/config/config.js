@@ -71,10 +71,10 @@ export default {
     //   pathRewrite: { '^/server': '' },
     // },
     '/api/': {
-      target: 'http://localhost:7001/',
+      target: 'http://120.78.139.146:7001/',
       changeOrigin: true,
       pathRewrite: { '^/api': '' },
-    }
+    },
   },
   ignoreMomentLocale: true,
   lessLoaderOptions: {

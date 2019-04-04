@@ -10,7 +10,7 @@ export = (appInfo: any) => {
   config.hello="this is hello"
 
   config.security={
-    domainWhiteList:["http://localhost:8000"],
+    domainWhiteList:["http://localhost:8000","http://192.168.1.10"],
     csrf: {
       enable: false,
     },
@@ -28,7 +28,8 @@ export = (appInfo: any) => {
 
   config.cluster={
     listen:{
-      port:7001
+      port:7001,
+      hostname:"120.78.139.146"
     }
   }
 
