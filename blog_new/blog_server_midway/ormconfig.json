@@ -7,7 +7,7 @@
   "database": "myblog",
   "synchronize": true,
   "logging": false,
-  "entities": ["dist/entity/**/*.js"],
-  "migrations": ["dist/migration/**/*.js"],
-  "subscribers": ["dist/subscriber/**/*.js"]
+  "entities": ["src/entity/**/*{.ts,.js}"],
+  "migrations": ["src/migration/**/*{.ts,.js}"],
+  "subscribers": ["src/subscriber/**/*{.ts,.js}"]
 }

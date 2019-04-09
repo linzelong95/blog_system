@@ -26,12 +26,12 @@ export = (appInfo: any) => {
     whitelist:[".png",".jpg",".jpeg",".gif"]
   }
 
-  config.cluster={
-    listen:{
-      port:7001,
-      hostname:"120.78.139.146"
-    }
-  }
+  // config.cluster={
+  //   listen:{
+  //     port:7001,
+  //     hostname:"120.78.139.146"
+  //   }
+  // }
 
   return config;
 };

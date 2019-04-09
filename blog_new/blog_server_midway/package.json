@@ -29,7 +29,7 @@
     "cov": "midway-bin cov --ts",
     "ci": "midway-bin cov --ts",
     "build": "midway-bin build -c",
-    "start": "egg-scripts start --daemon",
+    "start": "egg-scripts start --daemon --title=egg-server-blogserver --framework=midway",
     "stop": "egg-scripts stop"
   }
 }
