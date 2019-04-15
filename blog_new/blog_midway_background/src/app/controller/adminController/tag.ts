@@ -18,15 +18,15 @@ export class AdminTagController {
   @post("/update")
   async save(ctx): Promise<void> {
     const { id, name, isEnable, sortId } = ctx.request.body;
-    const flag = await this.adminTagService.save({ id, name, isEnable, sort: { id: sortId } });
+    const { flag, entity } = await this.adminTagService.save({ id, name, isEnable, sort: { id: sortId } });
     const action = id ? "更新" : "添加";
     if (!flag) {
       ctx.status = 400;
-      ctx.body = { message: `${action}失败`, flag };
+      ctx.body = { message: `${action}失败`, flag, entity };
       return;
     }
     ctx.status = 200;
-    ctx.body = { message: `${action}成功`, flag };
+    ctx.body = { message: `${action}成功`, flag, entity };
   }
 
   @post("/delete")

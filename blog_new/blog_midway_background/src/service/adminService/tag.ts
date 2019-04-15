@@ -13,7 +13,6 @@ export class AdminTagService {
     const orderByMap: OrderByCondition = {};
     if (orderBy.name && ["name", "isEnable", "sort", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`tag.${orderBy.name}`] = orderBy.by;
     if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["tag.createDate"] = "ASC";
-    console.log(index, size)
     return await this.repository
       .createQueryBuilder("tag")
       .innerJoinAndSelect("tag.sort", "sort", sortIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
@@ -29,7 +28,7 @@ export class AdminTagService {
     let flag = true;
     const tagEntity = this.repository.create({ ...options });
     await this.repository.save(tagEntity).catch(e => { flag = false });
-    return flag;
+    return {flag,entity:tagEntity};
   }
 
   async delete(ids: number[]) {

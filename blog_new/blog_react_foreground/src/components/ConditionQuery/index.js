@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Form, Button, Icon } from 'antd';
-// import CustomForm from '@/components/CustomForm';
 import CustomForm from '@/components/SeftForm';
 import LangConfig from '@/assets/LangConfig';
 import PropTypes from 'prop-types';
@@ -22,10 +21,10 @@ class ConditionQuery extends Component {
     expandForm: false,
   };
 
-  componentWillReceiveProps=(nextProps)=>{
-    const {condition:nextCondition}=nextProps;
-    const {condition:thisCondition,form}=this.props;
-    if(Object.keys(nextCondition).length===0 && Object.values(thisCondition).some(i=>![undefined,null,""].includes(i))){
+  componentWillReceiveProps = (nextProps) => {
+    const { condition: nextCondition } = nextProps;
+    const { condition: thisCondition, form } = this.props;
+    if (Object.keys(nextCondition).length === 0 && Object.values(thisCondition).some(i => ![undefined, null, ""].includes(i))) {
       form.resetFields();
     }
   }
@@ -80,7 +79,6 @@ class ConditionQuery extends Component {
     const config1 = [...modalFormConfig, btnGroupConfig];
     const config2 = c1 ? (c2 ? [c1, c2, btnGroupConfig] : [c1, btnGroupConfig]) : [];
     const newConfig = expandForm ? config1 : config2;
-    // return <CustomForm form={form} modalFormConfig={newConfig} initialFormData={condition} compact />;
     return <CustomForm form={form} modalFormConfig={newConfig} initialFormData={condition} compact gutter={24} lang={lang} />;
   }
 }

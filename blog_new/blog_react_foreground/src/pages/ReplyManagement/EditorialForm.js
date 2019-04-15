@@ -15,7 +15,6 @@ const initArticleContainer = {
   index: 1,
   size: 6,
   query: '',
-  selectedItems: [],
 };
 
 @Form.create()

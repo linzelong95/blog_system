@@ -13,4 +13,5 @@ export class userTagController {
     const [list, total] = await this.userTagService.list({ isEnable, name, orderBy, index, size, sortIdsArr });
     ctx.body = { list, total };
   }
+
 }

@@ -3,50 +3,36 @@ import { Modal, Button, Table } from 'antd';
 import StandardTable from '@/components/StandardTable';
 import ConditionQuery from '@/components/ConditionQuery';
 import LangConfig from '@/assets/LangConfig';
-import { CommonEnum } from '@/assets/Enum';
 
-const { SortField } = CommonEnum;
 const { CommonLang: { CLEAR, SINGLE_SELECTION, MULTIPLE_SELECTION, CLOSE, ACTION, DROP } } = LangConfig;
 
 class CustomFormTable extends React.PureComponent {
   state = {
-    index: 1,
-    size: 6,
-    condition: {},
     customFormTableVisible: false,
   };
 
   componentDidMount = () => {
-    const { condition } = this.state;
-    const { getList, netUrl, netValue = {} } = this.props;
-    const { size = 6 } = netValue;
-    this.setState({ size });
-    const customValue = { ...netValue };
-    let conditionQuery = { ...condition };
-    if (customValue.conditionQuery) {
-      conditionQuery = { ...condition, ...customValue.conditionQuery };
-      delete customValue.conditionQuery;
-    }
-    getList({ netUrl, index: 1, size, conditionQuery, ...customValue });
+    const { getList, netUrl, customValue = {}, index = 1, size = 6, conditionQuery: conditionQueryProp } = this.props;
+    const { conditionQuery: conditionQueryCustom } = customValue;
+    const conditionQuery = { ...conditionQueryProp, ...conditionQueryCustom };
+    getList({ netUrl, index, size, ...customValue, conditionQuery });
   }
 
   cleanSelectedItem = () => this.handleSelectRows([], []);
 
   onQuery = (condition) => {
-    const { getList, netUrl, netValue = {} } = this.props;
-    const { size: pageSize } = this.state;
-    const { size = pageSize } = netValue;
-    this.setState({ condition, index: 1, size });
-    const customValue = { ...netValue };
-    let conditionQuery = { ...condition };
-    if (customValue.conditionQuery) {
-      conditionQuery = { ...condition, ...customValue.conditionQuery };
-      delete customValue.conditionQuery;
-    }
-    getList({ netUrl, index: 1, size, conditionQuery, ...customValue });
+    const { getList, netUrl, customValue = {}, size, conditionQuery: conditionQueryProp } = this.props;
+    const { conditionQuery: conditionQueryCustom } = customValue;
+    let conditionQuery = { ...conditionQueryProp, ...conditionQueryCustom, ...condition };
+    if (!Object.keys(condition).length) conditionQuery = { ...condition, ...conditionQueryCustom };
+    getList({ netUrl, index: 1, size, ...customValue, conditionQuery });
   }
 
-  toggleCustomFormTable = () => this.setState((oldState) => ({ customFormTableVisible: !oldState.customFormTableVisible }));
+  toggleCustomFormTable = () => {
+    const { doVerifyFunc = () => true } = this.props;
+    const flag = doVerifyFunc();
+    if (flag) this.setState((oldState) => ({ customFormTableVisible: !oldState.customFormTableVisible }));
+  }
 
   handleSelectRows = (keys, items) => {
     const { onHandleCustomTableChange, formVerify } = this.props;
@@ -54,28 +40,12 @@ class CustomFormTable extends React.PureComponent {
   }
 
   dataChange = ({ current: index, pageSize: size }, filters, sorter) => {
-    const { getList, netUrl, netValue = {} } = this.props;
-    const { condition } = this.state;
-    const { columnKey, order } = sorter;
-    const sort = SortField[columnKey].code;
-    const direction = order === "descend" ? 1 : 0;
-    getList({ netUrl, direction, sort, index, size, ...condition, ...netValue });
-    this.setState({ index, size });
-  }
-
-  dataChange = ({ current: index, pageSize: size }, filters, sorter) => {
-    const { getList, netUrl, netValue = {} } = this.props;
-    const { condition } = this.state;
+    const { getList, netUrl, customValue = {}, conditionQuery: conditionQueryProp } = this.props;
+    const { conditionQuery: conditionQueryCustom } = customValue;
     const { columnKey, order } = sorter;
     const orderBy = columnKey ? { name: columnKey, by: order === 'descend' ? 'desc' : 'asc' } : {};
-    const customValue = { ...netValue };
-    let conditionQuery = { ...condition, orderBy };
-    if (customValue.conditionQuery) {
-      conditionQuery = { ...condition, ...customValue.conditionQuery };
-      delete customValue.conditionQuery;
-    }
-    getList({ netUrl, index, size, conditionQuery, ...customValue });
-    this.setState({ index, size });
+    const conditionQuery = { ...conditionQueryProp, ...conditionQueryCustom, orderBy };
+    getList({ netUrl, index, size, ...customValue, conditionQuery });
   };
 
   getTableScroll = (columns) => ({ x: !columns[0].width.toString().endsWith("%") ? columns.reduce((col_width, column) => col_width + column.width, 0) : undefined });
@@ -84,6 +54,8 @@ class CustomFormTable extends React.PureComponent {
     const {
       list = [],
       total = 6,
+      index = 1,
+      size = 6,
       selectedItems = [],
       hasConditionQuery = true,
       hasBaseTableRowSelection = true,
@@ -98,13 +70,15 @@ class CustomFormTable extends React.PureComponent {
       onHandleCustomTableChange,
       actionColumn,
       netUrl,
+      conditionQuery = {},
       itemTable: { COLUMNS, CONDITION },
       formVerify,
       notAllowChange,
       showTableConfig = {},
+      additionalComponent = [],
       ...restProps
     } = this.props;
-    const { condition, customFormTableVisible, index, size } = this.state;
+    const { customFormTableVisible } = this.state;
     const selectedRowKeys = selectedItems.map(i => i.id);
     const customActionColumn = actionColumn || {
       title: ACTION[lang],
@@ -139,15 +113,18 @@ class CustomFormTable extends React.PureComponent {
           destroyOnClose
           visible={customFormTableVisible}
           onCancel={this.toggleCustomFormTable}
-          footer={<Button type="primary" onClick={this.toggleCustomFormTable}>{CLOSE[lang]}</Button>}
+          footer={[
+            ...additionalComponent.map(i => i.component),
+            <Button type="primary" onClick={this.toggleCustomFormTable}>{CLOSE[lang]}</Button>
+          ]}
           maskClosable={false}
           width={1200}
         >
-          {hasConditionQuery && <ConditionQuery modalFormConfig={CONDITION} condition={condition} onQuery={this.onQuery} lang={lang} />}
+          {hasConditionQuery && <ConditionQuery modalFormConfig={CONDITION} condition={conditionQuery} onQuery={this.onQuery} lang={lang} />}
           <StandardTable
             number={selectedItems.length}
             cleanSelectedItem={this.cleanSelectedItem}
-            rowSelection={hasBaseTableRowSelection ? { selectedRowKeys, type, onChange: this.handleSelectRows ,getCheckboxProps:(record)=>({disabled:record.disabled})} : undefined}
+            rowSelection={hasBaseTableRowSelection ? { selectedRowKeys, type, onChange: this.handleSelectRows, getCheckboxProps: (record) => ({ disabled: record.disabled }) } : undefined}
             dataSource={list}
             columns={baseTableColumns}
             rowKey={record => record.id}

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Form, Modal, Tag, Icon } from 'antd';
+import React, { Fragment } from 'react';
+import { Form, Modal, Tag, Icon, Button } from 'antd';
 import CustomUpload from '@/components/CustomUpload';
 import CustomFormTable from '@/components/CustomFormTable';
 import { timeFormat } from '@/utils/utils';
@@ -21,7 +21,7 @@ const initTagContainer = {
   total: 0,
   index: 1,
   size: 6,
-  query: "",
+  conditionQuery: {},
   selectedItems: []
 };
 
@@ -32,7 +32,8 @@ class EditorialForm extends React.PureComponent {
     markdownValue: '',
     categoryOptions: [],
     fileList: [],
-    tagContainer: initTagContainer
+    tagContainer: initTagContainer,
+    tagEditorialModalVisible: false,
   };
 
   componentDidMount = () => {
@@ -126,7 +127,7 @@ class EditorialForm extends React.PureComponent {
   }
 
   getList = (payload) => {
-    const { index = 1, size = 6, query = "" } = payload;
+    const { index = 1, size = 6, conditionQuery = {} } = payload;
     const { request } = this.props;
     request({ ...payload, isEnable: 1, index, size }, (res) => {
       const { list: preList, total } = res;
@@ -135,19 +136,57 @@ class EditorialForm extends React.PureComponent {
         newItem.disabled = !i.isEnable;
         return newItem;
       })
-      this.setState(oldState => ({ tagContainer: { ...oldState.tagContainer, total, list, index, size, query } }))
+      this.setState(oldState => ({ tagContainer: { ...oldState.tagContainer, total, list, index, size, conditionQuery } }))
     });
   }
 
   categoryChange = (option) => {
     const sortIdsArr = option.slice(0, 1);
-    const { tagContainer: { index, size, query } } = this.state;
-    this.getList({ netUrl: AdminTagAPI.LIST.url, index, size, query, conditionQuery: { sortIdsArr } });
+    this.getList({ netUrl: AdminTagAPI.LIST.url, index: 1, size: 6, conditionQuery: { sortIdsArr } });
+  }
+
+  toggleTagEdit = obj => {
+    const { form, request } = this.props;
+    if (obj === 'cancel') {
+      this.toggleEditorialTagPanel();
+      return;
+    }
+    form.validateFields((err, values) => {
+      const { tagSort, tagName } = values;
+      if (!tagSort || !tagName) {
+        Modal.error({ title: "请选择或输入相关值" });
+        return;
+      }
+      const netUrl = AdminTagAPI.INSERT.url;
+      request({ ...values, netUrl, name: tagName, sortId: tagSort.key }, (res) => {
+        const { flag, entity } = res;
+        if (!flag) {
+          Modal.error({ title: "添加失败，请重试，注意标签是否已存在！" });
+          return;
+        }
+        this.setState(oldState => ({ tagContainer: { ...oldState.tagContainer, selectedItems: [...oldState.tagContainer.selectedItems, { ...entity, sort: { id: tagSort.key, name: tagSort.label } }] } }));
+        const { tagContainer: { index, size, conditionQuery } } = this.state;
+        const categoryIds = form.getFieldValue("category") || [];
+        const sortIdsArr = categoryIds.slice(0, 1);
+        this.getList({ netUrl: AdminTagAPI.LIST.url, index, size, conditionQuery: { ...conditionQuery, sortIdsArr } })
+      });
+      this.toggleEditorialTagPanel();
+    });
+  };
+
+  toggleEditorialTagPanel = () => this.setState(oldState => ({ tagEditorialModalVisible: !oldState.tagEditorialModalVisible }));
+
+  doVerifyFunc = () => {
+    const { form } = this.props;
+    const categoryIds = form.getFieldValue("category");
+    const flag = Array.isArray(categoryIds) && categoryIds.length > 0;
+    if (!flag) Modal.error({ title: "请先选择分类！" });
+    return flag;
   }
 
   render() {
     const { form, editorialPanelVisible } = this.props;
-    const { initialFormData, markdownValue, categoryOptions, fileList, tagContainer } = this.state;
+    const { initialFormData, markdownValue, categoryOptions, fileList, tagContainer, tagEditorialModalVisible } = this.state;
     const markdownNode = <Editor value={markdownValue} preview expand onChange={this.markDownChange} />;
     const tagTable = {
       COLUMNS: [
@@ -161,6 +200,42 @@ class EditorialForm extends React.PureComponent {
     };
     const categoryIds = form.getFieldValue("category") || [];
     const sortIdsArr = categoryIds.slice(0, 1);
+    const additionalComponent = !categoryIds.length ? [] : [{
+      type: "modal",
+      component: (
+        <Fragment>
+          <Button type="danger" onClick={this.toggleEditorialTagPanel}>没有找到？新建一个</Button>
+          {getModalForm({
+            form,
+            editorialPanelVisible: tagEditorialModalVisible,
+            toggleEdit: this.toggleTagEdit,
+            modalFormConfig: [{
+              fieldId: 'tagName',
+              label: '名称',
+              fieldProps: { style: { width: '86%' } },
+              fieldType: 'input',
+              formItemLayout: { labelCol: { span: 6 } },
+            },
+            {
+              fieldId: 'tagSort',
+              label: '分类',
+              fieldType: 'select',
+              fieldProps: {
+                options: [],
+                labelInValue: true,
+                style: { width: '86%' },
+                disabled: true
+              },
+              initialValue: { key: categoryIds[0], label: categoryOptions.filter(i => i.id === categoryIds[0])[0].name },
+              formItemLayout: { labelCol: { span: 6 } },
+            }],
+            INSERT: AdminTagAPI.INSERT,
+            UPDATE: AdminTagAPI.INSERT,
+            width: 600,
+          })}
+        </Fragment>
+      )
+    }];
     const tagComponent = (
       <CustomFormTable
         onHandleCustomTableChange={this.onHandleCustomTableChange}
@@ -169,11 +244,16 @@ class EditorialForm extends React.PureComponent {
         selectBtnName="标签"
         list={tagContainer.list}
         total={tagContainer.total}
+        index={tagContainer.index}
+        size={tagContainer.size}
         netUrl={tagContainer.netUrl}
+        conditionQuery={tagContainer.conditionQuery}
         selectedItems={tagContainer.selectedItems}
         tableWidth={{ width: "100%" }}
         type="checkbox"
-        netValue={{ conditionQuery: { sortIdsArr } }}
+        customValue={{conditionQuery:{sortIdsArr}}}
+        additionalComponent={additionalComponent}
+        doVerifyFunc={this.doVerifyFunc}
       />
     );
     const imgUpload = (
