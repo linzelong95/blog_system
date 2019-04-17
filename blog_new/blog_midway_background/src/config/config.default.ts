@@ -10,7 +10,7 @@ export = (appInfo: any) => {
   config.hello = "this is hello"
 
   config.security = {
-    domainWhiteList: ["http://localhost:8000", "http://192.168.1.10"],
+    domainWhiteList: ["http://localhost:8000", "http://localhost:8080","http://192.168.1.10"],
     csrf: {
       enable: false,
     },
