@@ -53,7 +53,7 @@ class EditorialForm extends React.PureComponent {
       })
     );
     if (formItem.id) {
-      request({ netUrl: CONTENT.url, id: formItem.id }, res => {
+      request({ netUrl: CONTENT.url, articleId: formItem.id }, res => {
         formItem.content = res.list[0].content;
         this.formatInitialFormData(formItem);
       });

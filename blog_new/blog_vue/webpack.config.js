@@ -91,7 +91,15 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     noInfo: true,
-    overlay: true
+    overlay: true,
+    proxy:{
+      '/api/': {
+        target: 'http://127.0.0.1:7001/',
+        changeOrigin: true,
+        // secure: false,// 如果是https接口，需要配置这个参数
+        pathRewrite: { '^/api': '' },
+      },
+    }
   },
   performance: {
     hints: false

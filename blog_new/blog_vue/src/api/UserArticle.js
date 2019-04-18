@@ -2,8 +2,13 @@ import axios from 'axios';
 
 export default class UserArticle {
   list({conditionQuery={},...params}={}){
-    return axios.post('http://127.0.0.1:7001/user/article/list',{
+    return axios.post(`/api/user/article/list`,{
       conditionQuery,
+      ...params
+    })
+  }
+  content(params){
+    return axios.post(`/api/user/article/content`,{
       ...params
     })
   }

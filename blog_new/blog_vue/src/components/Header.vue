@@ -1,8 +1,13 @@
 <template>
   <div id="header">
-    <div class="logo">
-      <img src="../assets/logo.png">
-      <span>向上的博客</span>
+    <div class="back"  v-show="backFlag">
+      <a-icon type="left-circle" @click="goBack" />
+    </div>
+    <div class="logo" :class="{f_left:!backFlag}">
+      <router-link to="/homepage">
+        <img src="../assets/logo.png">
+        <span>向上的博客</span>
+      </router-link>
     </div>
     <div class="menu">
       <a-icon type="menu-fold" @click="toggleMenu" />
@@ -27,12 +32,24 @@
 export default {
   data () {
     return {
-      menuFlag:false
+      menuFlag:false,
+      backFlag:false
     }
+  },
+  created(){
+    this.backFlag=this.$route.path!=="/homepage";
   },
   methods:{
     toggleMenu(){
       this.menuFlag=!this.menuFlag;
+    },
+    goBack(){
+      this.$router.go(-1);
+    }
+  },
+  watch:{
+    "$route.path":function(newVal){
+      this.backFlag=newVal!=="/homepage";
     }
   }
 }
@@ -42,17 +59,23 @@ export default {
   #header{
     width:100%;
     height:50px;
+    line-height: 50px;
+    position: relative;
+    .back{
+      position: absolute;
+      left: 0;
+    }
     .logo{
-      float: left;
-      line-height: 50px;
+      text-align: center;
       img{
         width:36px;
         height:36px;
       }
     }
     .menu{
-      float: right;
-      line-height: 50px;
+      position: absolute;
+      right: 0;
+      top:0;
     }
   }
 </style>

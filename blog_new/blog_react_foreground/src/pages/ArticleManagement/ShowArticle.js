@@ -164,7 +164,7 @@ class ShowArticle extends React.Component {
                   {item.abstract}
                 </p>
               )}
-              <ShowMarkdown value={item.reply} />
+              <ShowMarkdown value={item.content} />
             </div>
           </Col>
           <Col span={8}>

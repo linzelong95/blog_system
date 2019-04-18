@@ -43,6 +43,10 @@ export default {
   a{
     text-decoration: none;
     color: #333;
+    &:link,&:hover,&:active,&:visited{
+      text-decoration: none;
+      color: #333;
+    }
   }
   input,textarea{
     outline: none;
@@ -57,12 +61,12 @@ export default {
     line-height: 0;
     visibility: hidden;
   }
-  // .f_left{
-  //   float: left;
-  // }
-  // .f_right{
-  //   float:right;
-  // }
+  .f_left{
+    float: left;
+  }
+  .f_right{
+    float:right;
+  }
   #app{
     header{
       position: fixed;
@@ -70,10 +74,12 @@ export default {
       background: white;
       width:100%;
       padding: 0px 20px;
+      z-index:2;
     }
     section{
-      margin:60px 10px 10px 10px;
-      background:white;
+      margin:0px 10px;
+      padding:60px 0px 10px 0px;
+      height:100%;
     }
   }
 </style>

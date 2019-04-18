@@ -3,6 +3,8 @@
     <a-card
       v-for="item in list"
       :key="item.id"
+      class="card"
+      @click="readArticle(item.id)"
     >
       <img
         alt="example"
@@ -44,16 +46,12 @@ export default {
         this.list=list;
         this.total=total;
       })
-      .catch(e=>console.log(e))
+      .catch(e=>this.$error({title:"请求出错！"}))
   },
   methods:{
-    // getArticles(){
-    //   axios.post('http://127.0.0.1:7001/user/article/list',{
-    //     conditionQuery:{}
-    //   })
-    //     .then(res=>console.log(res.data))
-    //     .catch(e=>console.log(e))
-    // }
+    readArticle(id){
+      this.$router.push(`/article/${id}`)
+    }
   }
 }
 </script>
@@ -62,5 +60,14 @@ export default {
   #homepage{
     width:100%;
     overflow: hidden;
+    .card{
+      margin-bottom:10px;
+      &:last-of-type{
+        margin-bottom: 0;
+      }
+    }
+    /deep/ .ant-card-meta-title{
+      white-space: normal;
+    }
   }
 </style>
