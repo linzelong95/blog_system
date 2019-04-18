@@ -289,11 +289,11 @@ class HomePage extends React.Component {
                           right: '-55px',
                           width: '150px',
                           textAlign: 'center',
-                          overflow: 'hidden',
                           transform: 'rotate(40deg)',
+                          color:'yellow'
                         }}
                       >
-                        <span style={{ color: 'yellow' }}>置顶</span>
+                        置顶
                       </div>
                     )}
                     <List.Item.Meta

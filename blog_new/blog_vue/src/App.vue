@@ -1,21 +1,24 @@
 <template>
   <div id="app">
     <header>
-      <v-header />
+      <v-header @executeAppToggleShowSearch="executeSonToggleShowSearch" />
     </header>
     <section>
-      <router-view />
+      <router-view ref="son" />
     </section>
   </div>
 </template>
 
 <script>
-import Header from './components/Header.vue';
+import Header from './components/Header/Header.vue';
 export default {
   name: 'app',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
+  mounted(){
+    console.log()
+  },
+  methods:{
+    executeSonToggleShowSearch(){
+      this.$refs.son.toggleShowSearch();
     }
   },
   components:{
@@ -74,7 +77,7 @@ export default {
       background: white;
       width:100%;
       padding: 0px 20px;
-      z-index:2;
+      z-index:999;
     }
     section{
       margin:0px 10px;

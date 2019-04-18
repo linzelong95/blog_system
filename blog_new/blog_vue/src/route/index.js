@@ -1,5 +1,5 @@
-import Homepage from '../components/Homepage.vue';
-import OneArticle from '../components/OneArticle.vue'
+import Homepage from '../pages/Homepage.vue';
+import OneArticle from '../pages/OneArticle.vue'
 
 const routes= [
   {path:'/homepage',component:Homepage},

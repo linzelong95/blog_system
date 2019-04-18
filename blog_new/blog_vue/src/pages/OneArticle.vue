@@ -1,30 +1,34 @@
 <template>
   <div id="article">
-    <h2>{{article.title}}</h2>
-    <div class="f_right">
-      <a-icon type="clock-circle" />
-      {{article.createDate|dateFormat}}
-    </div>
-    <div class="clearfix" />
-    <div class="tags" v-if="article.tags && article.tags.length">
-      <b>标签：</b>
-      {{article.tags.map(i=>i.name).join(", ")}}
-    </div>
-    <div class="abstract">
-      <b>摘要：</b>
-      {{article.abstract}}
-    </div>
-    <div class="content" v-html="article.content" />
+    <a-spin :spinning="spinningFlag">
+      <h2>{{article.title}}</h2>
+      <div class="f_right">
+        <a-icon type="clock-circle" />
+        {{article.createDate|dateFormat}}
+      </div>
+      <div class="clearfix" />
+      <div class="tags" v-if="article.tags && article.tags.length">
+        <b>标签：</b>
+        {{article.tags.map(i=>i.name).join(", ")}}
+      </div>
+      <div class="abstract">
+        <b>摘要：</b>
+        {{article.abstract}}
+      </div>
+      <v-markdown :value="article.content" />
+    </a-spin>
   </div>
 </template>
 
 <script>
+import ShowMarkdown from '../components/ShowMarkdown/ShowMarkdown.vue'
 import UserArticle from '../api/UserArticle';
 const userArticleAPI=new UserArticle();
 export default {
   data () {
     return {
-      article:{}
+      article:{},
+      spinningFlag:true
     }
   },
   created(){
@@ -36,13 +40,14 @@ export default {
           .then(res=>{
             article.content=res.data.list[0].content;
             this.article=article;
+            this.spinningFlag=false;
           })
           .catch(e=>this.$error({title:"请求出错！"}))
       })
       .catch(e=>this.$error({title:"请求出错！"}))
   },
-  methods:{
-
+  components:{
+    "v-markdown":ShowMarkdown
   }
 }
 </script>

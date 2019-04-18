@@ -5,11 +5,17 @@
     </div>
     <div class="logo" :class="{f_left:!backFlag}">
       <router-link to="/homepage">
-        <img src="../assets/logo.png">
+        <img src="../../assets/logo.png">
         <span>向上的博客</span>
       </router-link>
     </div>
     <div class="menu">
+      <span class="search" @click="toggleShowSearch">
+        <a-icon type="search" />
+        <a-icon type="caret-down" class="down" v-if="showSearchFlag" />
+        <a-icon type="caret-up" class="up" v-else />
+      </span>
+      &nbsp;&nbsp;&nbsp;
       <a-icon type="menu-fold" @click="toggleMenu" />
     </div>
     <div>
@@ -33,7 +39,8 @@ export default {
   data () {
     return {
       menuFlag:false,
-      backFlag:false
+      backFlag:false,
+      showSearchFlag:false
     }
   },
   created(){
@@ -45,6 +52,10 @@ export default {
     },
     goBack(){
       this.$router.go(-1);
+    },
+    toggleShowSearch(){
+      this.$emit("executeAppToggleShowSearch");
+      this.showSearchFlag=!this.showSearchFlag;
     }
   },
   watch:{
@@ -76,6 +87,22 @@ export default {
       position: absolute;
       right: 0;
       top:0;
+      .search{
+        position: relative;
+        display: inline-block;
+        .up,.down{
+          color:#1890ff;
+          position: absolute;
+          font-size: 2px;
+          left:5px;
+        }
+        .up{
+          top:7px;
+        }
+        .down{
+          bottom:7px;
+        }
+      }
     }
   }
 </style>

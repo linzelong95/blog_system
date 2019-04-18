@@ -6,12 +6,14 @@ import routes from './route';
 Vue.use(VueRouter);
 const router=new VueRouter({routes});
 
-import { Button,Drawer,Icon,Card ,Tag,message,Modal} from 'ant-design-vue';
+import { Button,Drawer,Icon,Card ,Tag,message,Modal,Spin,Input} from 'ant-design-vue';
 Vue.use(Button);
 Vue.use(Drawer);
 Vue.use(Icon);
 Vue.use(Card);
 Vue.use(Tag);
+Vue.use(Spin);
+Vue.use(Input);
 Vue.prototype.$message=message;
 Vue.prototype.$error=Modal.error;
 
