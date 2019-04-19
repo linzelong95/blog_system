@@ -4,18 +4,21 @@
       <a-drawer
         title="搜索框"
         placement="top"
-        height=100
-        closable="false"
-        maskClosable="false"
-        :visible="showSearchFlag"
-        z-index="998"
+        :height="100"
+        @close="toggleShowSearch"
+        :visible="$store.state.searchBoxFlag"
+        :zIndex="998"
       >
-        <a-input-search
-          placeholder="文章搜索"
-          v-model="conditionQuery.title"
-          @search="searchArticle"
-          enterButton
-        />
+        <div style="display:flex;justify-content:space-between">
+          <a-input-search
+            placeholder="文章搜索"
+            v-model="conditionQuery.title"
+            @search="searchArticle"
+            enterButton
+            ref="searchInput"
+          />
+          <a-button type="danger" shape="circle" icon="reload" @click="resetTitle" />
+        </div>
       </a-drawer>
       <a-card
         v-for="item in list"
@@ -40,7 +43,7 @@
             <div class="tag-and-date">
               <span>
                 <a-icon type="tags" v-if="item.tags&&item.tags.length" />
-                {{item.tags.map(i=>i.name).join(", ")}}
+                {{item.tags&&item.tags.map(i=>i.name).join(", ")}}
               </span>
               <span>
                 <a-icon type="clock-circle" />
@@ -53,12 +56,12 @@
             </div>
           </template>
         </a-card-meta>
-        <a-tag color="purple" style="position:absolute;top:0px;left:0px">
+        <a-tag color="purple" class="category" v-show="item.category!==undefined">
           <a-icon type="tag" />&nbsp;{{item.category.sort.name}},{{item.category.name}}
         </a-tag>
         <div class="top" v-if="item.isTop===1">置顶</div>
       </a-card>
-      <div class="more" v-show="moreFlag && !spinningFlag">
+      <div class="more" v-if="moreFlag && !spinningFlag">
         <a-button @click="loadMore">加载更多</a-button>
       </div>
     </a-spin>
@@ -80,62 +83,53 @@ export default {
       baseImgUrl,
       conditionQuery: { title: '', category: {}, orderBy: {} },
       spinningFlag:true,
-      showSearchFlag:false
     }
   },
   created(){
-    userArticleAPI.list({
-      conditionQuery:this.conditionQuery,
-      index:this.index,
-      size:this.size
-    })
-      .then(res=>{
-        const {data:{list,total}}=res;
-        this.list=list;
-        this.total=total;
-        this.moreFlag=list.length!==total;
-        this.spinningFlag=!this.spinningFlag;
-      })
-      .catch(e=>this.$error({title:"请求出错！"}));
+    this.getArticleList();
   },
   methods:{
-    readArticle(id){
-      this.$router.push(`/article/${id}`);
-    },
-    loadMore(){
-      const index=this.index+1;
+    getArticleList(paramsObj={},isConcat){
+      this.spinningFlag=true;
+      const {index=this.index,size=this.size}=paramsObj;
       userArticleAPI.list({
-        conditionQuery:this.conditionQuery,
+        size,
         index,
-        size:this.size
+        conditionQuery:this.conditionQuery,
+        ...paramsObj
       })
-        .then(res=>{
-          const {data:{list,total}}=res;
-          const newList=[...this.list,list];
-          this.list=newList;
-          this.index=index;
-          this.total=total;
-          this.moreFlag=newList.length!==total;
-        })
-        .catch(e=>this.$error({title:"请求出错！"}));
-    },
-    toggleShowSearch(){
-      this.showSearchFlag=!this.showSearchFlag;
-    },
-    searchArticle(){
-      userArticleAPI.list({
-      conditionQuery:this.conditionQuery,
-      index:1,
-      size:this.size
-    })
       .then(res=>{
         const {data:{list,total}}=res;
-        this.list=list;
+        const newList=isConcat?[...this.list,...list]:list;
+        this.list=newList;
+        this.index=index;
         this.total=total;
-        this.moreFlag=list.length!==total;
+        this.moreFlag=newList.length!==total;
+        this.spinningFlag=false;
       })
       .catch(e=>this.$error({title:"请求出错！"}));
-    }
+    },
+    loadMore(){
+      this.getArticleList({index:this.index+1},true);
+    },
+    toggleShowSearch(){
+      this.$store.commit("toggleSearchBox");
+    },
+    searchInputFocus(){
+      this.$nextTick(()=>this.$refs.searchInput.focus());
+    },
+    searchArticle(){
+      this.getArticleList({index:1});
+      this.toggleShowSearch();
+    },
+    resetTitle(){
+      this.conditionQuery.title="";
+      this.getArticleList({index:1});
+      this.toggleShowSearch();
+    },
+    readArticle(id){
+      this.$router.push(`/read/${id}`);
+    },
   }
 }
 </script>
@@ -157,6 +151,11 @@ export default {
         display: flex;
         justify-content: space-between;
         font-size:10px;
+      }
+      .category{
+        position:absolute;
+        top:0px;
+        left:0px;
       }
       .top{
         position: absolute;

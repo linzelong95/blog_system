@@ -1,9 +1,9 @@
 <template>
   <div id="app">
-    <header>
-      <v-header @executeAppToggleShowSearch="executeSonToggleShowSearch" />
+    <header  v-if="!['/login'].includes($route.path)">
+      <v-header @executeParentFunc="executeSonSearchInputFocus" />
     </header>
-    <section>
+    <section :class="{section:!['/login'].includes($route.path)}">
       <router-view ref="son" />
     </section>
   </div>
@@ -13,12 +13,9 @@
 import Header from './components/Header/Header.vue';
 export default {
   name: 'app',
-  mounted(){
-    console.log()
-  },
   methods:{
-    executeSonToggleShowSearch(){
-      this.$refs.son.toggleShowSearch();
+    executeSonSearchInputFocus(){
+      this.$refs.son.searchInputFocus();
     }
   },
   components:{
@@ -39,6 +36,8 @@ export default {
     color: #333;
     background:#f5f5f5;
     font-family: 'Microsoft Yahei',sans-serif;
+    height:100%;
+    width:100%;
   }
   ul,ol{
     list-style: none;
@@ -71,6 +70,8 @@ export default {
     float:right;
   }
   #app{
+    width:100%;
+    height:100%;
     header{
       position: fixed;
       top:0;
@@ -79,9 +80,11 @@ export default {
       padding: 0px 20px;
       z-index:999;
     }
-    section{
+    .section{
       margin:0px 10px;
-      padding:60px 0px 10px 0px;
+      padding:64px 0px 10px 0px;
+    }
+    section{
       height:100%;
     }
   }
