@@ -142,7 +142,7 @@ export default function request(url, options = { expirys: isAntdPro() }, hasUrlP
           description: response.errMsg,
         });
       }
-      return response
+      return response;
     })
     .catch(e => {
       const status = e.name;

@@ -12,7 +12,7 @@
     <div class="menu">
       <span class="search" @click="toggleShowSearch">
         <a-icon type="search" />
-        <a-icon type="caret-down" class="down" v-if="$store.state.searchBoxFlag" />
+        <a-icon type="caret-down" class="down" v-if="$store.state.search.searchBoxFlag" />
         <a-icon type="caret-up" class="up" v-else />
       </span>
       &nbsp;&nbsp;&nbsp;
@@ -79,8 +79,8 @@ export default {
       this.$router.go(-1);
     },
     toggleShowSearch(){
-      this.$store.commit("toggleSearchBox");
-      if(this.$store.state.searchBoxFlag) this.$emit("executeParentFunc");
+      this.$store.dispatch({type:"search/toggleSearchBox"});
+      if(this.$store.state.search.searchBoxFlag) this.$emit("executeParentFunc");
     },
     changeMenu(obj){
       const {key}=obj;

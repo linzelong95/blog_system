@@ -26,6 +26,7 @@ import ShowMarkdown from '../components/ShowMarkdown/ShowMarkdown.vue';
 import Reply from '../components/Reply/Reply.vue';
 import UserArticle from '../api/UserArticle';
 const userArticleAPI=new UserArticle();
+import request from '../api/request';
 export default {
   data () {
     return {
@@ -34,6 +35,7 @@ export default {
     }
   },
   created(){
+    request()
     const articleId=this.$route.params.id;
     userArticleAPI.list({conditionQuery:{id:articleId}})
       .then(res=>{

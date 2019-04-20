@@ -4,6 +4,7 @@
     "stage-3"
   ],
   "plugins": [
+    "transform-runtime",
     [
       "import",
       { "libraryName": "ant-design-vue", "libraryDirectory": "es", "style": true }
