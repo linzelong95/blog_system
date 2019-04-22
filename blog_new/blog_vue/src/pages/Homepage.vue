@@ -69,13 +69,9 @@
 </template>
 
 <script>
-import {baseImgUrl} from '../utils/defaultSetting.js'
-import UserArticle from '../api/UserArticle';
-const userArticleAPI=new UserArticle();
-import request from '../api/request';
+import {baseImgUrl} from '../utils/defaultSetting.js';
 import urls from '../api/urls';
 const {UserArticleAPI}=urls;
-import vm from '../main';
 export default {
   data () {
     return {
@@ -90,7 +86,6 @@ export default {
     }
   },
   mounted(){
-    console.log(999999,vm)
     this.getArticleList();
   },
   methods:{
@@ -102,7 +97,7 @@ export default {
         conditionQuery:this.conditionQuery,
         ...paramsObj
       }
-      const data=await request(UserArticleAPI.LIST.url,newParamsObj);
+      const data=await this.$request(UserArticleAPI.LIST.url,newParamsObj);
       if(!data) return;
       const {list,total}=data;
       const newList=isConcat?[...this.list,...list]:list;
@@ -111,26 +106,6 @@ export default {
       this.total=total;
       this.moreFlag=newList.length!==total;
     },
-    // getArticleList(paramsObj={},isConcat){
-    //   this.spinningFlag=true;
-    //   const {index=this.index,size=this.size}=paramsObj;
-    //   userArticleAPI.list({
-    //     size,
-    //     index,
-    //     conditionQuery:this.conditionQuery,
-    //     ...paramsObj
-    //   })
-    //   .then(res=>{
-    //     const {data:{list,total}}=res;
-    //     const newList=isConcat?[...this.list,...list]:list;
-    //     this.list=newList;
-    //     this.index=index;
-    //     this.total=total;
-    //     this.moreFlag=newList.length!==total;
-    //     this.spinningFlag=false;
-    //   })
-    //   .catch(e=>this.$error({title:"请求出错！"}));
-    // },
     loadMore(){
       this.getArticleList({index:this.index+1},true);
     },

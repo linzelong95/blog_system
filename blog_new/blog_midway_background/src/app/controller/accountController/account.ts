@@ -80,7 +80,7 @@ export class AccountController {
     const { cap } = ctx.session;
     if (captcha === `${cap}`) {
       ctx.status = 200;
-      ctx.body = { message: "验证成功" };
+      ctx.body = { message: "验证成功",flag: true };
     } else {
       ctx.status = 400;
       ctx.body = { message: "验证失败", flag: false };

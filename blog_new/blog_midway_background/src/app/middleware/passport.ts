@@ -47,6 +47,7 @@ module.exports = (options, app) => {
     const md5Pwd = decrypted.toString("utf8");// 解密完成
     const user = await getRepository(User)
       .createQueryBuilder("user")
+      // .addSelect("user.password")
       .where("user.account=:account", { account: username })
       .andWhere("user.password=:password", { password: md5Pwd })
       .getOne();

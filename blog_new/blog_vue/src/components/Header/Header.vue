@@ -47,11 +47,14 @@
           <a-menu-item key="reply">
             <a-icon type="calendar" />回复管理
           </a-menu-item>
-          <a-menu-item key="login">
-            <a-icon type="calendar" />登录
+          <a-menu-item key="logout" v-show="$store.state.login.loginStatus">
+            <a-icon type="calendar" />退出账号
           </a-menu-item>
-          <a-menu-item key="register">
-            <a-icon type="calendar" />注册
+          <a-menu-item key="login" v-show="!$store.state.login.loginStatus">
+            <a-icon type="calendar"/>登录账号
+          </a-menu-item>
+          <a-menu-item key="register" v-show="!$store.state.login.loginStatus">
+            <a-icon type="calendar" />注册账号
           </a-menu-item>
         </a-menu>
       </a-drawer>
@@ -60,6 +63,8 @@
 </template>
 
 <script>
+import urls from '../../api/urls';
+const {AccountAPI}=urls;
 export default {
   data () {
     return {
@@ -82,9 +87,13 @@ export default {
       this.$store.dispatch({type:"search/toggleSearchBox"});
       if(this.$store.state.search.searchBoxFlag) this.$emit("executeParentFunc");
     },
-    changeMenu(obj){
+    async changeMenu(obj){
       const {key}=obj;
       this.toggleMenu();
+      if(key==="logout") {
+        this.$store.dispatch({type:"login/logout"});
+        return;
+      }
       this.$router.push(`/${key}`);
     }
   },

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <header  v-if="!['/login'].includes($route.path)">
+    <header  v-if="!['/login','/register'].includes($route.path)">
       <v-header @executeParentFunc="executeSonSearchInputFocus" />
     </header>
     <section :class="{section:!['/login'].includes($route.path)}">
@@ -44,7 +44,7 @@ export default {
   }
   a{
     text-decoration: none;
-    color: #333;
+    color: #1890FF;
     &:link,&:hover,&:active,&:visited{
       text-decoration: none;
       color: #333;

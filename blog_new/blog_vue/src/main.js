@@ -3,7 +3,10 @@ import App from './App.vue';
 import store from './vuex';
 import router from './router';
 
-import { Button,Drawer,Icon,Card ,Tag,message,Modal,Spin,Input,Comment,Avatar,Divider,Menu,Form} from 'ant-design-vue';
+import request from './api/request';
+Vue.prototype.$request=request;
+
+import { Button,Drawer,Icon,Card ,Tag,message,Modal,Spin,Input,Comment,Avatar,Divider,Menu,Form,Checkbox} from 'ant-design-vue';
 Vue.use(Button);
 Vue.use(Drawer);
 Vue.use(Icon);
@@ -16,6 +19,7 @@ Vue.use(Avatar);
 Vue.use(Divider);
 Vue.use(Menu);
 Vue.use(Form);
+Vue.use(Checkbox);
 Vue.prototype.$message=message;
 Vue.prototype.$error=Modal.error;
 
@@ -32,7 +36,5 @@ const vm=new Vue({
   store,
   render: h => h(App)
 });
-
-console.log(88888)
 
 export default vm;

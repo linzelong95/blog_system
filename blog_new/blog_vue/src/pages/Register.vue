@@ -1,11 +1,11 @@
 <template>
-  <div id="login">
+  <div id="register">
     <div class="container">
       <h1>
         <img src="../assets/logo.png">
-        <span>向上的博客</span>
+        <span>注册账户</span>
       </h1>
-      <p>这是我的个人博客，欢迎关注</p>
+      <p>欢迎注册账户，让我们共同学习与进步</p>
       <div class="form">
         <a-form
           :form="form"
@@ -48,6 +48,25 @@
               />
             </a-input>
           </a-form-item>
+                    <a-form-item
+            :validate-status="passwordError() ? 'error' : ''"
+            :help="passwordError() || ''"
+          >
+            <a-input
+              v-decorator="[
+                're-password',
+                {rules: [{ required: true, message: '请再次输入密码!' }]}
+              ]"
+              type="password"
+              placeholder="再次输入密码"
+            >
+              <a-icon
+                slot="prefix"
+                type="lock"
+                style="color:rgba(0,0,0,.25)"
+              />
+            </a-input>
+          </a-form-item>
           <a-form-item
             :validate-status="captchaError() ? 'error' : ''"
             :help="captchaError() || ''"
@@ -69,10 +88,6 @@
             </a-input>
             <img :src="'data:image/png;base64,'+captcha" @click="onGetCaptcha" />
           </a-form-item>
-          <a-form-item class="option">
-            <a-checkbox :checked="autoLogin" @change="changeAutoLogin">自动登录</a-checkbox>
-            <a class="f_right" href="">忘记密码</a>
-          </a-form-item>
           <a-form-item>
             <a-button
               type="primary"
@@ -80,9 +95,11 @@
               :disabled="hasErrors(form.getFieldsError())"
               style="width:100%"
             >
-              登录
+              注册
             </a-button>
-            <router-link to="/register"><a>没有账户？去注册</a></router-link>
+            <router-link to="/login">
+              <a>已有账户？去登陆</a>
+            </router-link>
           </a-form-item>
         </a-form>
       </div>
@@ -101,7 +118,6 @@
       return {
         hasErrors,
         form:this.$form.createForm(this),
-        autoLogin:false,
         captcha:"",
       }
     },
@@ -155,7 +171,7 @@
 </script>
 
 <style lang="scss" scoped>
-  #login{
+  #register{
     width:100%;
     height:100%;
     display: flex;

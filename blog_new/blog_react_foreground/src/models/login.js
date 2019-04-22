@@ -29,7 +29,7 @@ export default {
       if (!autoLoginMark) {
         const verifyCaptchaResult = yield call(handleArticles, { netUrl:VERIFY_WEBPAGE_CAPTCHA.url,captcha });
         if(!verifyCaptchaResult.status) return;
-        accountObj = { ...accountObj, lastTime: new Date().getTime() };
+        accountObj = { ...accountObj, lastTime: Date.now() };
       }
       const publicKey = yield call(handleArticles, { netUrl: GET_PUBLICK_KEY.url });
       const response = yield call(handleArticles, { netUrl: LOGIN.url, account, password : rsa(md5Pwd, publicKey.item) });
