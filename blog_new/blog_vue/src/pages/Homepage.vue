@@ -1,6 +1,6 @@
 <template>
   <div id="homepage">
-    <a-spin :spinning="spinningFlag">
+    <a-spin :spinning="$store.state.spinningFlag">
       <a-drawer
         title="搜索框"
         placement="top"
@@ -61,7 +61,7 @@
         </a-tag>
         <div class="top" v-if="item.isTop===1">置顶</div>
       </a-card>
-      <div class="more" v-if="moreFlag && !spinningFlag">
+      <div class="more" v-if="moreFlag && !$store.state.spinningFlag">
         <a-button @click="loadMore">加载更多</a-button>
       </div>
     </a-spin>
@@ -82,7 +82,6 @@ export default {
       moreFlag:true,
       baseImgUrl,
       conditionQuery: { title: '', category: {}, orderBy: {} },
-      spinningFlag:false,
     }
   },
   mounted(){
@@ -138,9 +137,6 @@ export default {
       margin-bottom:10px;
       position: relative;
       overflow: hidden;
-      &:last-of-type{
-        margin-bottom: 0;
-      }
       .abstract{
         text-indent: 2em;
       }
@@ -169,7 +165,7 @@ export default {
       white-space: normal;
     }
     .more{
-      margin-top:10px;
+      margin-bottom:10px;
       text-align: center;
     }
   }

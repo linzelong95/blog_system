@@ -1,9 +1,15 @@
 <template>
   <div id="app">
     <header  v-if="!['/login','/register'].includes($route.path)">
-      <v-header @executeParentFunc="executeSonSearchInputFocus" />
+      <v-header @executeParentFunc="executeSonSearchInputFocus"  />
     </header>
-    <section :class="{section:!['/login'].includes($route.path)}">
+    <router-link to="/homepage" v-else>
+      <a class="home">
+        <a-icon type="home" />
+        <span>去首页</span>
+      </a>
+    </router-link>
+    <section :class="{section:!['/login','/register'].includes($route.path)}">
       <router-view ref="son" />
     </section>
   </div>
@@ -20,7 +26,7 @@ export default {
   },
   components:{
     "v-header":Header
-  }
+  },
 }
 </script>
 
@@ -72,6 +78,7 @@ export default {
   #app{
     width:100%;
     height:100%;
+    position: relative;
     header{
       position: fixed;
       top:0;
@@ -80,9 +87,14 @@ export default {
       padding: 0px 20px;
       z-index:999;
     }
+    .home{
+      display: block;
+      position: absolute;
+      top:20px;
+      left:20px;
+    }
     .section{
-      margin:0px 10px;
-      padding:64px 0px 10px 0px;
+      padding:64px 10px 0px 10px;
     }
     section{
       height:100%;

@@ -1,14 +1,16 @@
 import axios from 'axios';
 import { stringify } from 'qs';
-import vm from '../main';
+import $store from '../vuex';
+import { Modal} from 'ant-design-vue';
+const $error=Modal.error;
 
 export default function request(url,data={},method="post"){
-  // vm.$store.dispatch({type:"toggleSpinnig",payload:{spinning:true}});
+  $store.dispatch({type:"toggleSpinnig",payload:{spinningFlag:true}});
   let paramObj={method,data,url};
   if(method==="get") paramObj={method,url:`${url}?${stringify(data)}`};
   return axios(paramObj)
     .then(res=>{
-      // vm.$store.dispatch({type:"toggleSpinnig",payload:{spinning:false}});
+      $store.dispatch({type:"toggleSpinnig",payload:{spinningFlag:false}});
       return res.data;
     })
     .catch(e => {
@@ -17,12 +19,11 @@ export default function request(url,data={},method="post"){
       // console.log(3333,e.message)
       // console.log(4444,e.config)
       const {status}=e.response;
-      // vm.$store.dispatch({type:"toggleSpinnig",payload:{spinning:false}});
+      $store.dispatch({type:"toggleSpinnig",payload:{spinningFlag:false}});
       if (status === 401) {
-        // vm.$router.push("/login");
+        $error({title:"请登录后再操作！"});
         return;
       }
-      // vm.$error({title:"请求出错"});
-      // alert(e.message)
+      // $error({title:"请求出错"});
     });
 }

@@ -1,6 +1,6 @@
 <template>
   <div id="register">
-    <div class="container">
+    <div class="container" v-if="!successFlag">
       <h1>
         <img src="../assets/logo.png">
         <span>注册账户</span>
@@ -17,7 +17,7 @@
           >
             <a-input
               v-decorator="[
-                'account',
+                'mail',
                 {rules: [{ required: true, message: 'Please input your username!' }]}
               ]"
               placeholder="账户名"
@@ -54,7 +54,7 @@
           >
             <a-input
               v-decorator="[
-                're-password',
+                'rePassword',
                 {rules: [{ required: true, message: '请再次输入密码!' }]}
               ]"
               type="password"
@@ -104,6 +104,16 @@
         </a-form>
       </div>
     </div>
+    <div class="result" v-else>
+      <img src="../assets/logo.png">
+      <h1>
+        <a-icon type="check-circle" />
+        <span>恭喜您，注册成功！</span>
+      </h1>
+      <router-link to="/login">
+        <a-button type="primary">去登录</a-button>
+      </router-link>
+    </div>
   </div>
 </template>
 
@@ -119,19 +129,11 @@
         hasErrors,
         form:this.$form.createForm(this),
         captcha:"",
+        successFlag:false
       }
     },
     created(){
-      const user = localStorage.getItem('blog_account') || {};
-      const { account, password, lastTime = 0, autoLogin = false } = user;
-      this.autoLogin=autoLogin;
-      const d7 = 7 * 24 * 60 * 60 * 1000;
-      const validTimeFlag = Date.now() - lastTime < d7;
-      if (!autoLogin || !validTimeFlag || !account || !password) {
-        this.onGetCaptcha();
-        return;
-      }
-      this.$store.dispatch({type:"login/login",payload:{account, password, autoLogin ,autoLoginMark: true}});
+      this.onGetCaptcha();
     },
     mounted(){
       this.$nextTick(()=>{
@@ -139,9 +141,6 @@
       });
     },
     methods:{
-      changeAutoLogin(e){
-        this.autoLogin=e.target.checked;
-      },
       userNameError () {
         const { getFieldError, isFieldTouched } = this.form;
         return isFieldTouched('userName') && getFieldError('userName');
@@ -158,8 +157,12 @@
         e.preventDefault();
         this.form.validateFields((err,values)=>{
           if(err) return;
-          this.$store.dispatch({type:"login/login",payload:{...values,autoLogin:this.autoLogin}});
-
+          const {password,rePassword}=values;
+          if(password!==rePassword) return this.$error({title:"两次密码不一致"});
+          this.$store.dispatch({type:"login/register",payload:values})
+            .then(res=>{
+              this.successFlag=res==="success";
+            })
         })
       },
       onGetCaptcha(){
@@ -195,9 +198,17 @@
             width:30%;
           }
         }
-        .option{
-          margin:-25px 0px 0px -130px;
-        }
+      }
+    }
+    .result{
+      img{
+        width:100px;
+        height:100px;
+      }
+      h1{
+        color:green;
+        font-weight: 900;
+        margin:30px 0px 50px 0px;
       }
     }
   }

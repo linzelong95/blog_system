@@ -91,6 +91,7 @@
 </template>
 
 <script>
+  import store from 'store';
   import urls from '../api/urls';
   const {AccountAPI}=urls;
   function hasErrors (fieldsError) {
@@ -106,7 +107,7 @@
       }
     },
     created(){
-      const user = localStorage.getItem('blog_account') || {};
+      const user = store.get('blog_account') || {};
       const { account, password, lastTime = 0, autoLogin = false } = user;
       this.autoLogin=autoLogin;
       const d7 = 7 * 24 * 60 * 60 * 1000;
