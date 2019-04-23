@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { stringify } from 'qs';
 import $store from '../vuex';
+import $router from '../router';
 import { Modal} from 'ant-design-vue';
 const $error=Modal.error;
 
@@ -18,12 +19,11 @@ export default function request(url,data={},method="post"){
       // console.log(2222,e.request)
       // console.log(3333,e.message)
       // console.log(4444,e.config)
-      const {status}=e.response;
+      const {status,data:{message,needRedirect}}=e.response;
       $store.dispatch({type:"toggleSpinnig",payload:{spinningFlag:false}});
       if (status === 401) {
-        $error({title:"请登录后再操作！"});
-        return;
+        $error({title:message});
+        if(needRedirect) $router.push('/login');
       }
-      // $error({title:"请求出错"});
     });
 }

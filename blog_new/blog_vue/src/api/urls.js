@@ -9,7 +9,6 @@ const urls= {
     GET_PUBLICK_KEY: { url: "/api/account/getpublickey", desc: { zh_CN: "获取公钥", en_US: "get the public key" } },
     GET_WEBPAGE_CAPTCHA: { url: "/api/account/getcaptcha", desc: { zh_CN: "获取网页验证码", en_US: "get captcha of phone" } },
     VERIFY_WEBPAGE_CAPTCHA: { url: "/api/account/verifycaptcha", desc: { zh_CN: "验证网页验证码", en_US: "verify captcha of phone" } },
-
   },
 
   UserArticleAPI: {

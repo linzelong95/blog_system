@@ -1,7 +1,7 @@
 import $router from '../router';
 import {getPageQuery,serialize,rsa} from '../utils/utils.js';
 import $request from '../api/request';
-import { Modal} from 'ant-design-vue';
+import { Modal,message} from 'ant-design-vue';
 import store from 'store';
 import urls from '../api/urls';
 const {AccountAPI}=urls;
@@ -60,6 +60,7 @@ const login={
       const { autoLogin=false} = user;
       store.set('blog_account', { autoLogin});
       commit("save",{loginStatus:false,currentUser:{}});
+      message.success("退出成功！");
       $router.push(`/homepage`);
     },
     async register(_,{payload}){

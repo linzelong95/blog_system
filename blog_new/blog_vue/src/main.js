@@ -6,7 +6,7 @@ import router from './router';
 import request from './api/request';
 Vue.prototype.$request=request;
 
-import { Button,Drawer,Icon,Card ,Tag,message,Modal,Spin,Input,Comment,Avatar,Divider,Menu,Form,Checkbox,Table} from 'ant-design-vue';
+import { Button,Drawer,Icon,Card ,Tag,message,Modal,Spin,Input,Comment,Avatar,Divider,Menu,Form,Checkbox,Table,Badge,Select} from 'ant-design-vue';
 Vue.use(Button);
 Vue.use(Drawer);
 Vue.use(Icon);
@@ -21,8 +21,12 @@ Vue.use(Menu);
 Vue.use(Form);
 Vue.use(Checkbox);
 Vue.use(Table);
+Vue.use(Badge);
+Vue.use(Select);
+Vue.use(Modal);
 Vue.prototype.$message=message;
 Vue.prototype.$error=Modal.error;
+Vue.prototype.$confirm=Modal.confirm;
 
 import moment from 'moment';
 Vue.filter("dateFormat",function(dataStr,pattern="YYYY-MM-DD HH:mm:ss"){

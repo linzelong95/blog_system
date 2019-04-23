@@ -1,6 +1,6 @@
 import Homepage from '../pages/Homepage.vue';
 import OneArticle from '../pages/OneArticle.vue';
-import Tag from '../pages/Tag.vue';
+import Tag from '../pages/Tag/Tag.vue';
 import Login from '../pages/Login.vue';
 import Register from '../pages/Register.vue';
 

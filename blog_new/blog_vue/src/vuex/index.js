@@ -14,7 +14,7 @@ const initState={
   spinningFlag:false,
   list:[],
   index:1,
-  size:12,
+  size:10,
   total:0,
   formItem:{}
 };
@@ -51,7 +51,7 @@ const store=new Vuex.Store({
       }
       if(callback) {
         commit("toggleSpinnig",false);
-        callback();
+        callback(response);
         return;
       }
       if(!action.includes("list")){
@@ -59,10 +59,10 @@ const store=new Vuex.Store({
         // 这里处理操作后的提示信息
         let tempIndex=index;
         do{
-          response=$request(`${baseUrl}/list`,{conditionQuery,index:tempIndex,size,t:Date.now()});
+          response=await $request(`${baseUrl}/list`,{conditionQuery,index:tempIndex,size,t:Date.now()});
           if(!response) return $error({title:"请求出错了！"});
           tempIndex--;
-        }while(tempIndex>0&& response.list && response.list.length);
+        }while(tempIndex>0&& response.list && !response.list.length);
       }
       const {total}=response;
       const maxIndex = Math.ceil(total / size);

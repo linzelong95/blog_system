@@ -58,11 +58,23 @@ module.exports = (options, app) => {
   app.use(passport.session());
   app.passport = passport;
   app.use(async (ctx, next) => {
-    const limitedUrls = ['/admin/', '/user/comment/delete','/user/comment/insert'];
-    if (limitedUrls.some(i => ctx.originalUrl.includes(i)) && !ctx.isAuthenticated()) {
+    const adminUrls = ['/admin/'];
+    const userUrls = ['/user/comment/delete', '/user/comment/insert'];
+    if (userUrls.some(i => ctx.originalUrl.includes(i)) && !ctx.isAuthenticated()) {
       ctx.status = 401;
-      ctx.body = { errMsg: '用户未登录,将为您跳转到首页，请根据需要登录' };
+      ctx.body = { message: '用户未登录!', needRedirect: false };
       return;
+    }
+    if (adminUrls.some(i => ctx.originalUrl.includes(i))) {
+      if (!ctx.isAuthenticated()) {
+        ctx.status = 401;
+        ctx.body = { message: '管理员未登录!', needRedirect: true };
+        return;
+      } else if (ctx.state.user.roleName !== "admin") {
+        ctx.status = 401;
+        ctx.body = { message: '无权限操作！', needRedirect: true };
+        return;
+      }
     }
     await next();
   });

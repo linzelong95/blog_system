@@ -94,10 +94,11 @@ export default {
       left:20px;
     }
     .section{
-      padding:64px 10px 0px 10px;
+      padding:64px 10px 10px 10px;
     }
     section{
-      height:100%;
+      display: block;
+      height:100%; // 为什么设置了100% padding-bottom便不起作用？
     }
   }
 </style>
