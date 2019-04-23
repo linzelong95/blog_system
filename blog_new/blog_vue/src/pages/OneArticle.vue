@@ -1,6 +1,6 @@
 <template>
   <div id="article">
-    <a-spin :spinning="spinningFlag">
+    <a-spin :spinning="$store.state.spinningFlag">
       <h2>{{article.title}}</h2>
       <div class="tags" v-if="article.tags && article.tags.length">
         <b>标签：</b>
@@ -24,31 +24,32 @@
 <script>
 import ShowMarkdown from '../components/ShowMarkdown/ShowMarkdown.vue';
 import Reply from '../components/Reply/Reply.vue';
-import UserArticle from '../api/UserArticle';
-const userArticleAPI=new UserArticle();
-import request from '../api/request';
+import urls from '../api/urls';
+const {UserArticleAPI}=urls;
 export default {
   data () {
     return {
       article:{},
-      spinningFlag:true
     }
   },
-  created(){
-    request()
+  mounted(){
     const articleId=this.$route.params.id;
-    userArticleAPI.list({conditionQuery:{id:articleId}})
-      .then(res=>{
-        const article=res.data.list[0];
-        userArticleAPI.content({articleId})
-          .then(res=>{
-            article.content=res.data.list[0].content;
-            this.article=article;
-            this.spinningFlag=false;
-          })
-          .catch(e=>this.$error({title:"请求出错！"}));
-      })
-      .catch(e=>this.$error({title:"请求出错！"}));
+    this.request({conditionQuery:{id:articleId}},res=>{
+      const article=res.list[0];
+      this.request({netUrl:UserArticleAPI.CONTENT.url,articleId},response=>{
+        article.content=res.list[0].content;
+        this.article=article;
+      });
+    });
+  },
+  destroyed(){
+    this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
+  },
+  methods:{
+    async request(paramsObj={},callback,isConcat){
+      const payload={netUrl:UserArticleAPI.LIST.url,conditionQuery:this.conditionQuery,...paramsObj}
+      this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
+    },
   },
   components:{
     "v-markdown":ShowMarkdown,

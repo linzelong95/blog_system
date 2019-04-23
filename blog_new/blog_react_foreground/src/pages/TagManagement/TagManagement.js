@@ -26,7 +26,7 @@ class TagManagement extends React.Component {
   componentDidMount = () => {
     this.request({ index: 1, size: 10 });
     this.request({ netUrl: AdminSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, res =>
-      // 是否需要disabled字段，待确定
+      // 是否需要disabled字段，待确定,应该不需要吧？
       this.setState({
         categoryOptions: res.list.map(i => {
           const newSort = { ...i };

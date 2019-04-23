@@ -1,5 +1,11 @@
 <template>
   <div id="tag">
+    <div class="breadcrumb">
+      <a-breadcrumb>
+        <a-breadcrumb-item><router-link to="/homepage"><a>首页</a></router-link></a-breadcrumb-item>
+        <a-breadcrumb-item><router-link to="/tag"><a>标签管理</a></router-link></a-breadcrumb-item>
+      </a-breadcrumb>
+    </div>
     <div class="action">
       <span>
         <a-button type="primary" size="small" @click="toggleEditorialPanel">新增</a-button>
@@ -15,7 +21,12 @@
       <a-button type="primary" icon="home" shape="circle" size="small" @click="handleShowAll" />
     </div>
     <a-table
-      :columns="columns"
+      :columns="[
+        {title:'名称',dataIndex:'name',key:'name',sorter:true,width:100},
+        {title:'所属',dataIndex:'sort',key:'sort',sorter:true,width:100,scopedSlots: { customRender: 'sort' },filters:categoryOptions.map(i => ({ text: i.name, value: `${i.id}` })),filteredValue: filters.sort || null},
+        {title:'状态',dataIndex:'isEnable',key:'isEnable',sorter:true,width:100,scopedSlots: { customRender: 'isEnable' },filters: [{ text: '不可用', value: '0' }, { text: '可用', value: '1' }],filterMultiple: false,filteredValue: filters.isEnable || null},
+        {title:'操作',dataIndex:'action',key:'action',width:100,fixed:'right',scopedSlots: { customRender: 'action' }},
+      ]"
       :rowKey="record=>record.id"
       :dataSource="$store.state.list"
       :loading="$store.state.spinningFlag"
@@ -29,7 +40,7 @@
         pageSize:$store.state.size,
       }"
       @change="handleTableChange"
-      :scroll="{x:400}"
+      :scroll="{x:450}"
       size="small"
     >
       <template slot="sort" slot-scope="val">
@@ -60,23 +71,17 @@
 <script>
   import EditorialForm from './EditorialForm.vue'
   import urls from '../../api/urls';
-  const { AdminTagAPI }=urls;
-  const columns=[
-    {title:"名称",dataIndex:"name",key:"name",sorter:true,width:100},
-    {title:"所属",dataIndex:"sort",key:"sort",sorter:true,width:100,scopedSlots: { customRender: 'sort' }},
-    {title:"状态",dataIndex:"isEnable",key:"isEnable",sorter:true,width:100,scopedSlots: { customRender: 'isEnable' }},
-    {title:"操作",dataIndex:"action",key:"action",width:100,fixed:"right",scopedSlots: { customRender: 'action' }},
-  ];
+  const { AdminTagAPI ,AdminSortAPI}=urls;
   export default {
     data () {
       return {
-        columns,
         conditionQuery: { title: '', category: {}, orderBy: {} },
         selectedItems:[],
         filters: {},
         AdminTagAPI,
         editorialPanelVisible:false,
-        formItem:{}
+        formItem:{},
+        categoryOptions:[]
       }
     },
     components:{
@@ -84,6 +89,9 @@
     },
     mounted(){
       this.request();
+      this.request({ netUrl: AdminSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, res =>{
+        this.categoryOptions=res.list;
+      });
     },
     destroyed(){
       this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
@@ -101,6 +109,7 @@
         this.editorialPanelVisible=!this.editorialPanelVisible;
       },
       cleanFormItem(){
+        this.cleanSelectedItem();
         this.formItem={};
       },
       handleShowAll(){
@@ -175,6 +184,9 @@
     background: white;
     padding:10px 5px 0px 5px;
     margin-bottom:10px;
+    .breadcrumb{
+      margin-bottom: 5px;
+    }
     .action{
       margin-bottom: 10px;
       display: flex;

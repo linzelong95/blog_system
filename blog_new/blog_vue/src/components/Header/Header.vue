@@ -29,7 +29,7 @@
         <a-menu
           style="width: 256px"
           mode="vertical"
-          v-model="current"
+          :selectedKeys="current"
           @click="changeMenu"
         >
           <a-menu-item key="homepage">
@@ -63,6 +63,7 @@
 </template>
 
 <script>
+import store from 'store';
 import urls from '../../api/urls';
 const {AccountAPI}=urls;
 export default {
@@ -73,8 +74,15 @@ export default {
       current:["homepage"]
     }
   },
-  created(){
+  mounted(){
     this.backFlag=this.$route.path!=="/homepage";
+    const currentPageUrl=window.location.href;
+    const loginStatus=this.$store.state.login.loginStatus;
+    const user=store.get("blog_account")||{};
+    const {currentUser}=user;
+    if(!loginStatus&&currentUser&&!currentPageUrl.includes("/login")){
+      this.$store.dispatch({type:"login/login",payload:{...user,autoLoginMark:true}});
+    }
   },
   methods:{
     toggleMenu(){

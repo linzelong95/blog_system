@@ -26,19 +26,17 @@ const store=new Vuex.Store({
     },
     save(state,payload){
       const {list:preList,index:preIndex,size:preSize,total:preTotal,formItem:preFormItem}=state;
-      const {list=preList,index=preIndex,size=preSize,total=preTotal,formItem=preFormItem}=payload;
+      const {list=preList,index=preIndex,size=preSize,total=preTotal,formItem=preFormItem,isConcat}=payload;
       state.list=list;
       state.index=index;
       state.size=size;
       state.total=total;
       state.formItem=formItem;
+      if(isConcat) state.list=[...preList,...list];
     }
   },
   actions:{
-    toggleSpinnig({commit},{payload,isConcat}){
-      commit("toggleSpinnig",payload.spinningFlag);
-    },
-    async commonHandle({state,commit},{payload,callback}){
+    async commonHandle({state,commit},{payload,callback,isConcat}){
       commit("toggleSpinnig",true);
       const {index:pageIndex,size:pageSize}=state;
       const {netUrl,index=pageIndex,size=pageSize,conditionQuery}=payload;
@@ -67,7 +65,7 @@ const store=new Vuex.Store({
       const {total}=response;
       const maxIndex = Math.ceil(total / size);
       const actualIndex = maxIndex > index ? index : maxIndex < 1 ? 1 : maxIndex;
-      commit("save",{...response,index:actualIndex,size});
+      commit("save",{...response,index:actualIndex,size,isConcat});
       commit("toggleSpinnig",false);
     }
   },
