@@ -21,7 +21,7 @@
         </div>
       </a-drawer>
       <a-card
-        v-for="item in list"
+        v-for="item in $store.state.list"
         :key="item.id"
         class="card"
         @click="readArticle(item.id)"
@@ -61,7 +61,7 @@
         </a-tag>
         <div class="top" v-if="item.isTop===1">置顶</div>
       </a-card>
-      <div class="more" v-if="moreFlag && !$store.state.spinningFlag">
+      <div class="more" v-if="$store.state.list.length!== $store.state.total && !$store.state.spinningFlag">
         <a-button @click="loadMore">加载更多</a-button>
       </div>
     </a-spin>
@@ -75,42 +75,23 @@ const {UserArticleAPI}=urls;
 export default {
   data () {
     return {
-      list:[],
-      total:0,
-      index:1,
-      size:10,
-      moreFlag:true,
       baseImgUrl,
       conditionQuery: { title: '', category: {}, orderBy: {} },
     }
   },
   mounted(){
-    this.getArticleList();
+    this.request({},null,true);
+  },
+  destroyed(){
+    this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
   },
   methods:{
     async request(paramsObj={},callback,isConcat){
       const payload={netUrl:UserArticleAPI.LIST.url,conditionQuery:this.conditionQuery,...paramsObj}
       this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
     },
-    async getArticleList(paramsObj={},isConcat){
-      const {index=this.index,size=this.size}=paramsObj;
-      const newParamsObj={
-        size,
-        index,
-        conditionQuery:this.conditionQuery,
-        ...paramsObj
-      }
-      const data=await this.$request(UserArticleAPI.LIST.url,newParamsObj);
-      if(!data) return;
-      const {list,total}=data;
-      const newList=isConcat?[...this.list,...list]:list;
-      this.list=newList;
-      this.index=index;
-      this.total=total;
-      this.moreFlag=newList.length!==total;
-    },
     loadMore(){
-      this.getArticleList({index:this.index+1},true);
+      this.request({index:this.$store.state.index+1},null,true);
     },
     toggleShowSearch(){
       this.$store.dispatch({type:"search/toggleSearchBox"});
@@ -119,12 +100,12 @@ export default {
       this.$nextTick(()=>this.$refs.searchInput.focus());
     },
     searchArticle(){
-      this.getArticleList({index:1});
+      this.request({index:1},null,true);
       this.toggleShowSearch();
     },
     resetTitle(){
       this.conditionQuery.title="";
-      this.getArticleList({index:1});
+      this.request({index:1},null,true);
       this.toggleShowSearch();
     },
     readArticle(id){

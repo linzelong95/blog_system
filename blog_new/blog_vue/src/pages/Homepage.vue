@@ -1,27 +1,12 @@
 <template>
   <div id="homepage">
-    <a-spin :spinning="$store.state.spinningFlag">
-      <a-drawer
-        title="搜索框"
-        placement="top"
-        :height="100"
-        @close="toggleShowSearch"
-        :visible="$store.state.search.searchBoxFlag"
-        :zIndex="998"
-      >
-        <div style="display:flex;justify-content:space-between">
-          <a-input-search
-            placeholder="文章搜索"
-            v-model="conditionQuery.title"
-            @search="searchArticle"
-            enterButton
-            ref="searchInput"
-          />
-          <a-button type="danger" shape="circle" icon="reload" @click="resetTitle" />
-        </div>
-      </a-drawer>
+    <a-spin :spinning="spinningFlag">
+      <v-search 
+        @request="request"
+        ref="searchRef"
+      />
       <a-card
-        v-for="item in $store.state.list"
+        v-for="item in list"
         :key="item.id"
         class="card"
         @click="readArticle(item.id)"
@@ -56,63 +41,63 @@
             </div>
           </template>
         </a-card-meta>
-        <a-tag color="purple" class="category" v-show="item.category!==undefined">
+        <a-tag color="purple" class="category" v-if="item.category && item.category.sort">
           <a-icon type="tag" />&nbsp;{{item.category.sort.name}},{{item.category.name}}
         </a-tag>
         <div class="top" v-if="item.isTop===1">置顶</div>
       </a-card>
-      <div class="more" v-if="$store.state.list.length!== $store.state.total && !$store.state.spinningFlag">
-        <a-button @click="loadMore">加载更多</a-button>
+      <div class="more" v-if="list.length!== total && !spinningFlag">
+        <a-button @click="loadMore">加载更多>></a-button>
       </div>
     </a-spin>
   </div>
 </template>
 
 <script>
-import {baseImgUrl} from '../utils/defaultSetting.js';
-import urls from '../api/urls';
-const {UserArticleAPI}=urls;
-export default {
-  data () {
-    return {
-      baseImgUrl,
-      conditionQuery: { title: '', category: {}, orderBy: {} },
+  import {mapState} from 'vuex';
+  import Search from '../components/Search/Search.vue';
+  import {baseImgUrl} from '../utils/defaultSetting.js';
+  import urls from '../api/urls';
+  const {UserArticleAPI}=urls;
+  export default {
+    data () {
+      return {
+        baseImgUrl,
+        conditionQuery: { title: '', category: {}, orderBy: {} },
+      }
+    },
+    components:{
+      "v-search":Search 
+    },
+    mounted(){
+      this.request({},null,true);
+    },
+    destroyed(){
+      this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
+    },
+    methods:{
+      async request(paramsObj={},callback,isConcat){
+        const conditionQuery={...this.conditionQuery,title:this.searchContent};
+        const payload={netUrl:UserArticleAPI.LIST.url,conditionQuery,...paramsObj}
+        this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
+      },
+      loadMore(){
+        this.request({index:this.index+1},null,true);
+      },
+      searchInputFocus(){
+        this.$nextTick(()=>this.$refs.searchRef.focus());
+      },
+      readArticle(id){
+        this.$router.push(`/read/${id}`);
+      },
+    },
+    computed:{
+      ...mapState(['list','total','index','spinningFlag']),
+      ...mapState({
+        searchContent:state=>state.search.searchContent
+      }),
     }
-  },
-  mounted(){
-    this.request({},null,true);
-  },
-  destroyed(){
-    this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
-  },
-  methods:{
-    async request(paramsObj={},callback,isConcat){
-      const payload={netUrl:UserArticleAPI.LIST.url,conditionQuery:this.conditionQuery,...paramsObj}
-      this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
-    },
-    loadMore(){
-      this.request({index:this.$store.state.index+1},null,true);
-    },
-    toggleShowSearch(){
-      this.$store.dispatch({type:"search/toggleSearchBox"});
-    },
-    searchInputFocus(){
-      this.$nextTick(()=>this.$refs.searchInput.focus());
-    },
-    searchArticle(){
-      this.request({index:1},null,true);
-      this.toggleShowSearch();
-    },
-    resetTitle(){
-      this.conditionQuery.title="";
-      this.request({index:1},null,true);
-      this.toggleShowSearch();
-    },
-    readArticle(id){
-      this.$router.push(`/read/${id}`);
-    },
   }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -122,6 +107,9 @@ export default {
       margin-bottom:10px;
       position: relative;
       overflow: hidden;
+      &:last-of-type{
+        margin-bottom:0px;
+      }
       .abstract{
         text-indent: 2em;
       }
@@ -150,7 +138,7 @@ export default {
       white-space: normal;
     }
     .more{
-      margin-bottom:10px;
+      margin-top:10px;
       text-align: center;
     }
   }

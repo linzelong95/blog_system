@@ -12,7 +12,7 @@
     <div class="menu">
       <span class="search" @click="toggleShowSearch">
         <a-icon type="search" />
-        <a-icon type="caret-down" class="down" v-if="$store.state.search.searchBoxFlag" />
+        <a-icon type="caret-down" class="down" v-if="searchBoxFlag" />
         <a-icon type="caret-up" class="up" v-else />
       </span>
       &nbsp;&nbsp;&nbsp;
@@ -47,13 +47,13 @@
           <a-menu-item key="reply">
             <a-icon type="calendar" />回复管理
           </a-menu-item>
-          <a-menu-item key="logout" v-show="$store.state.login.loginStatus">
+          <a-menu-item key="logout" v-show="loginStatus">
             <a-icon type="calendar" />退出账号
           </a-menu-item>
-          <a-menu-item key="login" v-show="!$store.state.login.loginStatus">
+          <a-menu-item key="login" v-show="!loginStatus">
             <a-icon type="calendar"/>登录账号
           </a-menu-item>
-          <a-menu-item key="register" v-show="!$store.state.login.loginStatus">
+          <a-menu-item key="register" v-show="!loginStatus">
             <a-icon type="calendar" />注册账号
           </a-menu-item>
         </a-menu>
@@ -63,55 +63,63 @@
 </template>
 
 <script>
-import store from 'store';
-import urls from '../../api/urls';
-const {AccountAPI}=urls;
-export default {
-  data () {
-    return {
-      menuFlag:false,
-      backFlag:false,
-      current:["homepage"]
-    }
-  },
-  mounted(){
-    this.backFlag=this.$route.path!=="/homepage";
-    const currentPageUrl=window.location.href;
-    const loginStatus=this.$store.state.login.loginStatus;
-    const user=store.get("blog_account")||{};
-    const {currentUser}=user;
-    if(!loginStatus&&currentUser&&!currentPageUrl.includes("/login")){
-      this.$store.dispatch({type:"login/login",payload:{...user,autoLoginMark:true}});
-    }
-  },
-  methods:{
-    toggleMenu(){
-      this.menuFlag=!this.menuFlag;
-    },
-    goBack(){
-      this.$router.go(-1);
-    },
-    toggleShowSearch(){
-      this.$store.dispatch({type:"search/toggleSearchBox"});
-      if(this.$store.state.search.searchBoxFlag) this.$emit("executeParentFunc");
-    },
-    async changeMenu(obj){
-      const {key}=obj;
-      this.toggleMenu();
-      if(key==="logout") {
-        this.$store.dispatch({type:"login/logout"});
-        return;
+  import {mapState} from 'vuex';
+  import store from 'store';
+  import urls from '../../api/urls';
+  const {AccountAPI}=urls;
+  export default {
+    data () {
+      return {
+        menuFlag:false,
+        backFlag:false,
+        current:["homepage"]
       }
-      this.$router.push(`/${key}`);
-    }
-  },
-  watch:{
-    "$route.path":function(newVal){
-      this.backFlag=newVal!=="/homepage";
-      this.current=[newVal.slice(1)];
+    },
+    mounted(){
+      const pathname=this.$route.path.substring(1);
+      this.current=[pathname];
+      this.backFlag=pathname!=="homepage";
+      const currentPageUrl=window.location.href;
+      const user=store.get("blog_account")||{};
+      const {currentUser}=user;
+      if(!this.loginStatus&&currentUser&&!currentPageUrl.includes("/login")){
+        this.$store.dispatch({type:"login/login",payload:{...user,autoLoginMark:true}});
+      }
+    },
+    methods:{
+      toggleMenu(){
+        this.menuFlag=!this.menuFlag;
+      },
+      goBack(){
+        this.$router.go(-1);
+      },
+      toggleShowSearch(){
+        this.$store.dispatch({type:"search/toggleSearchBox"});
+        if(this.searchBoxFlag) this.$emit("executeParentFunc");
+      },
+      changeMenu(obj){
+        const {key}=obj;
+        this.toggleMenu();
+        if(key==="logout") {
+          this.$store.dispatch({type:"login/logout"});
+          return;
+        }
+        this.$router.push(`/${key}`);
+      }
+    },
+    watch:{
+      "$route.path":function(newVal){
+        this.backFlag=newVal!=="/homepage";
+        this.current=[newVal.substring(1)];
+      }
+    },
+    computed:{
+      ...mapState({
+        searchBoxFlag:state=>state.search.searchBoxFlag,
+        loginStatus:state=>state.login.loginStatus,
+      }),
     }
   }
-}
 </script>
 
 <style lang="scss" scoped>

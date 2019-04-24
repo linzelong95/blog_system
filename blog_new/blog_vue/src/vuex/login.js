@@ -1,7 +1,7 @@
 import $router from '../router';
 import {getPageQuery,serialize,rsa} from '../utils/utils.js';
 import $request from '../api/request';
-import { Modal,message} from 'ant-design-vue';
+import { Modal} from 'ant-design-vue';
 import store from 'store';
 import urls from '../api/urls';
 const {AccountAPI}=urls;
@@ -54,14 +54,21 @@ const login={
       }
       $router.push(redirect||"/homepage");
     },
-    async logout({commit}){
+    async logout({commit},{payload={}}){
       await $request(AccountAPI.LOGOUT.url );
       const user =store.get("blog_account") || {};
       const { autoLogin=false} = user;
       store.set('blog_account', { autoLogin});
       commit("save",{loginStatus:false,currentUser:{}});
-      message.success("退出成功！");
-      $router.push(`/homepage`);
+      // $router.push(`/homepage`);
+      const {path}=payload;
+      let currentPageUrl=window.location.href;
+      if(path) {
+        const index=currentPageUrl.lastIndexOf("/");
+        currentPageUrl=currentPageUrl.substring(0,index)+path;
+      }
+      if(currentPageUrl.includes("/exception")) return $router.push(`/homepage`);
+      $router.push(`/login?redirect=${currentPageUrl}`);
     },
     async register(_,{payload}){
       const {password,captcha}=payload;

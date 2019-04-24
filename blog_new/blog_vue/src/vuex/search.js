@@ -1,17 +1,24 @@
 const search={
   namespaced:true,
   state:{
-    searchBoxFlag:false
+    searchBoxFlag:false,
+    searchContent:""
   },
   mutations:{
-    toggleSearchBox(state){
+    toggleSearchBox(state,searchBoxFlag){
       state.searchBoxFlag=!state.searchBoxFlag;
+      if(searchBoxFlag!==undefined) state.searchBoxFlag=searchBoxFlag;
+    },
+    setSearchContent(state,searchContent){
+      state.searchContent=searchContent;
     }
   },
   actions:{
-    toggleSearchBox(context,payload){
-      // context包含 commit rootState state dispatch
-      context.commit("toggleSearchBox");
+    toggleSearchBox({commit},{payload={}}){
+      commit("toggleSearchBox",payload.searchBoxFlag);
+    },
+    setSearchContent({commit},{payload}){
+      commit("setSearchContent",payload.searchContent);
     }
   },
   getters:{

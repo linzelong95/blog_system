@@ -30,10 +30,13 @@ Vue.prototype.$error=Modal.error;
 Vue.prototype.$confirm=Modal.confirm;
 
 router.beforeEach((to,from,next)=>{
-  const {meta={}}=to;
+  const {meta={},path}=to;
   const {currentUser={}}=store.state.login;
   if(!meta.auth) return next(); 
-  if(!currentUser.account) return next("/login");
+  if(!currentUser.account) {
+    store.dispatch({type:"login/logout",payload:{path}});
+    return;
+  }
   if(meta.role==="user" || currentUser.roleName==="admin") return next();
   message.error("无权限！");
   next("/homepage");

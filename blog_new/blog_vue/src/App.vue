@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <header  v-if="!['/login','/register'].includes($route.path)">
+    <header  v-if="showHeaderFlag">
       <v-header @executeParentFunc="executeSonSearchInputFocus"  />
     </header>
     <router-link to="/homepage" v-else>
@@ -9,7 +9,7 @@
         <span>去首页</span>
       </a>
     </router-link>
-    <section :class="{section:!['/login','/register'].includes($route.path)}">
+    <section :class="{section:showHeaderFlag,fullScreen:!showHeaderFlag}">
       <router-view ref="son" />
     </section>
   </div>
@@ -19,6 +19,14 @@
 import Header from './components/Header/Header.vue';
 export default {
   name: 'app',
+  data(){
+    return {
+      showHeaderFlag:true
+    }
+  },
+  mounted(){
+    this.showHeaderFlag=!['/login','/register'].includes(this.$route.path);
+  },
   methods:{
     executeSonSearchInputFocus(){
       this.$refs.son.searchInputFocus();
@@ -27,6 +35,11 @@ export default {
   components:{
     "v-header":Header
   },
+  watch:{
+    "$route.path":function(newVal){
+      this.showHeaderFlag=!['/login','/register'].includes(newVal);
+    }
+  }
 }
 </script>
 
@@ -96,9 +109,8 @@ export default {
     .section{
       padding:64px 10px 10px 10px;
     }
-    section{
-      display: block;
-      height:100%; // 为什么设置了100% padding-bottom便不起作用？
+    .fullScreen{
+      height:100%;
     }
   }
 </style>

@@ -21,7 +21,7 @@ const initState={
 const store=new Vuex.Store({
   state:initState,
   mutations:{
-    toggleSpinnig(state,spinningFlag){
+    toggleSpinning(state,spinningFlag){
       state.spinningFlag=spinningFlag;
     },
     save(state,payload){
@@ -37,18 +37,18 @@ const store=new Vuex.Store({
   },
   actions:{
     async commonHandle({state,commit},{payload,callback,isConcat}){
-      commit("toggleSpinnig",true);
+      commit("toggleSpinning",true);
       const {index:pageIndex,size:pageSize}=state;
       const {netUrl,index=pageIndex,size=pageSize,conditionQuery}=payload;
       const position=netUrl.lastIndexOf("/")+1;
       let action=netUrl.substring(position);
       let response=await $request(netUrl,{...payload,size,index,t:Date.now()});
       if(!response) {
-        commit("toggleSpinnig",false);
+        commit("toggleSpinning",false);
         return;
       }
       if(callback) {
-        commit("toggleSpinnig",false);
+        commit("toggleSpinning",false);
         callback(response);
         return;
       }
@@ -66,7 +66,7 @@ const store=new Vuex.Store({
       const maxIndex = Math.ceil(total / size);
       const actualIndex = maxIndex > index ? index : maxIndex < 1 ? 1 : maxIndex;
       commit("save",{...response,index:actualIndex,size,isConcat});
-      commit("toggleSpinnig",false);
+      commit("toggleSpinning",false);
     }
   },
   modules:{

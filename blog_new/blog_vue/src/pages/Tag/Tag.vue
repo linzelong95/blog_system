@@ -1,5 +1,9 @@
 <template>
   <div id="tag">
+    <v-search 
+      @request="request"
+      ref="searchRef"
+    />
     <div class="breadcrumb">
       <a-breadcrumb>
         <a-breadcrumb-item><router-link to="/homepage"><a>首页</a></router-link></a-breadcrumb-item>
@@ -28,16 +32,16 @@
         {title:'操作',dataIndex:'action',key:'action',width:100,fixed:'right',scopedSlots: { customRender: 'action' }},
       ]"
       :rowKey="record=>record.id"
-      :dataSource="$store.state.list"
-      :loading="$store.state.spinningFlag"
+      :dataSource="list"
+      :loading="spinningFlag"
       :rowSelection="{
         selectedRowKeys:selectedItems.map(i=>i.id),
         onChange:handleSelectRows
       }"
       :pagination="{
-        current:$store.state.index,
-        total:$store.state.total,
-        pageSize:$store.state.size,
+        current:index,
+        total:total,
+        pageSize:size,
       }"
       @change="handleTableChange"
       :scroll="{x:450}"
@@ -69,13 +73,15 @@
 </template>
 
 <script>
+  import {mapState} from 'vuex';
+  import Search from '../../components/Search/Search.vue';
   import EditorialForm from './EditorialForm.vue'
   import urls from '../../api/urls';
   const { AdminTagAPI ,AdminSortAPI}=urls;
   export default {
     data () {
       return {
-        conditionQuery: { title: '', category: {}, orderBy: {} },
+        conditionQuery: { name: '',orderBy :{}, sortIdsArr : []  },
         selectedItems:[],
         filters: {},
         AdminTagAPI,
@@ -85,7 +91,8 @@
       }
     },
     components:{
-      "v-editor":EditorialForm
+      "v-editor":EditorialForm,
+      "v-search":Search 
     },
     mounted(){
       this.request();
@@ -98,9 +105,13 @@
     },
     methods:{
       async request(paramsObj={},callback,isConcat){
-        const payload={netUrl:AdminTagAPI.LIST.url,conditionQuery:this.conditionQuery,...paramsObj}
+        const conditionQuery={...this.conditionQuery,name:this.searchContent};
+        const payload={netUrl:AdminTagAPI.LIST.url,conditionQuery,...paramsObj};
         this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
         if (payload.netUrl !== AdminTagAPI.LIST.url) this.cleanSelectedItem();
+      },
+      searchInputFocus(){
+        this.$nextTick(()=>this.$refs.searchRef.focus());
       },
       cleanSelectedItem(){
         this.selectedItems=[];
@@ -115,6 +126,7 @@
       handleShowAll(){
         this.conditionQuery={};
         this.filters={};
+        this.$store.dispatch({type:"search/setSearchContent",payload:{searchContent:""}});
         this.request({index:1});
       },
       handleItems(action,item){
@@ -175,7 +187,13 @@
         }
         this.selectedItems=newItems;
       }
-    }
+    },
+    computed:{
+    ...mapState(['list','total','index','size','spinningFlag']),
+    ...mapState({
+      searchContent:state=>state.search.searchContent
+    }),
+  }
   }
 </script>
 
@@ -183,7 +201,6 @@
   #tag{
     background: white;
     padding:10px 5px 0px 5px;
-    margin-bottom:10px;
     .breadcrumb{
       margin-bottom: 5px;
     }
