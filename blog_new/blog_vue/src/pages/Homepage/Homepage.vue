@@ -1,6 +1,7 @@
 <template>
   <div id="homepage">
     <a-spin :spinning="spinningFlag">
+      <v-action class="action" @request="request" @changeConditionQuery="changeConditionQuery" :conditionQuery="conditionQuery" />
       <v-search 
         @request="request"
         ref="searchRef"
@@ -55,9 +56,10 @@
 
 <script>
   import {mapState} from 'vuex';
-  import Search from '../components/Search/Search.vue';
-  import {baseImgUrl} from '../utils/defaultSetting.js';
-  import urls from '../api/urls';
+  import Search from '../../components/Search/Search.vue';
+  import Action from './Action.vue';
+  import {baseImgUrl} from '../../utils/defaultSetting.js';
+  import urls from '../../api/urls';
   const {UserArticleAPI}=urls;
   export default {
     data () {
@@ -67,7 +69,8 @@
       }
     },
     components:{
-      "v-search":Search 
+      "v-search":Search ,
+      "v-action":Action
     },
     mounted(){
       this.request({},null,true);
@@ -80,6 +83,9 @@
         const conditionQuery={...this.conditionQuery,title:this.searchContent};
         const payload={netUrl:UserArticleAPI.LIST.url,conditionQuery,...paramsObj}
         this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
+      },
+      changeConditionQuery(obj){
+        this.conditionQuery={...this.conditionQuery,...obj};
       },
       loadMore(){
         this.request({index:this.index+1},null,true);
@@ -103,6 +109,12 @@
 <style lang="scss" scoped>
   #homepage{
     width:100%;
+    .action{
+      position: fixed;
+      top:250px;
+      left:0px;
+      z-index: 1000;
+    }
     .card{
       margin-bottom:10px;
       position: relative;

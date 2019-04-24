@@ -113,9 +113,9 @@ class HomePage extends React.Component {
 
   handleTagSelect = (id, checked) => {
     const { temporaryCondition: { tagIdsArr = [] } } = this.state;
-    const newlabelIds = checked ? [...tagIdsArr, id] : tagIdsArr.filter(i => i !== id);
+    const newTagIds = checked ? [...tagIdsArr, id] : tagIdsArr.filter(i => i !== id);
     this.setState(oldState => ({
-      temporaryCondition: { ...oldState.temporaryCondition, tagIdsArr: newlabelIds },
+      temporaryCondition: { ...oldState.temporaryCondition, tagIdsArr: newTagIds },
     }));
   }
 
@@ -426,7 +426,7 @@ class HomePage extends React.Component {
                 checkable
                 showLine
                 onCheck={this.conditionTreeSelect}
-                defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
+                // defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
                 checkedKeys={temporaryCondition.filteredSortArr || []}
               >
                 {categoryOptions.map(item => (

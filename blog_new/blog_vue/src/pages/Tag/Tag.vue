@@ -2,6 +2,7 @@
   <div id="tag">
     <v-search 
       @request="request"
+      placeholder="标签搜索"
       ref="searchRef"
     />
     <div class="breadcrumb">

@@ -1,7 +1,7 @@
 <template>
   <div id="tag-edit">
     <a-modal
-      title="哈哈"
+      :title="initialFormData.id?AdminTagAPI.UPDATE.desc['zh_CN']:AdminTagAPI.INSERT.desc['zh_CN']"
       :visible="editorialPanelVisible"
       width="100%"
       okText="确定"
