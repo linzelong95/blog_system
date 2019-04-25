@@ -1,7 +1,12 @@
 <template>
   <div id="homepage">
     <a-spin :spinning="spinningFlag">
-      <v-action class="action" @request="request" @changeConditionQuery="changeConditionQuery" :conditionQuery="conditionQuery" />
+      <v-action 
+        class="action" 
+        @request="request" 
+        @changeConditionQuery="changeConditionQuery" 
+        :conditionQuery="conditionQuery" 
+      />
       <v-search 
         @request="request"
         ref="searchRef"
@@ -57,7 +62,7 @@
 <script>
   import {mapState} from 'vuex';
   import Search from '../../components/Search/Search.vue';
-  import Action from './Action.vue';
+  import Action from '../../components/Action/Action.vue';
   import {baseImgUrl} from '../../utils/defaultSetting.js';
   import urls from '../../api/urls';
   const {UserArticleAPI}=urls;

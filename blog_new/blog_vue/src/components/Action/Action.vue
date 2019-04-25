@@ -1,12 +1,29 @@
 <template>
   <div id="action">
-    <a-badge :dot="temporaryCondition.filterflag"><a-icon type="appstore" theme="twoTone" class="appstore" @click="toggleExpand" /></a-badge>
-    <div class="category" :class="{active:temporaryCondition.filteredSortArr&&temporaryCondition.filteredSortArr.length > 0}" v-show="expandFlag" @click="selectAction('category')">分类</div>
-    <div class="tag" :class="{active:temporaryCondition.tagIdsArr && temporaryCondition.tagIdsArr.length > 0}" v-show="expandFlag" @click="selectAction('tag')">标签</div>
-    <div class="sort" v-show="expandFlag" @click="selectAction('sort')">排序</div>
+    <a-badge :dot="temporaryCondition.filterflag||(conditionQuery.orderBy && Object.keys(conditionQuery.orderBy).length > 0)"><a-icon type="appstore" theme="twoTone" class="appstore" @click="toggleExpand" /></a-badge>
+    <div class="filter" :class="{active:temporaryCondition.filterflag}" v-show="expandFlag" @click="toggleFilterModal">筛选</div>
+    <div class="sort" :class="{active:conditionQuery.orderBy && Object.keys(conditionQuery.orderBy).length > 0}" v-show="expandFlag" @click="toggleSorter">排序
+      <div class="item" v-if="showSorterFlag">
+        <a-tag color="magenta" @click.stop="sort" id="default">
+          默认
+          <a-icon type="swap"/>
+        </a-tag>
+        <a-tag color="magenta" @click.stop="sort" id="title">
+          标题
+          <a-icon :type="conditionQuery.orderBy&&conditionQuery.orderBy.name === 'title'&&conditionQuery.orderBy.by === 'DESC'?'down':'up'" />
+        </a-tag>
+        <a-tag color="magenta" @click.stop="sort" id="createDate">
+          时间
+          <a-icon :type="conditionQuery.orderBy&&conditionQuery.orderBy.name === 'createDate'&&conditionQuery.orderBy.by === 'DESC'?'down':'up'" />
+        </a-tag>
+      </div>
+    </div>
+    <div class="clear"  v-show="expandFlag" @click="clearCondition">
+      <a-icon type="redo" theme="outlined" style="font-size:20px;"/>
+    </div>
     <a-modal
       title="请选择"
-      :visible="openModalName!=''"
+      :visible="filterModalVisible"
       width="100%"
       okText="确定"
       cancelText="取消"
@@ -18,26 +35,44 @@
         <a-button key="clear" type="primary" size="small" @click="filterRequest('clear')">清空</a-button>
         <a-button key="ok" type="primary" size="small" @click="filterRequest('category')">确定</a-button>
       </template>
+      <a-radio-group :value="filterSort" buttonStyle="solid" @change="handleFilterSort" size="small">
+        <a-radio-button value="selectedByCate">
+          <a-badge :dot="temporaryCondition.filteredSortArr&&temporaryCondition.filteredSortArr.length > 0">
+            &nbsp;按分类&nbsp;&nbsp;
+          </a-badge>
+        </a-radio-button>
+        <a-radio-button value="selectedByTag">
+          <a-badge :dot="temporaryCondition.tagIdsArr&&temporaryCondition.tagIdsArr.length > 0">
+            &nbsp;按标签&nbsp;&nbsp;
+          </a-badge>
+        </a-radio-button>
+      </a-radio-group>
+      <a-alert
+        message="注意是否同时进行两种类别的筛选！"
+        type="warning"
+        showIcon
+        style="margin:15px 0px"
+      />
       <a-tree
         checkable
         showLine
         :treeData="categoryOptions"
         :checkedKeys="temporaryCondition.filteredSortArr || []"
         @check="conditionTreeSelect"
-        v-if="openModalName==='category'"
+        v-if="filterSort==='selectedByCate'"
       />
-      <a-row>
-        <a-col :span="5" style="margin-top: 5px">请选择：</a-col>
-        <a-col :span="19">
-            <a-checkable-tag
-              v-for="item in tagOptions"
-              :key="item.id"
-              style="margin-top:5px"
-              :checked="temporaryCondition.tagIdsArr && temporaryCondition.tagIdsArr.includes(item.id)"
-              @change="(checked)=>handleTagSelect(checked,item.id)"
-            >
-              {{item.name}}
-            </a-checkable-tag>
+      <a-row v-if="filterSort==='selectedByTag'">
+        <a-col :span="4" style="margin-top: 5px">标签：</a-col>
+        <a-col :span="20">
+          <a-checkable-tag
+            v-for="item in tagOptions"
+            :key="item.id"
+            style="margin-top:5px"
+            :checked="temporaryCondition.tagIdsArr && temporaryCondition.tagIdsArr.includes(item.id)"
+            @change="(checked)=>handleTagSelect(checked,item.id)"
+          >
+            {{item.name}}
+          </a-checkable-tag>
         </a-col>
       </a-row>
     </a-modal>
@@ -51,7 +86,9 @@
     data(){
       return {
         expandFlag:false,
-        openModalName:"",
+        showSorterFlag: false,
+        filterModalVisible:false,
+        filterSort: 'selectedByCate',
         categoryOptions:[],
         tagOptions:[],
         temporaryCondition:{}
@@ -86,15 +123,41 @@
       toggleExpand(){
         this.expandFlag=!this.expandFlag;
       },
-      selectAction(name){
-        this.openModalName=name;
+      toggleSorter(){
+        this.showSorterFlag=!this.showSorterFlag;
+      },
+      toggleFilterModal(){
+        this.filterModalVisible=!this.filterModalVisible;
+      },
+      handleFilterSort(e){
+        this.filterSort=e.target.value;
+      },
+      clearCondition(){
+        this.$emit("changeConditionQuery",{filteredSortArr : [], tagIdsArr : [],orderBy: {}});
+        this.$store.dispatch({type:"search/setSearchContent",payload:{searchContent:""}});
+        this.temporaryCondition={};
+        this.$emit("request",{index:1});
+      },
+      sort(e){
+        const { id: name } = e.currentTarget;
+        if(name==="default"){
+          this.$emit("changeConditionQuery",{orderBy:{}});
+          this.$emit("request",{index:1});
+          this.toggleSorter();
+          this.toggleExpand();
+          return;
+        }
+        const { conditionQuery: { orderBy = {} } } = this;
+        this.$emit("changeConditionQuery",{orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' }});
+        this.$emit("request",{index:1});
       },
       filterRequest(method){
+        this.toggleExpand();
         if (method === 'clear') {
           this.temporaryCondition={};
           return;
         }
-        this.selectAction("");
+        this.toggleFilterModal();
         let filterflag = false;
         if (method === 'exit') {
           const { conditionQuery: { filteredSortArr = [], tagIdsArr = [] } } = this;
@@ -140,27 +203,32 @@
     font-weight: bold;
     color:white;
     text-align: center;
-    line-height: 30px;
+    line-height: 34px;
     .appstore{
       font-size: 30px;
     }
-    .category,.tag,.sort{
+    .filter,.clear,.sort{
       position: absolute;
-      width:30px;
-      height:30px;
-      border-radius: 15px;
+      width:34px;
+      height:34px;
+      border-radius: 17px;
       background:lightskyblue;
     }
-    .category{
+    .filter{
       top:0px;
-      left:30px;
+      left:25px;
     }
-    .tag{
-      left:50px;
+    .clear{
+      bottom:0px;
+      left:25px;
+      background:red;
     }
     .sort{
-      bottom:0px;
-      left:30px;
+      left:50px;
+      .item{
+        position: absolute;
+        left:20px;
+      }
     }
     .active{
       background: lightpink;

@@ -27,7 +27,7 @@
         :visible="menuFlag"
       >
         <a-menu
-          style="width: 256px"
+          style="width: 126px"
           mode="vertical"
           :selectedKeys="current"
           @click="changeMenu"

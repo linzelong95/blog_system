@@ -406,7 +406,7 @@ class HomePage extends React.Component {
                     &nbsp;按分类&nbsp;&nbsp;
                   </Badge>
                 </Radio.Button>
-                <Radio.Button value="selectedByLabel">
+                <Radio.Button value="selectedByTag">
                   <Badge
                     dot={temporaryCondition.tagIdsArr && temporaryCondition.tagIdsArr.length > 0}
                   >
@@ -448,7 +448,7 @@ class HomePage extends React.Component {
                 ))}
               </Tree>
             )}
-            {filterSort === 'selectedByLabel' && (
+            {filterSort === 'selectedByTag' && (
               <Row>
                 <Col span={3} style={{ marginTop: "5px" }}>请选择：</Col>
                 <Col span={21}>

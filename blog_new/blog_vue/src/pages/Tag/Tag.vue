@@ -190,11 +190,11 @@
       }
     },
     computed:{
-    ...mapState(['list','total','index','size','spinningFlag']),
-    ...mapState({
-      searchContent:state=>state.search.searchContent
-    }),
-  }
+      ...mapState(['list','total','index','size','spinningFlag']),
+      ...mapState({
+        searchContent:state=>state.search.searchContent
+      }),
+    }
   }
 </script>
 
