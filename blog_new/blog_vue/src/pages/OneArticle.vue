@@ -1,7 +1,7 @@
 <template>
-  <div id="article">
+  <div id="one-article">
     <a-spin :spinning="$store.state.spinningFlag">
-      <h2>{{article.title}}</h2>
+      <h3 class="title">{{article.title}}</h3>
       <div class="tags" v-if="article.tags && article.tags.length">
         <b>标签：</b>
         <i>{{article.tags.map(i=>i.name).join(", ")}}</i>
@@ -10,8 +10,10 @@
         <b>摘要：</b>
         {{article.abstract}}
       </div>
-      <!-- <v-markdown :value="article.content" /> -->
-      <v-markdown-other>{{article.content}}</v-markdown-other>
+      <div class="content">
+        <v-markdown :value="article.content" />
+        <!-- <v-markdown-other :source="article.content"></v-markdown-other> -->
+      </div>
       <div class="f_right">
         <a-icon type="clock-circle" />
         {{article.createDate|dateFormat}}
@@ -63,14 +65,19 @@
 </script>
 
 <style lang="scss" scoped>
-  #article{
+  #one-article{
     background:white;
     padding:15px;
-    .abstract,.tags{
+    .title,.abstract,.tags{
       text-indent: 2em;
     }
     .abstract{
       margin-bottom:10px;
+    }
+    .content{
+      width:100%;
+      overflow: scroll;
+      overflow-y:hidden;
     }
   }
 </style>

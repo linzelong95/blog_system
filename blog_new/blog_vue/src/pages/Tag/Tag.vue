@@ -5,12 +5,12 @@
       placeholder="标签搜索"
       ref="searchRef"
     />
-    <div class="breadcrumb">
+    <a-divider class="breadcrumb">
       <a-breadcrumb>
         <a-breadcrumb-item><router-link to="/homepage"><a>首页</a></router-link></a-breadcrumb-item>
         <a-breadcrumb-item><router-link to="/tag"><a>标签管理</a></router-link></a-breadcrumb-item>
       </a-breadcrumb>
-    </div>
+    </a-divider>
     <div class="operation">
       <span>
         <a-button type="primary" size="small" @click="toggleEditorialPanel">新增</a-button>
@@ -201,9 +201,9 @@
 <style lang="scss" scoped>
   #tag{
     background: white;
-    padding:10px 5px 0px 5px;
+    padding:10px 10px 0px 10px;
     .breadcrumb{
-      margin-bottom: 5px;
+      margin: 0px;
     }
     .operation{
       margin-bottom: 10px;

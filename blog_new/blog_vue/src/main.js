@@ -6,7 +6,7 @@ import router from './router';
 import request from './api/request';
 Vue.prototype.$request=request;
 
-import { Button,Drawer,Icon,Card ,Tag,message,Modal,Spin,Input,Comment,Avatar,Divider,Menu,Form,Checkbox,Table,Badge,Select,Breadcrumb,Tree,Row,Col,Radio,Alert,List} from 'ant-design-vue';
+import { Button,Drawer,Icon,Card ,Tag,message,Modal,Spin,Input,Comment,Avatar,Divider,Menu,Form,Checkbox,Table,Badge,Select,Breadcrumb,Tree,Row,Col,Radio,Alert,List,Tabs} from 'ant-design-vue';
 Vue.use(Button);
 Vue.use(Drawer);
 Vue.use(Icon);
@@ -31,6 +31,7 @@ Vue.use(Col);
 Vue.use(Radio);
 Vue.use(Alert);
 Vue.use(List);
+Vue.use(Tabs);
 Vue.prototype.$message=message;
 Vue.prototype.$error=Modal.error;
 Vue.prototype.$confirm=Modal.confirm;

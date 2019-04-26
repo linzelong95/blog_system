@@ -10,12 +10,12 @@
       @request="request"
       ref="searchRef"
     />
-    <div class="breadcrumb">
+    <a-divider class="breadcrumb">
       <a-breadcrumb>
         <a-breadcrumb-item><router-link to="/homepage"><a>首页</a></router-link></a-breadcrumb-item>
         <a-breadcrumb-item><router-link to="/article"><a>文章管理</a></router-link></a-breadcrumb-item>
       </a-breadcrumb>
-    </div>
+    </a-divider>
     <div class="operation">
       <span>
         <a-button type="primary" size="small" @click="toggleEditorialPanel" v-if="selectedItems.length===0">新增</a-button>
@@ -53,7 +53,8 @@
             <a @click="readArticle(item.id,'admin')">
               {{item.title}}&nbsp;&nbsp;
               <a-tag color="purple" class="category" v-if="item.category && item.category.sort">
-                <a-icon type="tag" />&nbsp;{{item.category.sort.name}},{{item.category.name}}
+                <!-- <a-icon type="tag" />&nbsp; -->
+                {{item.category.sort.name}},{{item.category.name}}
               </a-tag>
             </a>
           </template>
@@ -221,7 +222,7 @@
       z-index: 1000;
     }
     .breadcrumb{
-      margin-bottom: 5px;
+      margin: 0px;
     }
     .operation{
       margin-bottom: 10px;

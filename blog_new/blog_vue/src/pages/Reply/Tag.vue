@@ -1,18 +1,16 @@
 <template>
-  <div id="category">
+  <div id="tag">
     <v-search 
       @request="request"
-      placeholder="分类搜索"
+      placeholder="标签搜索"
       ref="searchRef"
     />
-    <a-tabs :activeKey="tabKey" size="small" @change="handleChangeTabs">
-      <a-tab-pane tab="父分类" key="sort"/>
-      <a-tab-pane tab="子分类" key="cate"/>
-      <a-breadcrumb slot="tabBarExtraContent" class="breadcrumb">
+    <div class="breadcrumb">
+      <a-breadcrumb>
         <a-breadcrumb-item><router-link to="/homepage"><a>首页</a></router-link></a-breadcrumb-item>
-        <a-breadcrumb-item><router-link to="/category"><a>分类管理</a></router-link></a-breadcrumb-item>
+        <a-breadcrumb-item><router-link to="/tag"><a>标签管理</a></router-link></a-breadcrumb-item>
       </a-breadcrumb>
-    </a-tabs>
+    </div>
     <div class="operation">
       <span>
         <a-button type="primary" size="small" @click="toggleEditorialPanel">新增</a-button>
@@ -20,15 +18,20 @@
           <a-badge :count="selectedItems.length">
             <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button>
           </a-badge>
-          <a-button icon="delete" shape="circle" size="small" style="color:red;margin-left:20px;" @click="handleItems(AdminCateAPI.DELETE)" />
-          <a-button icon="unlock" shape="circle" size="small" style="color:green;" @click="handleItems(AdminCateAPI.UNLOCK)" />
-          <a-button icon="lock" shape="circle" size="small" style="color:#A020F0;" @click="handleItems(AdminCateAPI.LOCK)" />
+          <a-button icon="delete" shape="circle" size="small" style="color:red;margin-left:20px;" @click="handleItems(AdminTagAPI.DELETE)" />
+          <a-button icon="unlock" shape="circle" size="small" style="color:green;" @click="handleItems(AdminTagAPI.UNLOCK)" />
+          <a-button icon="lock" shape="circle" size="small" style="color:#A020F0;" @click="handleItems(AdminTagAPI.LOCK)" />
         </span>
       </span>
       <a-button type="primary" icon="home" shape="circle" size="small" @click="handleShowAll" />
     </div>
     <a-table
-      :columns="getColumn()"
+      :columns="[
+        {title:'名称',dataIndex:'name',key:'name',sorter:true,width:100},
+        {title:'所属',dataIndex:'sort',key:'sort',sorter:true,width:100,scopedSlots: { customRender: 'sort' },filters:categoryOptions.map(i => ({ text: i.name, value: `${i.id}` })),filteredValue: filters.sort || null},
+        {title:'状态',dataIndex:'isEnable',key:'isEnable',sorter:true,width:100,scopedSlots: { customRender: 'isEnable' },filters: [{ text: '不可用', value: '0' }, { text: '可用', value: '1' }],filterMultiple: false,filteredValue: filters.isEnable || null},
+        {title:'操作',dataIndex:'action',key:'action',width:100,fixed:'right',scopedSlots: { customRender: 'action' }},
+      ]"
       :rowKey="record=>record.id"
       :dataSource="list"
       :loading="spinningFlag"
@@ -53,10 +56,10 @@
         <a-tag color="gray" v-else>禁用</a-tag>
       </template>
       <template slot="action" slot-scope="_,item">
-        <a-button icon="form" size="small" shape="circle" style="color:#8B3A3A" @click="handleItems(tabKey==='cate'?AdminCateAPI.FORM:AdminSortAPI.FORM, item)" /> 
-        <a-button icon="delete" size="small" shape="circle" style="color:red" @click="handleItems(tabKey==='cate'?AdminCateAPI.DELETE:AdminSortAPI.DELETE, item)" /> 
-        <a-button icon="lock" size="small" shape="circle" style="color:#A020F0" @click="handleItems(tabKey==='cate'?AdminCateAPI.LOCK:AdminSortAPI.LOCK, item)" v-if="item.isEnable===1" /> 
-        <a-button icon="unlock" size="small" shape="circle" style="color:green" @click="handleItems(tabKey==='cate'?AdminCateAPI.UNLOCK:AdminSortAPI.UNLOCK, item)" v-else /> 
+        <a-button icon="form" size="small" shape="circle" style="color:#8B3A3A" @click="handleItems(AdminTagAPI.FORM, item)" /> 
+        <a-button icon="delete" size="small" shape="circle" style="color:red" @click="handleItems(AdminTagAPI.DELETE, item)" /> 
+        <a-button icon="lock" size="small" shape="circle" style="color:#A020F0" @click="handleItems(AdminTagAPI.LOCK, item)" v-if="item.isEnable===1" /> 
+        <a-button icon="unlock" size="small" shape="circle" style="color:green" @click="handleItems(AdminTagAPI.UNLOCK, item)" v-else /> 
       </template>
     </a-table>
     <v-editor 
@@ -75,19 +78,17 @@
   import Search from '../../components/Search/Search.vue';
   import EditorialForm from './EditorialForm.vue'
   import urls from '../../api/urls';
-  const { AdminCateAPI ,AdminSortAPI}=urls;
+  const { AdminTagAPI ,AdminSortAPI}=urls;
   export default {
     data () {
       return {
         conditionQuery: { name: '',orderBy :{}, sortIdsArr : []  },
         selectedItems:[],
         filters: {},
-        AdminCateAPI,
-        AdminSortAPI,
+        AdminTagAPI,
         editorialPanelVisible:false,
         formItem:{},
-        categoryOptions:[],
-        tabKey:"sort"
+        categoryOptions:[]
       }
     },
     components:{
@@ -96,29 +97,19 @@
     },
     mounted(){
       this.request();
+      this.request({ netUrl: AdminSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, res =>{
+        this.categoryOptions=res.list;
+      });
     },
     destroyed(){
       this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
     },
     methods:{
       async request(paramsObj={},callback,isConcat){
-        const { conditionQuery:con, tabKey,searchContent:name } = this;
-        const conditionQuery={...con,name};
-        const netUrl=tabKey === 'cate' ? AdminCateAPI.LIST.url : AdminSortAPI.LIST.url;
-        const payload={netUrl,conditionQuery,...paramsObj};
+        const conditionQuery={...this.conditionQuery,name:this.searchContent};
+        const payload={netUrl:AdminTagAPI.LIST.url,conditionQuery,...paramsObj};
         this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
-        if (payload.netUrl !== netUrl) this.cleanSelectedItem();
-      },
-      getColumn(){
-        const cateColumn=[
-          {title:'名称',dataIndex:'name',key:'name',sorter:true,width:100},
-          {title:'所属',dataIndex:'sort',key:'sort',sorter:true,width:100,scopedSlots: { customRender: 'sort' },filters:this.categoryOptions.map(i => ({ text: i.name, value: `${i.id}` })),filteredValue: this.filters.sort || null},
-          {title:'状态',dataIndex:'isEnable',key:'isEnable',sorter:true,width:100,scopedSlots: { customRender: 'isEnable' },filters: [{ text: '不可用', value: '0' }, { text: '可用', value: '1' }],filterMultiple: false,filteredValue: this.filters.isEnable || null},
-          {title:'操作',dataIndex:'action',key:'action',width:100,fixed:'right',scopedSlots: { customRender: 'action' }},
-        ];
-        const sortColumn=cateColumn.filter(i=>i.dataIndex!=="sort");
-        // return {cate:cateCloumn,sort:sortColumn};
-             return cateColumn;
+        if (payload.netUrl !== AdminTagAPI.LIST.url) this.cleanSelectedItem();
       },
       searchInputFocus(){
         this.$nextTick(()=>this.$refs.searchRef.focus());
@@ -196,21 +187,6 @@
           newItems = selectedItems.filter(i => keys.some(v => v === i.id));
         }
         this.selectedItems=newItems;
-      },
-      handleChangeTabs(tabKey){
-        this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
-        this.$store.dispatch({type:"search/setSearchContent",payload:{searchContent:""}});
-        // this.setState({ tabKey, selectedRowKeys: [], selectedItems: [], conditionQuery: {}, filters: {}, EditorialForm: tabKey === "cate" ? CateEditorialForm : SortEditorialForm });
-        this.tabKey=tabKey;
-        this.selectedItems=[];
-        this.conditionQuery={};
-        this.filters={};
-        if (tabKey === 'cate') {
-          this.request({ netUrl: AdminCateAPI.LIST.url, index: 1, size: 10 });
-          this.request({ netUrl: AdminSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, res => this.categoryOptions= res.list );
-        } else {
-          this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 10 });
-        }
       }
     },
     computed:{
@@ -223,22 +199,16 @@
 </script>
 
 <style lang="scss" scoped>
-  #category{
+  #tag{
     background: white;
-    padding:0px 10px;
+    padding:10px 5px 0px 5px;
     .breadcrumb{
-      margin-top:8px;
+      margin-bottom: 5px;
     }
     .operation{
       margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
-    }
-    /deep/ .ant-tabs-tab{
-      padding:8px 5px;
-    }
-    /deep/ .ant-tabs-bar{
-      margin-bottom: 10px;
     }
   }
 </style>

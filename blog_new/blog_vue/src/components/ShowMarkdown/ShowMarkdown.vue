@@ -1,12 +1,15 @@
 <template>
-  <div id="markdown" v-html="markedFunc" />
+  <div id="markdown" v-html="markedFunc">
+    <!-- <div v-html="markedFunc" /> -->
+  </div>
 </template>
 
 <script>
 import marked from './helpers/marked';
+import 'highlight.js/styles/tomorrow.css';
 export default {
 
-  props:["value","a"],
+  props:["value"],
   computed:{
     markedFunc:function(){
       return marked(this.value);
@@ -16,8 +19,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @import '../../../node_modules/highlight.js/styles/tomorrow.css';
   #markdown{
-    width: 100%;
     line-height: 2;
 
     p,
