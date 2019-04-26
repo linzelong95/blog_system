@@ -200,12 +200,9 @@ class ReplyManagement extends React.Component {
   };
 
   toggleSelectAll = () => {
-    const {
-      articleManagement: { list = [] },
-    } = this.props;
+    const {articleManagement: { list = [] }} = this.props;
     if (!list.length) return;
-    const { allSelectedFlag } = this.state;
-    const { selectedItems } = this.state;
+    const { allSelectedFlag,selectedItems } = this.state;
     const uniqueSeletedItems = list.filter(i => !selectedItems.some(v => v.id === i.id));
     const newSelectedItems = allSelectedFlag
       ? selectedItems.filter(i => !list.some(v => v.id === i.id))

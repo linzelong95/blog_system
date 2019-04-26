@@ -15,7 +15,7 @@
         v-for="item in list"
         :key="item.id"
         class="card"
-        @click="readArticle(item.id)"
+        @click="readArticle(item.id,'user')"
       >
         <img
           alt="pic"
@@ -98,8 +98,8 @@
       searchInputFocus(){
         this.$nextTick(()=>this.$refs.searchRef.focus());
       },
-      readArticle(id){
-        this.$router.push(`/read/${id}`);
+      readArticle(id,role){
+        this.$router.push(`/read/${role}/${id}`);
       },
     },
     computed:{

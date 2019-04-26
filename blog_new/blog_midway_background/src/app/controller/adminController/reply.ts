@@ -94,4 +94,32 @@ export class AdminReplyController {
     ctx.body = { message: `评论已设置为不通过`, flag };
   }
 
+  @post("/top")
+  async top(ctx): Promise<void> {
+    const { items } = ctx.request.body;
+    const ids = items.map(i => i.id);
+    const flag = await this.adminReplyService.top(ids);
+    if (!flag) {
+      ctx.status = 400;
+      ctx.body = { message: `置顶失败`, flag };
+      return;
+    }
+    ctx.status = 200;
+    ctx.body = { message: `置顶成功`, flag };
+  }
+
+  @post("/untop")
+  async untop(ctx): Promise<void> {
+    const { items } = ctx.request.body;
+    const ids = items.map(i => i.id);
+    const flag = await this.adminReplyService.untop(ids);
+    if (!flag) {
+      ctx.status = 400;
+      ctx.body = { message: `取置失败`, flag };
+      return;
+    }
+    ctx.status = 200;
+    ctx.body = { message: `取置成功`, flag };
+  }
+
 }

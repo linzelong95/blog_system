@@ -144,12 +144,9 @@ class ArticleManagement extends React.Component {
   };
 
   toggleSelectAll = () => {
-    const {
-      articleManagement: { list = [] },
-    } = this.props;
+    const {articleManagement: { list = [] }} = this.props;
     if (!list.length) return;
-    const { allSelectedFlag } = this.state;
-    const { selectedItems } = this.state;
+    const { allSelectedFlag,selectedItems } = this.state;
     const uniqueSeletedItems = list.filter(i => !selectedItems.some(v => v.id === i.id));
     const newSelectedItems = allSelectedFlag
       ? selectedItems.filter(i => !list.some(v => v.id === i.id))
@@ -416,11 +413,11 @@ class ArticleManagement extends React.Component {
                     <Icon type="form" style={{ color: 'green', width: '60px' }} onClick={() => this.handleItems(FORM, item)} />,
                     <Icon type="delete" style={{ color: 'red', width: '60px' }} onClick={() => this.handleItems(DELETE, item)} />,
                     item.isTop === 0
-                      ? <Icon type="arrow-up" style={{ color: '#4169E1', width: '60px' }} onClick={() => this.handleItems(TOP, item)} />
+                      ? <Icon type="arrow-up" style={{ color: '#B8860B', width: '60px' }} onClick={() => this.handleItems(TOP, item)} />
                       : <Icon type="arrow-down" style={{ color: 'black', width: '60px' }} onClick={() => this.handleItems(UNTOP, item)} />,
                     item.isEnable === 1
                       ? <Icon type="lock" style={{ color: '#4169E1', width: '60px' }} onClick={() => this.handleItems(LOCK, item)} />
-                      : <Icon type="unlock" style={{ color: 'black', width: '60px' }} onClick={() => this.handleItems(UNLOCK, item)} />,
+                      : <Icon type="unlock" style={{ color: '#551A8B', width: '60px' }} onClick={() => this.handleItems(UNLOCK, item)} />,
                     <Icon type="eye" style={{ color: '#A52A2A', width: '60px' }} onClick={() => this.readArticle(item)} />,
                   ]}
                   className={styles.eachChild}

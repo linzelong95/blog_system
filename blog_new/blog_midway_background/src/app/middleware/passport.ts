@@ -58,7 +58,6 @@ module.exports = (options, app) => {
   app.use(passport.session());
   app.passport = passport;
   app.use(async (ctx, next) => {
-    console.log(ctx.state.user)
     const adminUrls = ['/admin/'];
     const userUrls = ['/user/comment/delete', '/user/comment/insert'];
     if (userUrls.some(i => ctx.originalUrl.includes(i)) && !ctx.isAuthenticated()) {

@@ -7,7 +7,7 @@ import Register from '../pages/Register.vue';
 
 const routes= [
   {path:'/homepage',component:Homepage},
-  {path:'/read/:id',component:OneArticle},
+  {path:'/read/:role/:id',component:OneArticle},
   {path:'/article',component:Article,meta:{auth:true,role:"admin"}},
   {path:'/tag',component:Tag,meta:{auth:true,role:"admin"}},
   {path:'/login',component:Login},

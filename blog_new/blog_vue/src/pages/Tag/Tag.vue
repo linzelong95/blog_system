@@ -11,7 +11,7 @@
         <a-breadcrumb-item><router-link to="/tag"><a>标签管理</a></router-link></a-breadcrumb-item>
       </a-breadcrumb>
     </div>
-    <div class="action">
+    <div class="operation">
       <span>
         <a-button type="primary" size="small" @click="toggleEditorialPanel">新增</a-button>
         <span v-show="selectedItems.length>0">
@@ -205,7 +205,7 @@
     .breadcrumb{
       margin-bottom: 5px;
     }
-    .action{
+    .operation{
       margin-bottom: 10px;
       display: flex;
       justify-content: space-between;

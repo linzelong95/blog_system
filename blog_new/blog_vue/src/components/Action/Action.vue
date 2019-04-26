@@ -2,7 +2,8 @@
   <div id="action">
     <a-badge :dot="temporaryCondition.filterflag||(conditionQuery.orderBy && Object.keys(conditionQuery.orderBy).length > 0)"><a-icon type="appstore" theme="twoTone" class="appstore" @click="toggleExpand" /></a-badge>
     <div class="filter" :class="{active:temporaryCondition.filterflag}" v-show="expandFlag" @click="toggleFilterModal">筛选</div>
-    <div class="sort" :class="{active:conditionQuery.orderBy && Object.keys(conditionQuery.orderBy).length > 0}" v-show="expandFlag" @click="toggleSorter">排序
+    <div class="sort" :class="{active:conditionQuery.orderBy && Object.keys(conditionQuery.orderBy).length > 0}" v-show="expandFlag" @click="toggleSorter">
+      排序
       <div class="item" v-if="showSorterFlag">
         <a-tag color="magenta" @click.stop="sort" id="default">
           默认
@@ -19,7 +20,7 @@
       </div>
     </div>
     <div class="clear"  v-show="expandFlag" @click="clearCondition">
-      <a-icon type="redo" theme="outlined" style="font-size:20px;"/>
+      <a-icon type="home" theme="outlined" style="font-size:20px;"/>
     </div>
     <a-modal
       title="请选择"
@@ -35,18 +36,20 @@
         <a-button key="clear" type="primary" size="small" @click="filterRequest('clear')">清空</a-button>
         <a-button key="ok" type="primary" size="small" @click="filterRequest('category')">确定</a-button>
       </template>
-      <a-radio-group :value="filterSort" buttonStyle="solid" @change="handleFilterSort" size="small">
-        <a-radio-button value="selectedByCate">
-          <a-badge :dot="temporaryCondition.filteredSortArr&&temporaryCondition.filteredSortArr.length > 0">
-            &nbsp;按分类&nbsp;&nbsp;
-          </a-badge>
-        </a-radio-button>
-        <a-radio-button value="selectedByTag">
-          <a-badge :dot="temporaryCondition.tagIdsArr&&temporaryCondition.tagIdsArr.length > 0">
-            &nbsp;按标签&nbsp;&nbsp;
-          </a-badge>
-        </a-radio-button>
-      </a-radio-group>
+      <div style="text-align:center;">
+        <a-radio-group :value="filterSort" buttonStyle="solid" @change="handleFilterSort" size="small">
+          <a-radio-button value="selectedByCate">
+            <a-badge :dot="temporaryCondition.filteredSortArr&&temporaryCondition.filteredSortArr.length > 0">
+              &nbsp;按分类&nbsp;&nbsp;
+            </a-badge>
+          </a-radio-button>
+          <a-radio-button value="selectedByTag">
+            <a-badge :dot="temporaryCondition.tagIdsArr&&temporaryCondition.tagIdsArr.length > 0">
+              &nbsp;按标签&nbsp;&nbsp;
+            </a-badge>
+          </a-radio-button>
+        </a-radio-group>
+      </div>
       <a-alert
         message="注意是否同时进行两种类别的筛选！"
         type="warning"
@@ -133,10 +136,10 @@
         this.filterSort=e.target.value;
       },
       clearCondition(){
-        this.$emit("changeConditionQuery",{filteredSortArr : [], tagIdsArr : [],orderBy: {}});
         this.$store.dispatch({type:"search/setSearchContent",payload:{searchContent:""}});
         this.temporaryCondition={};
-        this.$emit("request",{index:1});
+        this.$emit("request",{index:1,conditionQuery:{}});
+        this.toggleExpand();
       },
       sort(e){
         const { id: name } = e.currentTarget;

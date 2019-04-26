@@ -84,4 +84,32 @@ export class AdminReplyService {
     return flag;
   }
 
+  async top(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Reply)
+      .set({ isTop: 1 })
+      .where("id in (:...ids)", { ids })
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
+  async untop(ids: number[]) {
+    let flag = true;
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(Reply)
+      .set({ isTop: 0 })
+      .where("id in (:...ids)", { ids })
+      .execute();
+    if (!result.raw.affectedRows) {
+      flag = false;
+    }
+    return flag;
+  }
+
 }
