@@ -49,9 +49,12 @@ const store=new Vuex.Store({
       }
       if(callback) {
         commit("toggleSpinning",false);
+        console.log(1111111111111)
         callback(response);
+        console.log(2222222222222)
         return;
       }
+      console.log(333333333333)
       if(!action.includes("list")){
         const baseUrl=netUrl.substring(0, position - 1);
         // 这里处理操作后的提示信息

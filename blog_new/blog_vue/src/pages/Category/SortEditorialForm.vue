@@ -1,7 +1,7 @@
 <template>
   <div id="tag-edit">
     <a-modal
-      :title="initialFormData.id?AdminTagAPI.UPDATE.desc['zh_CN']:AdminTagAPI.INSERT.desc['zh_CN']"
+      :title="initialFormData.id?AdminSortAPI.UPDATE.desc['zh_CN']:AdminSortAPI.INSERT.desc['zh_CN']"
       :visible="editorialPanelVisible"
       width="100%"
       okText="确定"
@@ -12,11 +12,6 @@
       <a-form :form="form" layout="horizontal">
         <a-form-item label="名称" :label-col="{span:5}" :wrapper-col="{span:15}">
           <a-input v-decorator="['name',{rules:[{required:true,message:'名称是必须的！'}],initialValue:this.initialFormData.name}]" />
-        </a-form-item>
-        <a-form-item label="分类" :label-col="{span:5}" :wrapper-col="{span:15}">
-          <a-select :labelInValue="true" v-decorator="['sort',{rules:[{required:true,message:'分类是必须的！'}],initialValue:this.initialFormData.sort}]">
-            <a-select-option v-for="item in categoryOptions.map(i => ({ label: i.name, value: i.id, disabled: !i.isEnable }))" :key="item.value" :value="item.value" :disabled="item.disabled">{{item.label}}</a-select-option>
-          </a-select>
         </a-form-item>
         <a-form-item label="状态" :label-col="{ span: 5 }" :wrapper-col="{ span: 15 }">
           <a-select v-decorator="['isEnable',{rules: [{ required: true, message: '请选择状态!' }],initialValue:this.initialFormData.isEnable!==undefined?this.initialFormData.isEnable:1}]">
@@ -31,13 +26,12 @@
 
 <script>
   import urls from '../../api/urls';
-  const { AdminTagAPI,AdminSortAPI }=urls;
+  const { AdminSortAPI }=urls;
   export default{
     data(){
       return {
         form:this.$form.createForm(this),
-        AdminTagAPI,
-        categoryOptions: [],
+        AdminSortAPI,
         initialFormData:{}
       }
     },
@@ -45,12 +39,10 @@
     mounted(){
       const formItem=this.formItem;
       if (formItem.id) this.formatInitialFormData(formItem);
-      this.$emit("request",{netUrl: AdminSortAPI.LIST.url, index: 1, size: 999},res=>{this.categoryOptions= res.list;})
     },
     methods:{
       formatInitialFormData (formItem) {
-        const { sort } = formItem;
-        this.initialFormData = { ...formItem, sort: { label: sort.name, key: sort.id } };
+        this.initialFormData = { ...formItem };
       },
       toggleEdit(obj){
         if (obj === 'cancel') {
@@ -62,10 +54,9 @@
         }
         this.form.validateFields((err, values) => {
           if (err) return;
-          const { sort } = values;
           const id=this.formItem.id;
-          const netUrl = id ? AdminTagAPI.UPDATE.url : AdminTagAPI.INSERT.url;
-          this.$emit("request",{ ...values, id, netUrl, sortId: sort.key });
+          const netUrl = id ? AdminSortAPI.UPDATE.url : AdminSortAPI.INSERT.url;
+          this.$emit("request",{ ...values, id, netUrl });
           this.$emit("toggleEditorialPanel");
           this.$emit("cleanFormItem");
           this.form.resetFields();

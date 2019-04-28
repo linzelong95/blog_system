@@ -52,12 +52,8 @@ class CategoryManagement extends React.Component {
 
   toggleEditorialPanel = (flag) => {
     const { editorialPanelVisible, tabKey } = this.state;
-    if (editorialPanelVisible) {
-      this.setState({ EditorialForm: tabKey === "cate" ? CateEditorialForm : SortEditorialForm });
-    }
-    if (flag === "son") {
-      this.setState({ EditorialForm: CateEditorialForm });
-    }
+    if (editorialPanelVisible) this.setState({ EditorialForm: tabKey === "cate" ? CateEditorialForm : SortEditorialForm });
+    if (flag === "son") this.setState({ EditorialForm: CateEditorialForm });
     this.setState({ editorialPanelVisible: !editorialPanelVisible });
   }
 

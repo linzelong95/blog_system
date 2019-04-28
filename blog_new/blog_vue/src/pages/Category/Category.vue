@@ -20,15 +20,15 @@
           <a-badge :count="selectedItems.length">
             <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button>
           </a-badge>
-          <a-button icon="delete" shape="circle" size="small" style="color:red;margin-left:20px;" @click="handleItems(AdminCateAPI.DELETE)" />
-          <a-button icon="unlock" shape="circle" size="small" style="color:green;" @click="handleItems(AdminCateAPI.UNLOCK)" />
-          <a-button icon="lock" shape="circle" size="small" style="color:#A020F0;" @click="handleItems(AdminCateAPI.LOCK)" />
+          <a-button icon="delete" shape="circle" size="small" style="color:red;margin-left:20px;" @click="handleItems(tabKey === 'sort' ? AdminSortAPI.DELETE : AdminCateAPI.DELETE)" />
+          <a-button icon="unlock" shape="circle" size="small" style="color:green;" @click="handleItems(tabKey === 'sort' ? AdminSortAPI.UNLOCK : AdminCateAPI.UNLOCK)" />
+          <a-button icon="lock" shape="circle" size="small" style="color:#A020F0;" @click="handleItems(tabKey === 'sort' ? AdminSortAPI.LOCK : AdminCateAPI.LOCK)" />
         </span>
       </span>
       <a-button type="primary" icon="home" shape="circle" size="small" @click="handleShowAll" />
     </div>
     <a-table
-      :columns="getColumn()"
+      :columns="getColumn()[tabKey]"
       :rowKey="record=>record.id"
       :dataSource="list"
       :loading="spinningFlag"
@@ -42,7 +42,7 @@
         pageSize:size,
       }"
       @change="handleTableChange"
-      :scroll="{x:450}"
+      :scroll="tabKey==='sort'?undefined:{x:450}"
       size="small"
     >
       <template slot="sort" slot-scope="val">
@@ -58,9 +58,34 @@
         <a-button icon="lock" size="small" shape="circle" style="color:#A020F0" @click="handleItems(tabKey==='cate'?AdminCateAPI.LOCK:AdminSortAPI.LOCK, item)" v-if="item.isEnable===1" /> 
         <a-button icon="unlock" size="small" shape="circle" style="color:green" @click="handleItems(tabKey==='cate'?AdminCateAPI.UNLOCK:AdminSortAPI.UNLOCK, item)" v-else /> 
       </template>
+      <a-table
+        :slot="tabKey==='sort'?'expandedRowRender':null"
+        slot-scope="record"
+        :rowKey="record=>record.id"
+        :columns="getColumn()[tabKey].map(i=>{i.align='center';return i;})"
+        :dataSource="record.categories.map(i=>({...i,sort:{id:record.id,name:record.name}}))"
+        :pagination="false"
+        :showHeader="false"
+      >
+        <template slot="action" slot-scope="_,item">
+          <a-button icon="form" size="small" shape="circle" style="color:#8B3A3A" @click="handleItems(AdminCateAPI.FORM, item)" /> 
+          <a-button icon="delete" size="small" shape="circle" style="color:red" @click="handleItems(AdminCateAPI.DELETE, item)" /> 
+          <a-button icon="lock" size="small" shape="circle" style="color:#A020F0" @click="handleItems(AdminCateAPI.LOCK, item)" v-if="item.isEnable===1" /> 
+          <a-button icon="unlock" size="small" shape="circle" style="color:green" @click="handleItems(AdminCateAPI.UNLOCK, item)" v-else /> 
+        </template>
+      </a-table>
     </a-table>
-    <v-editor 
-      v-if="editorialPanelVisible"
+    <v-editor-sort
+      v-if="editorialPanelVisible&&useEditor==='sort'"
+      :editorialPanelVisible="editorialPanelVisible"
+      :formItem="formItem"
+      @cleanFormItem="cleanFormItem"
+      @toggleEditorialPanel="toggleEditorialPanel"
+      @request="request"
+    />
+    <v-editor-cate
+      v-if="editorialPanelVisible&&useEditor==='cate'"
+      :tabKey="tabKey"
       :editorialPanelVisible="editorialPanelVisible"
       :formItem="formItem"
       @cleanFormItem="cleanFormItem"
@@ -73,7 +98,8 @@
 <script>
   import {mapState} from 'vuex';
   import Search from '../../components/Search/Search.vue';
-  import EditorialForm from './EditorialForm.vue'
+  import CateEditorialForm from './CateEditorialForm.vue';
+  import SortEditorialForm from './SortEditorialForm.vue';
   import urls from '../../api/urls';
   const { AdminCateAPI ,AdminSortAPI}=urls;
   export default {
@@ -87,12 +113,17 @@
         editorialPanelVisible:false,
         formItem:{},
         categoryOptions:[],
-        tabKey:"sort"
+        tabKey:"sort",
+        useEditor:"sort"
       }
     },
     components:{
-      "v-editor":EditorialForm,
+      "v-editor-sort":SortEditorialForm,
+      "v-editor-cate":CateEditorialForm,
       "v-search":Search 
+    },
+    created(){
+      this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
     },
     mounted(){
       this.request();
@@ -116,9 +147,12 @@
           {title:'状态',dataIndex:'isEnable',key:'isEnable',sorter:true,width:100,scopedSlots: { customRender: 'isEnable' },filters: [{ text: '不可用', value: '0' }, { text: '可用', value: '1' }],filterMultiple: false,filteredValue: this.filters.isEnable || null},
           {title:'操作',dataIndex:'action',key:'action',width:100,fixed:'right',scopedSlots: { customRender: 'action' }},
         ];
-        const sortColumn=cateColumn.filter(i=>i.dataIndex!=="sort");
-        // return {cate:cateCloumn,sort:sortColumn};
-             return cateColumn;
+        const sortColumn=[
+          {title:'名称',dataIndex:'name',key:'name',sorter:true,width:'25%'},
+          {title:'状态',dataIndex:'isEnable',key:'isEnable',sorter:true,width:'30%',scopedSlots: { customRender: 'isEnable' },filters: [{ text: '不可用', value: '0' }, { text: '可用', value: '1' }],filterMultiple: false,filteredValue: this.filters.isEnable || null},
+          {title:'操作',dataIndex:'action',key:'action',width:'45%',scopedSlots: { customRender: 'action' }},
+        ];
+        return {cate:cateColumn,sort:sortColumn};
       },
       searchInputFocus(){
         this.$nextTick(()=>this.$refs.searchRef.focus());
@@ -140,7 +174,7 @@
         this.request({index:1});
       },
       handleItems(action,item){
-        const selectedItems  = this.selectedItems;
+        const { selectedItems, tabKey } = this;
         const { url: netUrl, desc, actionTip } = action;
         const lang='zh_CN';
         let content = '';
@@ -167,10 +201,12 @@
         const onOk = () => {
           if (netUrl.includes('/form')) {
             this.formItem=item;
+            this.useEditor=netUrl.includes('/cate/form')?"cate":"sort";
             this.toggleEditorialPanel();
             return;
           }
-          this.request({ netUrl, items });
+          const callback = tabKey === "sort" && netUrl.includes("/cate") ? () => this.request() : undefined;
+          this.request({ netUrl, items },callback);
         };
         this.$confirm({ title, content, okText, cancelText, onCancel, onOk });
       },
@@ -202,6 +238,7 @@
         this.$store.dispatch({type:"search/setSearchContent",payload:{searchContent:""}});
         // this.setState({ tabKey, selectedRowKeys: [], selectedItems: [], conditionQuery: {}, filters: {}, EditorialForm: tabKey === "cate" ? CateEditorialForm : SortEditorialForm });
         this.tabKey=tabKey;
+        this.useEditor=tabKey;
         this.selectedItems=[];
         this.conditionQuery={};
         this.filters={};
@@ -239,6 +276,28 @@
     }
     /deep/ .ant-tabs-bar{
       margin-bottom: 10px;
+    }
+    /deep/ .ant-table-expand-icon-th{
+      min-width: 10px;
+      width:10px;
+    }
+    /deep/ .ant-table-row-expand-icon-cell{
+      min-width: 10px;
+      width:10px;
+    }
+    /deep/ .ant-table-thead > tr > th.ant-table-selection-column{
+      min-width: 40px;
+      width:40px;
+    }
+    /deep/ .ant-table-tbody > tr > td.ant-table-selection-column{
+      min-width: 40px;
+      width:40px;
+    }
+    /deep/ .ant-table-small  .ant-table-content table th{
+      padding:8px 0px;
+    }
+    /deep/ .ant-table-small  .ant-table-content table td{
+      padding:8px 0px;
     }
   }
 </style>
