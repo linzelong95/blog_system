@@ -65,7 +65,7 @@
           const { sort } = values;
           const id=this.formItem.id;
           const netUrl = id ? AdminCateAPI.UPDATE.url : AdminCateAPI.INSERT.url;
-          const callback=this.tabKey==="sort"?()=>this.$emit("request"):undefined;
+          const callback=this.tabKey==="sort"?()=>{this.$emit("request");console.log("success")}:undefined;
           this.$emit("request",{ ...values, id, netUrl, sortId: sort.key },callback);
           this.$emit("toggleEditorialPanel");
           this.$emit("cleanFormItem");

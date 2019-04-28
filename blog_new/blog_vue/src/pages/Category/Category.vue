@@ -16,6 +16,7 @@
     <div class="operation">
       <span>
         <a-button type="primary" size="small" @click="toggleEditorialPanel">新增</a-button>
+        <a-button type="primary" size="small" @click="toggleEditorialPanel('son')">新增子分类</a-button>
         <span v-show="selectedItems.length>0">
           <a-badge :count="selectedItems.length">
             <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button>
