@@ -133,7 +133,7 @@
       this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
     },
     methods:{
-      async request(paramsObj={},callback,isConcat){
+       request(paramsObj={},callback,isConcat){
         const { conditionQuery:con, tabKey,searchContent:name } = this;
         const conditionQuery={...con,name};
         const netUrl=tabKey === 'cate' ? AdminCateAPI.LIST.url : AdminSortAPI.LIST.url;
