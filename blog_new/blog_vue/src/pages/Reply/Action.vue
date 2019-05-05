@@ -9,8 +9,12 @@
           默认
           <a-icon type="swap"/>
         </a-tag>
-        <a-tag color="magenta" @click.stop="sort" id="title">
-          标题
+        <a-tag color="magenta" @click.stop="sort" id="isApproved">
+          显示
+          <a-icon :type="conditionQuery.orderBy&&conditionQuery.orderBy.name === 'title'&&conditionQuery.orderBy.by === 'DESC'?'down':'up'" />
+        </a-tag>
+        <a-tag color="magenta" @click.stop="sort" id="isTop">
+          置顶
           <a-icon :type="conditionQuery.orderBy&&conditionQuery.orderBy.name === 'title'&&conditionQuery.orderBy.by === 'DESC'?'down':'up'" />
         </a-tag>
         <a-tag color="magenta" @click.stop="sort" id="createDate">
@@ -36,6 +40,19 @@
         <a-button key="clear" type="primary" size="small" @click="filterRequest('clear')">清空</a-button>
         <a-button key="ok" type="primary" size="small" @click="filterRequest('category')">确定</a-button>
       </template>
+      <div style="text-align: center">
+        <a-checkbox-group
+          :options="[
+            { label: '置顶', value: 'isTop' },
+            { label: '显示', value: 'isApproved' },
+            { label: '父', value: 'isParent' },
+            { label: '子', value: 'isSon' },
+          ]"
+          :value="temporaryCondition.commonFilterArr||[]"
+          @change="commonFilterConditionSelect"
+        />
+      </div>
+      <a-divider />
       <div style="text-align:center;">
         <a-radio-group :value="filterSort" buttonStyle="solid" @change="handleFilterSort" size="small">
           <a-radio-button value="selectedByCate">
@@ -48,10 +65,15 @@
               &nbsp;按标签&nbsp;&nbsp;
             </a-badge>
           </a-radio-button>
+          <a-radio-button value="selectedByArticle">
+            <a-badge :dot="temporaryCondition.articleArr&&temporaryCondition.articleArr.length > 0">
+              &nbsp;按文章&nbsp;&nbsp;
+            </a-badge>
+          </a-radio-button>
         </a-radio-group>
       </div>
       <a-alert
-        message="注意是否同时进行两种类别的筛选！"
+        message="注意是否同时进行多类筛选！"
         type="warning"
         showIcon
         style="margin:15px 0px"
@@ -78,13 +100,50 @@
           </a-checkable-tag>
         </a-col>
       </a-row>
+      <div style="text-align: center" v-if="filterSort==='selectedByArticle'">
+        <span>文章：</span>
+        <a-select
+          :labelInValue="true"
+          :showSearch="true"
+          mode="multiple"
+          :filterOption="false"
+          @change="articleSelet"
+          @search="query => searchItem({ query, container: articlecontainer })"
+          @focus="()=>searchItem({ query: '', container: articlecontainer })"
+          style="width: 70%"
+          :value="temporaryCondition.articleArr||[]"
+        >
+          <a-select-option v-for="item in articlecontainer.list" :value="item.id" :key="item.id">
+            {{item.title}}
+          </a-select-option>
+          <a-select-option :disabled="true" :key="-1" v-show="articlecontainer.list.length>6">
+            <a-pagination 
+              style="text-align:center;"
+              size="small"
+              :current="articlecontainer.index"
+              :total="articlecontainer.total"
+              :pageSize="articlecontainer.size"
+              @change="(i, s) =>searchItem({ query: articlecontainer.query, container:articlecontainer, pageIndex: i, pageSize: s })"
+            />
+          </a-select-option>
+        </a-select>
+      </div>
     </a-modal>
   </div>
 </template>
 
 <script>
   import urls from '../../api/urls';
-  const {UserSortAPI,UserTagAPI}=urls;
+  const {AdminSortAPI,AdminTagAPI,AdminArticleAPI}=urls;
+  const initArticleContainer = {
+    netUrl: AdminArticleAPI.LIST.url,
+    list: [],
+    total: 0,
+    index: 1,
+    size: 6,
+    query: '',
+    selectedItems: [],
+  };
   export default {
     data(){
       return {
@@ -94,15 +153,16 @@
         filterSort: 'selectedByCate',
         categoryOptions:[],
         tagOptions:[],
-        temporaryCondition:{}
+        temporaryCondition:{},
+        articlecontainer: initArticleContainer,
       }
     },
     props:["conditionQuery"],
     mounted(){
-      this.$emit("request",{netUrl:UserTagAPI.LIST.url,conditionQuery: { isEnable: 1 }, index: 1, size: 999},res=>{
+      this.$emit("request",{netUrl:AdminTagAPI.LIST.url,conditionQuery: { isEnable: 1 }, index: 1, size: 999},res=>{
         this.tagOptions=res.list;
       })
-      this.$emit("request",{netUrl:UserSortAPI.LIST.url,conditionQuery: { isEnable: 1 }, index: 1, size: 999},res=>{
+      this.$emit("request",{netUrl:AdminSortAPI.LIST.url,conditionQuery: { isEnable: 1 }, index: 1, size: 999},res=>{
         const catetories=res.list.filter(i => i.categories && i.categories.length > 0);
         this.categoryOptions=catetories.map(i=>{
           const item={
@@ -163,13 +223,13 @@
         this.toggleFilterModal();
         let filterflag = false;
         if (method === 'exit') {
-          const { conditionQuery: { filteredSortArr = [], tagIdsArr = [] } } = this;
-          filterflag = filteredSortArr.length > 0 || tagIdsArr.length;
-          this.temporaryCondition={...this.temporaryCondition,filteredSortArr, tagIdsArr, filterflag};
+          const { conditionQuery: { filteredSortArr = [], tagIdsArr = [],articleArr = [], commonFilterArr = [] } } = this;
+          filterflag = filteredSortArr.length > 0 || tagIdsArr.length||articleArr.length || commonFilterArr.length;
+          this.temporaryCondition={...this.temporaryCondition,filteredSortArr, tagIdsArr, articleArr, commonFilterArr, filterflag};
           return;
         }
-        const { temporaryCondition: { filteredSortArr = [], tagIdsArr = [] } } = this;
-        filterflag = filteredSortArr.length > 0 || tagIdsArr.length > 0;
+        const { temporaryCondition: { filteredSortArr = [], tagIdsArr = [],articleArr = [], commonFilterArr = [] } } = this;
+        filterflag = filteredSortArr.length > 0 || tagIdsArr.length > 0||articleArr.length >0|| commonFilterArr.length>0;
         const category = { sortIdsArr: [], cateIdsArr: [] };
         filteredSortArr.forEach(item => {
           const arr = item.split('-');
@@ -179,8 +239,16 @@
             category.cateIdsArr.push(parseInt(arr.pop(), 10));
           }
         });
+        const articleIdsArr = articleArr.map(i => i.key);
+        const isApproved = commonFilterArr.includes('isApproved') ? 1 : undefined;
+        const isTop = commonFilterArr.includes('isTop') ? 1 : undefined;
+        const isRoot = (() => {
+          if (commonFilterArr.includes('isParent') && !commonFilterArr.includes('isSon')) return 1;
+          if (!commonFilterArr.includes('isParent') && commonFilterArr.includes('isSon')) return 0;
+          return undefined;
+        })();
         this.temporaryCondition={...this.temporaryCondition,filterflag};
-        this.$emit("changeConditionQuery",{category, filteredSortArr, tagIdsArr});
+        this.$emit("changeConditionQuery",{category, filteredSortArr, tagIdsArr,articleIdsArr,isApproved,isTop,isRoot,articleArr,commonFilterArr});
         this.$emit("request",{index:1});
       },
       conditionTreeSelect(filteredSortArr){
@@ -190,7 +258,22 @@
         const { temporaryCondition: { tagIdsArr = [] } } = this;
         const newTagIds = checked ? [...tagIdsArr, id] : tagIdsArr.filter(i => i !== id);
         this.temporaryCondition={...this.temporaryCondition,tagIdsArr: newTagIds};
-      }
+      },
+      articleSelet(articleArr){
+        this.temporaryCondition={...this.temporaryCondition,articleArr};
+        this.searchItem({ query: '', container:this.articlecontainer });
+      },
+      searchItem ({ query, container, pageIndex, pageSize }) {
+        const { index: preIndex, size: preSize, netUrl } = container;
+        const index = pageIndex || preIndex;
+        const size = pageSize || preSize;
+        this.$emit("request",{netUrl, index, size, conditionQuery: { title: query } },res=>{
+          this.articlecontainer={...this.articlecontainer,...res, index, size, query};
+        });
+      },
+      commonFilterConditionSelect (commonFilterArr) {
+        this.temporaryCondition={...this.temporaryCondition,commonFilterArr};
+      },
     }
   }
 </script>

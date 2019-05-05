@@ -11,7 +11,7 @@ export class UserReplyService {
   async list(options) {
     const { reply, orderBy, index, size, articleIdsArr, isTop, isApproved } = options;
     const orderByMap: OrderByCondition = { "reply.isTop": "DESC" };
-    if (orderBy.name && ["isApproved", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`reply.${orderBy.name}`] = orderBy.by;
+    if (orderBy.name && ["isApproved", "isTop", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`reply.${orderBy.name}`] = orderBy.by;
     if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["reply.createDate"] = "ASC";
     return await this.repository
       .createQueryBuilder("reply")

@@ -10,9 +10,10 @@ export class AdminArticleService {
   repository = getRepository(Article);
 
   async list(options) {
-    const { index, size, title, orderBy, user, category: { sortIdsArr = [], cateIdsArr = [] } } = options;
-    const orderByMap: OrderByCondition = { "article.isTop": "DESC" };
+    const { index, size, title, orderBy, user, category: { sortIdsArr = [], cateIdsArr = [] },tagIdsArr } = options;
+    const orderByMap: OrderByCondition = {};
     if (orderBy.name && ["title", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`article.${orderBy.name}`] = orderBy.by;
+    if (!orderBy.name || !["isTop"].includes(orderBy.name)) orderByMap["article.isTop"] = "DESC";
     if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["article.createDate"] = "ASC";
     return await this.repository
       .createQueryBuilder("article")
@@ -21,6 +22,16 @@ export class AdminArticleService {
       .innerJoinAndSelect("category.sort", "sort")
       .leftJoinAndSelect("article.tags", "tag")
       .where("article.title like :title", { title: `%${title}%` })
+      .andWhere(qb => {
+        if (!tagIdsArr.length) return "1=1";
+        const subQuery = qb
+          .subQuery()
+          .select("article.id")
+          .from(Article, "article")
+          .innerJoin("article.tags", "tag", `tag.id in (:...tagIdsArr)`, { tagIdsArr })
+          .getQuery()
+        return `article.id in ${subQuery}`;
+      })
       .andWhere("article.user=:userId", { userId: user.id })
       .andWhere(sortIdsArr.length && !cateIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .andWhere(!sortIdsArr.length && cateIdsArr.length ? `category.id in (${cateIdsArr.join(",")})` : "1=1")

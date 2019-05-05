@@ -228,18 +228,14 @@ class ReplyManagement extends React.Component {
     this.toggleFilterModal();
     let filterflag = false;
     if (method === 'exit') {
-      const {
-        conditionQuery: { filteredSortArr = [], articleArr = [], commonFilterArr = [] },
-      } = this.state;
+      const {conditionQuery: { filteredSortArr = [], articleArr = [], commonFilterArr = [] }} = this.state;
       filterflag = filteredSortArr.length || articleArr.length || commonFilterArr.length;
       this.setState({
         temporaryCondition: { filteredSortArr, articleArr, commonFilterArr, filterflag },
       });
       return;
     }
-    const {
-      temporaryCondition: { filteredSortArr = [], articleArr = [], commonFilterArr = [] },
-    } = this.state;
+    const {temporaryCondition: { filteredSortArr = [], articleArr = [], commonFilterArr = [] }} = this.state;
     filterflag = filteredSortArr.length || articleArr.length || commonFilterArr.length;
     const category = { sortIdsArr: [], cateIdsArr: [] };
     filteredSortArr.forEach(item => {
@@ -370,7 +366,7 @@ class ReplyManagement extends React.Component {
                   </Tag>
                   <Tag
                     color="magenta"
-                    id="create_time"
+                    id="createDate"
                     style={{ marginLeft: '5px' }}
                     onClick={this.sort}
                   >
@@ -378,7 +374,7 @@ class ReplyManagement extends React.Component {
                     <Icon
                       type={
                         conditionQuery.orderBy &&
-                          conditionQuery.orderBy.name === 'create_time' &&
+                          conditionQuery.orderBy.name === 'createDate' &&
                           conditionQuery.orderBy.by === 'DESC'
                           ? 'down'
                           : 'up'
@@ -526,7 +522,7 @@ class ReplyManagement extends React.Component {
                 className={styles.eachChild}
                 key={item.id}
                 actions={[
-                  <span>{timeFormat(Number(new Date(item.create_time)))}</span>,
+                  <span>{timeFormat(Number(new Date(item.createDate)))}</span>,
                   <Button size="small" type="danger" onClick={() => this.handleItems(DELETE, item)}>删除</Button>,
                   <Button size="small" type="primary" onClick={() => this.handleItems(FORM, item)}>回复</Button>,
                   <Button size="small" type="primary" onClick={() => this.handleItems(item.isApproved ? DISAPPROVE : APPROVE, item)}>{item.isApproved ? '隐藏' : '过审'}</Button>,
@@ -662,6 +658,7 @@ class ReplyManagement extends React.Component {
                 <span>文章：</span>
                 <Select
                   labelInValue
+                  showSearch
                   mode="multiple"
                   filterOption={false}
                   onChange={this.articleSelet}

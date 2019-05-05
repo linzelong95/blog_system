@@ -10,8 +10,8 @@ export class AdminArticleController {
   @post("/list")
   async list(ctx): Promise<void> {
     const user = ctx.state.user;
-    const { conditionQuery: { title = "", orderBy = {}, category = {} }, index = 1, size = 10 } = ctx.request.body;
-    const [list, total] = await this.adminArticleService.list({ title, orderBy, index, size, category, user });
+    const { conditionQuery: { title = "", orderBy = {}, category = {}, tagIdsArr = [] }, index = 1, size = 10 } = ctx.request.body;
+    const [list, total] = await this.adminArticleService.list({ title, orderBy, index, size, category, tagIdsArr, user });
     ctx.body = { list, total };
   }
 
@@ -79,7 +79,7 @@ export class AdminArticleController {
     ctx.status = 200;
     ctx.body = { message: `启用成功`, flag };
   }
-  
+
   @post("/top")
   async top(ctx): Promise<void> {
     const { items } = ctx.request.body;

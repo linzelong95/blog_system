@@ -51,18 +51,18 @@
           <a-avatar slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png" />
           <template slot="title">
             <span style="font-size:10px;color:gray;">
-              《{{item.article.title}}》
+              <span>《{{item.article&&item.article.title}}》</span>
               <a-tag color="cyan" v-if="item.parentId === 0" style="font-size:10px;margin:0px;">父</a-tag>
               <a-tag color="magenta" v-if="item.isApproved === 0" style="font-size:10px;margin:0px;">待审</a-tag>
             </span>
           </template>
         </a-list-item-meta>
         <p class="abstract">
-          <i style="color:green; fontWeight: bold;">{{item.from.nickName}}</i>
+          <i style="color:green; fontWeight: bold;">{{item.from&&item.from.nickName}}</i>
           &nbsp;回复&nbsp;
           <span style="color: #A0522D;fontWeight: bold;">
             <i v-if="item.parentId === 0">该文</i>
-            <i v-else>{{item.to.nickName}}</i>
+            <i v-else>{{item.to&&item.to.nickName}}</i>
             &nbsp;:&nbsp;
           </span>
           <b style="color: black;">{{`“${item.reply}”`}}</b>
@@ -98,7 +98,7 @@
 <script>
   import {mapState} from 'vuex';
   import Search from '../../components/Search/Search.vue';
-  import Action from '../../components/Action/Action.vue';
+  import Action from './Action.vue';
   import EditorialForm from './EditorialForm.vue';
   import {baseImgUrl} from '../../utils/defaultSetting.js';
   import urls from '../../api/urls';
@@ -180,7 +180,6 @@
           : [...selectedItems, ...uniqueSeletedItems];
       },
       handleItems(action,item){
-        console.log(111111111)
         const selectedItems  = this.selectedItems;
         const { url: netUrl, desc, actionTip } = action;
         const lang='zh_CN';

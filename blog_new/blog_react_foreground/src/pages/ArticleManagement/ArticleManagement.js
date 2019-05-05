@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Modal, Card, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Tree } from 'antd';
+import { Modal, Card, Col, Row, Badge, Button, Tooltip, Input, Tag, Icon, List, Tree, Alert, Radio } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
 import EditorialForm from './EditorialForm';
@@ -10,7 +10,7 @@ import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
-const { AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT }, AdminSortAPI } = UrlEnum;
+const { AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT }, AdminSortAPI, AdminTagAPI } = UrlEnum;
 
 @connect(({ articleManagement, loading }) => ({
   articleManagement,
@@ -19,7 +19,7 @@ const { AdminArticleAPI: { LIST, DELETE, FORM, TOP, UNTOP, LOCK, UNLOCK, CONTENT
 class ArticleManagement extends React.Component {
   state = {
     conditionQuery: { title: '', category: {}, orderBy: {} },
-    showSorterFlag: false, 
+    showSorterFlag: false,
     selectedItems: [],
     allSelectedFlag: false,
     editorialPanelVisible: false,
@@ -28,6 +28,8 @@ class ArticleManagement extends React.Component {
     filterModalVisible: false,
     temporaryCondition: {},
     categoryOptions: [],
+    tagOptions: [],
+    filterSort: 'selectedByCate',
   };
 
   componentDidMount = () => this.request({ index: 1, size: 6 });
@@ -144,9 +146,9 @@ class ArticleManagement extends React.Component {
   };
 
   toggleSelectAll = () => {
-    const {articleManagement: { list = [] }} = this.props;
+    const { articleManagement: { list = [] } } = this.props;
     if (!list.length) return;
-    const { allSelectedFlag,selectedItems } = this.state;
+    const { allSelectedFlag, selectedItems } = this.state;
     const uniqueSeletedItems = list.filter(i => !selectedItems.some(v => v.id === i.id));
     const newSelectedItems = allSelectedFlag
       ? selectedItems.filter(i => !list.some(v => v.id === i.id))
@@ -170,6 +172,7 @@ class ArticleManagement extends React.Component {
     this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 999 }, (res) =>
       this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
     );
+    this.request({ netUrl: AdminTagAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, (res) => this.setState({ tagOptions: res.list }));
     this.toggleFilterModal();
   };
 
@@ -178,16 +181,16 @@ class ArticleManagement extends React.Component {
       this.setState({ temporaryCondition: {} });
       return;
     }
-    this.toggleFilterModal();
+    if (method !== "noModal") this.toggleFilterModal();
     let filterflag = false;
     if (method === 'exit') {
-      const { conditionQuery: { filteredSortArr = [] } } = this.state;
-      filterflag = filteredSortArr.length > 0;
-      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, filterflag } }));
+      const { conditionQuery: { filteredSortArr = [], tagIdsArr = [] }, } = this.state;
+      filterflag = filteredSortArr.length > 0 || tagIdsArr.length > 0;
+      this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, tagIdsArr, filterflag } }));
       return;
     }
-    const { temporaryCondition: { filteredSortArr = [] } } = this.state;
-    filterflag = filteredSortArr.length > 0;
+    const { temporaryCondition: { filteredSortArr = [], tagIdsArr = [] } } = this.state;
+    filterflag = filteredSortArr.length > 0 || tagIdsArr.length > 0;
     const category = { sortIdsArr: [], cateIdsArr: [] };
     filteredSortArr.forEach(item => {
       const arr = item.split('-');
@@ -197,12 +200,22 @@ class ArticleManagement extends React.Component {
         category.cateIdsArr.push(parseInt(arr.pop(), 10));
       }
     });
-    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr }, temporaryCondition: { ...oldState.temporaryCondition, filterflag } }), () =>
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, category, filteredSortArr, tagIdsArr }, temporaryCondition: { ...oldState.temporaryCondition, filterflag } }), () =>
       this.request({ index: 1 })
     );
   };
 
   conditionTreeSelect = filteredSortArr => this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr } }));
+
+  handleTagSelect = (id, checked) => {
+    const { temporaryCondition: { tagIdsArr = [] } } = this.state;
+    const newTagIds = checked ? [...tagIdsArr, id] : tagIdsArr.filter(i => i !== id);
+    this.setState(oldState => ({
+      temporaryCondition: { ...oldState.temporaryCondition, tagIdsArr: newTagIds },
+    }));
+  }
+
+  filterSort = e => this.setState({ filterSort: e.target.value });
 
   render() {
     const { articleManagement: { total = 6, list = [], size = 6, index = 1 }, loading } = this.props;
@@ -215,7 +228,9 @@ class ArticleManagement extends React.Component {
       showSorterFlag,
       filterModalVisible,
       categoryOptions,
+      tagOptions,
       conditionQuery,
+      filterSort,
       temporaryCondition,
     } = this.state;
     return (
@@ -406,9 +421,9 @@ class ArticleManagement extends React.Component {
               current: index,
             }}
             renderItem={item => (
-              <List.Item style={{ background: "lightgray",borderRadius:"5px" }}>
+              <List.Item style={{ background: "lightgray", borderRadius: "5px" }}>
                 <Card
-                  cover={<img alt="example" src={`${imgPrefix}${item.imageUrl}`||"https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"} />}
+                  cover={<img alt="example" src={`${imgPrefix}${item.imageUrl}` || "https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"} />}
                   actions={[
                     <Icon type="form" style={{ color: 'green', width: '60px' }} onClick={() => this.handleItems(FORM, item)} />,
                     <Icon type="delete" style={{ color: 'red', width: '60px' }} onClick={() => this.handleItems(DELETE, item)} />,
@@ -468,7 +483,7 @@ class ArticleManagement extends React.Component {
                       <span style={{ color: 'yellow' }}>置顶</span>
                     </div>
                   )}
-                  <Tag color="purple" style={{position:"absolute",top:"0px",left:"0px"}}>
+                  <Tag color="purple" style={{ position: "absolute", top: "0px", left: "0px" }}>
                     <Icon type="tag" />&nbsp;{item.category.sort.name},{item.category.name}
                   </Tag>
                 </Card>
@@ -476,40 +491,96 @@ class ArticleManagement extends React.Component {
             )}
           />
           <Modal
+            destroyOnClose
             visible={filterModalVisible}
             title="请选择筛选条件"
             onCancel={() => this.filterRequest('exit')}
             footer={[
               <Button onClick={() => this.filterRequest('exit')}>不更改并退出</Button>,
-              <Button type="danger" onClick={() => this.filterRequest('clear')}>清空</Button>,
-              <Button type="primary" onClick={this.filterRequest}>确定</Button>,
+              <Button type="danger" onClick={() => this.filterRequest('clear')}>
+                清空
+              </Button>,
+              <Button type="primary" onClick={this.filterRequest}>
+                确定
+              </Button>,
             ]}
           >
-            <Tree
-              checkable
-              showLine
-              onCheck={this.conditionTreeSelect}
-              defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
-              checkedKeys={temporaryCondition.filteredSortArr || []}
-            >
-              {categoryOptions.map(item => (
-                <Tree.TreeNode
-                  title={item.name}
-                  key={`${item.id}`}
-                  selectable={false}
-                  disabled={item.isEnable === 0}
-                >
-                  {item.categories.map(i => (
-                    <Tree.TreeNode
-                      title={i.name}
-                      key={`${item.id}-${i.id}`}
-                      selectable={false}
-                      disabled={item.isEnable === 1 ? i.isEnable === 0 : true}
-                    />
+            <div style={{ textAlign: 'center' }}>
+              <Radio.Group
+                size="small"
+                value={filterSort}
+                buttonStyle="solid"
+                onChange={this.filterSort}
+              >
+                <Radio.Button value="selectedByCate">
+                  <Badge
+                    dot={
+                      temporaryCondition.filteredSortArr &&
+                      temporaryCondition.filteredSortArr.length > 0
+                    }
+                  >
+                    &nbsp;按分类&nbsp;&nbsp;
+                  </Badge>
+                </Radio.Button>
+                <Radio.Button value="selectedByTag">
+                  <Badge
+                    dot={temporaryCondition.tagIdsArr && temporaryCondition.tagIdsArr.length > 0}
+                  >
+                    &nbsp;按标签&nbsp;&nbsp;
+                  </Badge>
+                </Radio.Button>
+              </Radio.Group>
+            </div>
+            <Alert
+              message="筛选分两种类别，请注意您是否需要同时进行两种类别的筛选！"
+              type="warning"
+              showIcon
+              style={{ margin: '15px 0px' }}
+            />
+            {filterSort === 'selectedByCate' && (
+              <Tree
+                checkable
+                showLine
+                onCheck={this.conditionTreeSelect}
+                // defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
+                checkedKeys={temporaryCondition.filteredSortArr || []}
+              >
+                {categoryOptions.map(item => (
+                  <Tree.TreeNode
+                    title={item.name}
+                    key={`${item.id}`}
+                    selectable={false}
+                    disabled={item.isEnable === 0}
+                  >
+                    {item.categories.map(i => (
+                      <Tree.TreeNode
+                        title={i.name}
+                        key={`${item.id}-${i.id}`}
+                        selectable={false}
+                        disabled={item.isEnable === 1 ? i.isEnable === 0 : true}
+                      />
+                    ))}
+                  </Tree.TreeNode>
+                ))}
+              </Tree>
+            )}
+            {filterSort === 'selectedByTag' && (
+              <Row>
+                <Col span={3} style={{ marginTop: "5px" }}>请选择：</Col>
+                <Col span={21}>
+                  {tagOptions.map(item => (
+                    <Tag.CheckableTag
+                      key={item.id}
+                      checked={temporaryCondition.tagIdsArr && temporaryCondition.tagIdsArr.includes(item.id)}
+                      onChange={(checked) => this.handleTagSelect(item.id, checked)}
+                      style={{ marginTop: "5px" }}
+                    >
+                      {item.name}
+                    </Tag.CheckableTag>
                   ))}
-                </Tree.TreeNode>
-              ))}
-            </Tree>
+                </Col>
+              </Row>
+            )}
           </Modal>
           {drawerVisible &&
             <ShowArticle

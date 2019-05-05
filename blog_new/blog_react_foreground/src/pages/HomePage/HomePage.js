@@ -89,7 +89,7 @@ class HomePage extends React.Component {
     let filterflag = false;
     if (method === 'exit') {
       const { conditionQuery: { filteredSortArr = [], tagIdsArr = [] }, } = this.state;
-      filterflag = filteredSortArr.length > 0 || tagIdsArr.length;
+      filterflag = filteredSortArr.length > 0 || tagIdsArr.length > 0;
       this.setState(oldState => ({ temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr, tagIdsArr, filterflag } }));
       return;
     }
@@ -290,7 +290,7 @@ class HomePage extends React.Component {
                           width: '150px',
                           textAlign: 'center',
                           transform: 'rotate(40deg)',
-                          color:'yellow'
+                          color: 'yellow'
                         }}
                       >
                         置顶

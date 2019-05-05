@@ -10,8 +10,9 @@ export class AdminReplyService {
 
   async list(options) {
     const { reply, orderBy, index, size, articleIdsArr, isTop, isApproved, isRoot, category: { sortIdsArr = [], cateIdsArr = [] } } = options;
-    const orderByMap: OrderByCondition = { "reply.isTop": "DESC" };
-    if (orderBy.name && ["isApproved", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`reply.${orderBy.name}`] = orderBy.by;
+    const orderByMap: OrderByCondition = {};
+    if (orderBy.name && ["isApproved", "isTop", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`reply.${orderBy.name}`] = orderBy.by;
+    if (!orderBy.name || !["isTop"].includes(orderBy.name)) orderByMap["reply.isTop"] = "DESC";
     if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["reply.createDate"] = "ASC";
     return await this.repository
       .createQueryBuilder("reply")
