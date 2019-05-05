@@ -3,6 +3,7 @@ import OneArticle from '../pages/OneArticle.vue';
 import Article from '../pages/Article/Article.vue';
 import Tag from '../pages/Tag/Tag.vue';
 import Category from '../pages/Category/Category.vue';
+import Reply from '../pages/Reply/Reply.vue';
 import Login from '../pages/Login.vue';
 import Register from '../pages/Register.vue';
 
@@ -12,6 +13,7 @@ const routes= [
   {path:'/article',component:Article,meta:{auth:true,role:"admin"}},
   {path:'/tag',component:Tag,meta:{auth:true,role:"admin"}},
   {path:'/category',component:Category,meta:{auth:true,role:"admin"}},
+  {path:'/reply',component:Reply,meta:{auth:true,role:"admin"}},
   {path:'/login',component:Login},
   {path:'/register',component:Register},
   {path:'/',redirect:'/homepage'},

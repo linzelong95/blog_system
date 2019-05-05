@@ -1,7 +1,7 @@
 <template>
-  <div id="tag-edit">
+  <div id="reply-edit">
     <a-modal
-      :title="initialFormData.id?AdminTagAPI.UPDATE.desc['zh_CN']:AdminTagAPI.INSERT.desc['zh_CN']"
+      :title="initialFormData.id?AdminReplyAPI.UPDATE.desc['zh_CN']:AdminReplyAPI.INSERT.desc['zh_CN']"
       :visible="editorialPanelVisible"
       width="100%"
       okText="确定"
@@ -10,19 +10,50 @@
       @cancel="toggleEdit('cancel')"
     >
       <a-form :form="form" layout="horizontal">
-        <a-form-item label="名称" :label-col="{span:5}" :wrapper-col="{span:15}">
-          <a-input v-decorator="['name',{rules:[{required:true,message:'名称是必须的！'}],initialValue:this.initialFormData.name}]" />
-        </a-form-item>
-        <a-form-item label="分类" :label-col="{span:5}" :wrapper-col="{span:15}">
-          <a-select :labelInValue="true" v-decorator="['sort',{rules:[{required:true,message:'分类是必须的！'}],initialValue:this.initialFormData.sort}]">
-            <a-select-option v-for="item in categoryOptions.map(i => ({ label: i.name, value: i.id, disabled: !i.isEnable }))" :key="item.value" :value="item.value" :disabled="item.disabled">{{item.label}}</a-select-option>
+        <a-form-item label="文章" :label-col="{span:5}" :wrapper-col="{span:15}">
+          <a-select 
+            v-decorator="['article',{rules:[{required:true,message:'文章是必须的！'}],initialValue:this.initialFormData.article}]" 
+            :disabled="this.initialFormData.id !== undefined" 
+            :labelInValue="true" 
+            :filterOption= "false"
+            :showSearch="true"
+            @search="(query) => this.searchItem({ query, container:this.articlecontainer })"
+            @focus="() => this.searchItem({ query: '', container:this.articlecontainer })"
+          >
+            <a-select-option v-for="item in this.articlecontainer.list.map(i => ({ label: i.title, value: i.id }))" :key="item.value" :value="item.value">{{item.label}}</a-select-option>
+            <a-select-option :disabled="true" :key="-1">
+              <a-pagination 
+                style="text-align:center;"
+                size="small"
+                :current="this.articlecontainer.index"
+                :total="this.articlecontainer.total"
+                :pageSize="this.articlecontainer.size"
+                @change="(i, s) =>this.searchItem({ query: this.articlecontainer.query, container:this.articlecontainer, pageIndex: i, pageSize: s })"
+              />
+            </a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="状态" :label-col="{ span: 5 }" :wrapper-col="{ span: 15 }">
-          <a-select v-decorator="['isEnable',{rules: [{ required: true, message: '请选择状态!' }],initialValue:this.initialFormData.isEnable!==undefined?this.initialFormData.isEnable:1}]">
-            <a-select-option :value="1">可用</a-select-option>
-            <a-select-option :value="0">禁用</a-select-option>
+        <a-form-item label="评论人" :label-col="{span:5}" :wrapper-col="{span:15}" v-if="this.initialFormData.id !== undefined">
+          <a-select 
+            v-decorator="['to',{rules:[{required:true,message:'评论人是必须的！'}],initialValue:this.initialFormData.to}]" 
+            :disabled="true" 
+            :labelInValue="true" 
+
+          >
+            <!-- <a-select-option></a-select-option> -->
           </a-select>
+        </a-form-item>
+        <a-form-item label="内容" :label-col="{span:5}" :wrapper-col="{span:15}" v-if="this.initialFormData.id !== undefined">
+          <span>{{this.initialFormData.preReply}}</span>
+        </a-form-item>
+        <a-form-item label="置顶" :label-col="{ span: 5 }" :wrapper-col="{ span: 15 }">
+          <a-select v-decorator="['isTop',{rules: [{ required: true, message: '请选择状态!' }],initialValue:this.initialFormData.isEnable!==undefined?this.initialFormData.isEnable:1}]">
+            <a-select-option :value="1">是</a-select-option>
+            <a-select-option :value="0">否</a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="回复" :label-col="{span:5}" :wrapper-col="{span:15}">
+          <a-textarea v-decorator="['reply',{rules:[{required:true,message:'回复内容是必须的！'}],initialValue:this.initialFormData.name}]" autosize />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -31,26 +62,43 @@
 
 <script>
   import urls from '../../api/urls';
-  const { AdminTagAPI,AdminSortAPI }=urls;
+  const { AdminReplyAPI,AdminArticleAPI }=urls;
+  const initArticleContainer = {
+    netUrl: AdminArticleAPI.LIST.url,
+    list: [],
+    total: 0,
+    index: 1,
+    size: 6,
+    query: '',
+  };
   export default{
     data(){
       return {
         form:this.$form.createForm(this),
-        AdminTagAPI,
-        categoryOptions: [],
-        initialFormData:{}
+        AdminReplyAPI,
+        initialFormData:{},
+        articlecontainer: initArticleContainer,
       }
     },
     props:["editorialPanelVisible","formItem"],
     mounted(){
-      const formItem=this.formItem;
+      const {formItem={}}=this;
       if (formItem.id) this.formatInitialFormData(formItem);
-      this.$emit("request",{netUrl: AdminSortAPI.LIST.url, index: 1, size: 999},res=>{this.categoryOptions= res.list;})
     },
     methods:{
       formatInitialFormData (formItem) {
-        const { sort } = formItem;
-        this.initialFormData = { ...formItem, sort: { label: sort.name, key: sort.id } };
+        const { id, from, reply: preReply, article: art } = formItem;
+        const article = { key: art.id, label: art.title };
+        const to = { key: from.id, label: from.nickName };
+        this.initialFormData = { id, to, preReply, article };
+      },
+      searchItem ({ query, container, pageIndex, pageSize }) {
+        const { index: preIndex, size: preSize, netUrl } = container;
+        const index = pageIndex || preIndex;
+        const size = pageSize || preSize;
+        this.$emit("request",{netUrl, index, size, conditionQuery: { title: query } },res=>{
+          this.articlecontainer={...this.articlecontainer,...res, index, size, query};
+        });
       },
       toggleEdit(obj){
         if (obj === 'cancel') {
@@ -62,10 +110,11 @@
         }
         this.form.validateFields((err, values) => {
           if (err) return;
-          const { sort } = values;
-          const id=this.formItem.id;
-          const netUrl = id ? AdminTagAPI.UPDATE.url : AdminTagAPI.INSERT.url;
-          this.$emit("request",{ ...values, id, netUrl, sortId: sort.key });
+          const { article, to } = values;
+          const netUrl = INSERT.url;
+          const parentId = pid === 0 ? id : pid;
+          const toId = to && to.key;
+          this.$emit("request",{ ...values, netUrl, parentId, toId, articleId: article.key  });
           this.$emit("toggleEditorialPanel");
           this.$emit("cleanFormItem");
           this.form.resetFields();
@@ -75,7 +124,7 @@
   }
 </script>
 <style lang="scss" scoped>
-  #tag-edit{
+  #reply-edit{
 
   }
 </style>

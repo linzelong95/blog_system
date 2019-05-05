@@ -16,7 +16,7 @@
     <div class="operation">
       <span>
         <a-button type="primary" size="small" @click="toggleEditorialPanel">新增</a-button>
-        <a-button type="primary" size="small" @click="toggleEditorialPanel('son')">新增子分类</a-button>
+        <a-button type="primary" size="small" @click="toggleEditorialPanel('cate')" v-show="tabKey==='sort'">新增子分类</a-button>
         <span v-show="selectedItems.length>0">
           <a-badge :count="selectedItems.length">
             <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button>
@@ -68,6 +68,10 @@
         :pagination="false"
         :showHeader="false"
       >
+        <template slot="isEnable" slot-scope="val">
+          <a-tag color="blue" v-if="val===1">可用</a-tag>
+          <a-tag color="gray" v-else>禁用</a-tag>
+        </template>
         <template slot="action" slot-scope="_,item">
           <a-button icon="form" size="small" shape="circle" style="color:#8B3A3A" @click="handleItems(AdminCateAPI.FORM, item)" /> 
           <a-button icon="delete" size="small" shape="circle" style="color:red" @click="handleItems(AdminCateAPI.DELETE, item)" /> 
@@ -161,7 +165,8 @@
       cleanSelectedItem(){
         this.selectedItems=[];
       },
-      toggleEditorialPanel(){
+      toggleEditorialPanel(flag){
+        this.useEditor=this.tabKey==="sort"&&flag==="cate"?this.useEditor="cate":this.tabKey;
         this.editorialPanelVisible=!this.editorialPanelVisible;
       },
       cleanFormItem(){
@@ -202,8 +207,9 @@
         const onOk = () => {
           if (netUrl.includes('/form')) {
             this.formItem=item;
-            this.useEditor=netUrl.includes('/cate/form')?"cate":"sort";
-            this.toggleEditorialPanel();
+            const flag=netUrl.includes('/cate/form')?"cate":"sort";
+            this.useEditor=flag;
+            this.toggleEditorialPanel(flag);
             return;
           }
           const callback = tabKey === "sort" && netUrl.includes("/cate") ? () => this.request() : undefined;

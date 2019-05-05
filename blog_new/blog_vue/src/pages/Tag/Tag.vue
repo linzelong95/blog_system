@@ -76,7 +76,7 @@
 <script>
   import {mapState} from 'vuex';
   import Search from '../../components/Search/Search.vue';
-  import EditorialForm from './EditorialForm.vue'
+  import EditorialForm from './EditorialForm.vue';
   import urls from '../../api/urls';
   const { AdminTagAPI ,AdminSortAPI}=urls;
   export default {
