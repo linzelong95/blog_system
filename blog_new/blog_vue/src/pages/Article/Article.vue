@@ -2,6 +2,7 @@
   <div id="article">
     <v-action 
       class="action" 
+      role="admin"
       @request="request" 
       @changeConditionQuery="changeConditionQuery" 
       :conditionQuery="conditionQuery" 
@@ -32,7 +33,7 @@
           <a-button icon="arrow-up" shape="circle" size="small" style="color:#A52A2A;" @click="handleItems(AdminArticleAPI.TOP)" />
         </span>
       </span>
-      <a-button :type="allSelectedFlag?'danger':'primary'" size="small" @click="toggleSelectAll" style="font-size:10px;">{{allSelectedFlag ? '反选' : '全选'}}</a-button>
+      <a-button :type="allSelectedFlag?'danger':'primary'" size="small" @click="toggleSelectAll">{{allSelectedFlag ? '反选' : '全选'}}</a-button>
     </div>
     <a-list
       :loading="spinningFlag"
@@ -76,7 +77,7 @@
         <a-icon type="arrow-up" v-else slot="actions" style="color:#A52A2A;" @click="handleItems(AdminArticleAPI.TOP, item)" />
         <a-icon type="lock" v-if="item.isEnable===1" slot="actions" style="color:#4169E1;" @click="handleItems(AdminArticleAPI.LOCK, item)" />
         <a-icon type="unlock" slot="actions" v-else style="color:#4169E1;" @click="handleItems(AdminArticleAPI.UNLOCK, item)" />
-        <a-button :type="selectedItems.some(i => i.id === item.id)?'danger':'primary'" size="small" style="font-size:10px;" slot="actions" @click="toggleSelectOne(item)">
+        <a-button :type="selectedItems.some(i => i.id === item.id)?'danger':'primary'" size="small" slot="actions" @click="toggleSelectOne(item)">
           {{selectedItems.some(i => i.id === item.id)?"退选":"选中"}}
         </a-button>
       </a-list-item>

@@ -32,7 +32,7 @@
           <a-button icon="arrow-up" shape="circle" size="small" style="color:#A52A2A;" @click="handleItems(AdminReplyAPI.TOP)" />
         </span>
       </span>
-      <a-button :type="allSelectedFlag?'danger':'primary'" size="small" @click="toggleSelectAll" style="font-size:10px;">{{allSelectedFlag ? '反选' : '全选'}}</a-button>
+      <a-button :type="allSelectedFlag?'danger':'primary'" size="small" @click="toggleSelectAll">{{allSelectedFlag ? '反选' : '全选'}}</a-button>
     </div>
     <a-list
       :loading="spinningFlag"
@@ -50,10 +50,10 @@
         <a-list-item-meta>
           <a-avatar slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png" />
           <template slot="title">
-            <span style="font-size:10px;color:gray;">
+            <span style="font-size:12px;color:gray;">
               <span>《{{item.article&&item.article.title}}》</span>
-              <a-tag color="cyan" v-if="item.parentId === 0" style="font-size:10px;margin:0px;">父</a-tag>
-              <a-tag color="magenta" v-if="item.isApproved === 0" style="font-size:10px;margin:0px;">待审</a-tag>
+              <a-tag color="cyan" v-if="item.parentId === 0" style="margin:0px;">父</a-tag>
+              <a-tag color="magenta" v-if="item.isApproved === 0" style="margin:0px;">待审</a-tag>
             </span>
           </template>
         </a-list-item-meta>
@@ -79,7 +79,7 @@
         <a-icon type="arrow-up" v-else slot="actions" style="color:#A52A2A;" @click="handleItems(AdminReplyAPI.TOP, item)" />
         <a-icon type="close" v-if="item.isApproved===1" slot="actions" style="color:#4169E1;" @click="handleItems(AdminReplyAPI.DISAPPROVE, item)" />
         <a-icon type="check" slot="actions" v-else style="color:#4169E1;" @click="handleItems(AdminReplyAPI.APPROVE, item)" />
-        <a-button :type="selectedItems.some(i => i.id === item.id)?'danger':'primary'" size="small" style="font-size:10px;" slot="actions" @click="toggleSelectOne(item)">
+        <a-button :type="selectedItems.some(i => i.id === item.id)?'danger':'primary'" size="small" slot="actions" @click="toggleSelectOne(item)">
           {{selectedItems.some(i => i.id === item.id)?"退选":"选中"}}
         </a-button>
       </a-list-item>
@@ -135,6 +135,7 @@
         const conditionQuery={...this.conditionQuery,title:this.searchContent};
         const payload={netUrl:AdminReplyAPI.LIST.url,conditionQuery,...paramsObj}
         this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
+        if (payload.netUrl !== AdminReplyAPI.LIST.url) this.cleanSelectedItem();
       },
       changeConditionQuery(obj){
         this.conditionQuery={...this.conditionQuery,...obj};

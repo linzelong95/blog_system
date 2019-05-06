@@ -3,6 +3,7 @@
     <a-spin :spinning="spinningFlag">
       <v-action 
         class="action" 
+        role="user"
         @request="request" 
         @changeConditionQuery="changeConditionQuery" 
         :conditionQuery="conditionQuery" 

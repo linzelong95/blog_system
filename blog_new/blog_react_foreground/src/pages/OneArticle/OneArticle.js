@@ -184,7 +184,7 @@ class HomePage extends React.Component {
                 <span>
                   <Icon type="edit" />
                   &nbsp;
-                  {timeFormat(Number(new Date(item.updateTime)))}
+                  {timeFormat(Number(new Date(item.updateDate)))}
                 </span>
               </div>
               {item.label && (

@@ -70,7 +70,7 @@
             <img :src="'data:image/png;base64,'+captcha" @click="onGetCaptcha" />
           </a-form-item>
           <a-form-item class="option">
-            <a-checkbox :checked="autoLogin" @change="changeAutoLogin">自动登录</a-checkbox>
+            <a-checkbox :checked="autoLogin" @change="changeAutoLogin" class="f_left">自动登录</a-checkbox>
             <a class="f_right" href="">忘记密码</a>
           </a-form-item>
           <a-form-item>
@@ -181,7 +181,7 @@
           }
         }
         .option{
-          margin:-25px 0px 0px -130px;
+          margin:-15px 0px 10px 0px;
         }
       }
     }

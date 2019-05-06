@@ -31,6 +31,7 @@
 
 <script>
   import urls from '../../api/urls';
+import { setTimeout } from 'timers';
   const { AdminCateAPI,AdminSortAPI }=urls;
   export default{
     data(){
@@ -60,13 +61,16 @@
           this.$emit("request");
           return;
         }
-        this.form.validateFields((err, values) => {
+        this.form.validateFields(async (err, values) => {
           if (err) return;
           const { sort } = values;
           const id=this.formItem.id;
           const netUrl = id ? AdminCateAPI.UPDATE.url : AdminCateAPI.INSERT.url;
-          const callback=this.tabKey==="sort"?()=>{this.$emit("request");console.log("success")}:undefined;
-          this.$emit("request",{ ...values, id, netUrl, sortId: sort.key },callback);
+          // 为什么callback里的this.$emit不执行，而console却没问题,语法上有什么错误？
+          // const callback=this.tabKey==="sort"?()=>{this.$emit("request");console.log("success")}:undefined;
+          // this.$emit("request",{ ...values, id, netUrl, sortId: sort.key },callback);
+          await this.$emit("request",{ ...values, id, netUrl, sortId: sort.key },()=>{});
+          if(this.tabKey==="sort") this.$emit("request");
           this.$emit("toggleEditorialPanel");
           this.$emit("cleanFormItem");
           this.form.resetFields();

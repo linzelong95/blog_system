@@ -11,8 +11,16 @@
         {{article.abstract}}
       </div>
       <div class="content">
-        <v-markdown :value="article.content" />
+        <!-- <v-markdown :value="article.content" /> -->
         <!-- <v-markdown-other :source="article.content"></v-markdown-other> -->
+        <mavon-editor
+          v-model="article.content"
+          defaultOpen= 'preview'
+          :editable="false"
+          :toolbarsFlag="false"
+          :subfield="false"
+          style="z-index:0"
+        />
       </div>
       <div class="f_right">
         <a-icon type="clock-circle" />

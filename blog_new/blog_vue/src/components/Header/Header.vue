@@ -149,7 +149,6 @@
         .up,.down{
           color:#1890ff;
           position: absolute;
-          font-size: 2px;
           left:5px;
         }
         .up{

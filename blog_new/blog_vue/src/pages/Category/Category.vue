@@ -43,7 +43,7 @@
         pageSize:size,
       }"
       @change="handleTableChange"
-      :scroll="tabKey==='sort'?undefined:{x:450}"
+      :scroll="tabKey==='sort'?undefined:{x:430}"
       size="small"
     >
       <template slot="sort" slot-scope="val">

@@ -84,7 +84,7 @@
 
 <script>
   import urls from '../../api/urls';
-  const {UserSortAPI,UserTagAPI}=urls;
+  const {UserSortAPI,UserTagAPI,AdminSortAPI,AdminTagAPI}=urls;
   export default {
     data(){
       return {
@@ -97,31 +97,7 @@
         temporaryCondition:{}
       }
     },
-    props:["conditionQuery"],
-    mounted(){
-      this.$emit("request",{netUrl:UserTagAPI.LIST.url,conditionQuery: { isEnable: 1 }, index: 1, size: 999},res=>{
-        this.tagOptions=res.list;
-      })
-      this.$emit("request",{netUrl:UserSortAPI.LIST.url,conditionQuery: { isEnable: 1 }, index: 1, size: 999},res=>{
-        const catetories=res.list.filter(i => i.categories && i.categories.length > 0);
-        this.categoryOptions=catetories.map(i=>{
-          const item={
-            title:i.name,
-            key:`${i.id}`,
-            disableCheckbox:i.isEnable===0,
-            children:i.categories.map(v=>{
-              const one={
-                title:v.name,
-                key:`${i.id}=${v.id}`,
-                disableCheckbox:i.isEnable === 1 ? v.isEnable === 0 : true
-              };
-              return one;
-            })
-          };
-          return item;
-        });
-      })
-    },
+    props:["conditionQuery","role"],
     methods:{
       toggleExpand(){
         this.expandFlag=!this.expandFlag;
@@ -130,7 +106,36 @@
         this.showSorterFlag=!this.showSorterFlag;
       },
       toggleFilterModal(){
-        this.filterModalVisible=!this.filterModalVisible;
+        const {filterModalVisible}=this;
+        this.filterModalVisible=!filterModalVisible;
+        if(filterModalVisible) return;
+        if(this.role==="admin"){
+          this.$emit("request",{netUrl:AdminTagAPI.LIST.url,conditionQuery: {}, index: 1, size: 999},res=>{
+            this.tagOptions=res.list;
+          });
+          this.$emit("request",{netUrl:AdminSortAPI.LIST.url,conditionQuery: {}, index: 1, size: 999},res=>{
+            const catetories=res.list.filter(i => i.categories && i.categories.length > 0);
+            this.categoryOptions=catetories.map(i=>({
+                title:i.name,
+                key:`${i.id}`,
+                disableCheckbox:false,
+                children:i.categories.map(v=>({title:v.name,key:`${i.id}=${v.id}`,disableCheckbox:false}))
+            }));
+          });
+          return;
+        }
+        this.$emit("request",{netUrl:UserTagAPI.LIST.url,conditionQuery: { isEnable: 1 }, index: 1, size: 999},res=>{
+          this.tagOptions=res.list;
+        });
+        this.$emit("request",{netUrl:UserSortAPI.LIST.url,conditionQuery: { isEnable: 1 }, index: 1, size: 999},res=>{
+          const catetories=res.list.filter(i => i.categories && i.categories.length > 0);
+          this.categoryOptions=catetories.map(i=>({
+              title:i.name,
+              key:`${i.id}`,
+              disableCheckbox:i.isEnable===0,
+              children:i.categories.map(v=>({title:v.name,key:`${i.id}=${v.id}`,disableCheckbox:i.isEnable === 1 ? v.isEnable === 0 : true}))
+          }));
+        });
       },
       handleFilterSort(e){
         this.filterSort=e.target.value;
