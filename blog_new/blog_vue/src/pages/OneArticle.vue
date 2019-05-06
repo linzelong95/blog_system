@@ -19,6 +19,7 @@
           :editable="false"
           :toolbarsFlag="false"
           :subfield="false"
+          :scrollStyle="true"
           style="z-index:0"
         />
       </div>
@@ -78,6 +79,10 @@
     padding:15px;
     .title,.abstract,.tags{
       text-indent: 2em;
+    }
+    .title{
+      font-weight: bold;
+      color:#1890ff;
     }
     .abstract{
       margin-bottom:10px;
