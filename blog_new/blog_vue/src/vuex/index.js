@@ -6,9 +6,8 @@ import login from './login';
 import search from './search';
 
 import $request from '../api/request';
-import { Modal} from 'ant-design-vue';
+import { Modal,message} from 'ant-design-vue';
 const $error=Modal.error;
-
 
 const initState={
   spinningFlag:false,
@@ -49,12 +48,14 @@ const store=new Vuex.Store({
       }
       if(callback) {
         commit("toggleSpinning",false);
+        if(!action.includes("list")&&!action.includes("content")) message.success("操作成功！");
         callback(response);
         return;
       }
       if(!action.includes("list")){
         const baseUrl=netUrl.substring(0, position - 1);
         // 这里处理操作后的提示信息
+        message.success("操作成功！");
         let tempIndex=index;
         do{
           response=await $request(`${baseUrl}/list`,{conditionQuery,index:tempIndex,size,t:Date.now()});

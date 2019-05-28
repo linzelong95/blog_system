@@ -17,6 +17,7 @@ module.exports = (options, app) => {
 
   // 反序列化（请求时，session中存在"passport":{"user":"1"}触发）
   passport.deserializeUser(async (user, done) => {
+    console.log(user)
     done(null, user)// 在其他路由使用ctx.state.user可以取得该信息
   });
 

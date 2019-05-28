@@ -29,7 +29,7 @@ export default class ModalForm extends PureComponent {
   };
 
   render() {
-    const {lang="zh-CN",gutter = 0,defaultSpan,modalFormConfig,initialFormData,form: { getFieldDecorator },formProps} = this.props;
+    const {lang="zh_CN",gutter = 0,defaultSpan,modalFormConfig,initialFormData,form: { getFieldDecorator },formProps} = this.props;
     const selectTip={zh_CN:"请选择",en_US:"please select "}[lang];
     const inputTip={zh_CN:"请输入",en_US:"please input "}[lang];
     return (

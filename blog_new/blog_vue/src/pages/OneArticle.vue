@@ -23,17 +23,18 @@
           style="z-index:0"
         />
       </div>
-      <div class="f_right">
+      <div class="f_right" :style="{'margin-top':'20px'}">
         <a-icon type="clock-circle" />
         {{article.createDate|dateFormat}}
       </div>
       <div class="clearfix" />
-      <v-reply :articleId="$route.params.id" :role="$route.params.role" />
+      <v-reply :articleId="$route.params.articleId" :authorId="article.user?article.user.id:undefined" />
     </a-spin>
   </div>
 </template>
 
 <script>
+  import {mapState} from 'vuex';
   import VueMarkdown from 'vue-markdown';
   import ShowMarkdown from '../components/ShowMarkdown/ShowMarkdown.vue';
   import Reply from '../components/Reply/Reply.vue';
@@ -46,10 +47,11 @@
       }
     },
     mounted(){
-      const {id:articleId,role}=this.$route.params;
+      const {currentUser:{roleName="user"}}=this;
+      const {articleId}=this.$route.params;
       this.request({conditionQuery:{id:articleId}},res=>{
         const article=res.list[0];
-        this.request({netUrl:role==="user"?UserArticleAPI.CONTENT.url:AdminArticleAPI.CONTENT.url,articleId},response=>{
+        this.request({netUrl:roleName==="user"?UserArticleAPI.CONTENT.url:AdminArticleAPI.CONTENT.url,articleId},response=>{
           article.content=response.list[0].content;
           this.article=article;
         });
@@ -60,8 +62,8 @@
     },
     methods:{
       async request(paramsObj={},callback,isConcat){
-        const {role}=this.$route.params;
-        const payload={netUrl:role==="user"?UserArticleAPI.LIST.url:AdminArticleAPI.LIST.url,conditionQuery:this.conditionQuery,...paramsObj}
+        const {currentUser:{roleName="user"}}=this;
+        const payload={netUrl:roleName==="user"?UserArticleAPI.LIST.url:AdminArticleAPI.LIST.url,conditionQuery:this.conditionQuery,...paramsObj}
         this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
       },
     },
@@ -69,6 +71,11 @@
       "v-markdown":ShowMarkdown,
       "v-reply":Reply,
       "v-markdown-other":VueMarkdown
+    },
+    computed:{
+      ...mapState({
+        currentUser:state=>state.login.currentUser,
+      }),
     }
   }
 </script>

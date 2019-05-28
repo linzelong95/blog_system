@@ -9,7 +9,7 @@ import Register from '../pages/Register.vue';
 
 const routes= [
   {path:'/homepage',component:Homepage},
-  {path:'/read/:role/:id',component:OneArticle},
+  {path:'/read/:articleId',component:OneArticle},
   {path:'/article',component:Article,meta:{auth:true,role:"admin"}},
   {path:'/tag',component:Tag,meta:{auth:true,role:"admin"}},
   {path:'/category',component:Category,meta:{auth:true,role:"admin"}},

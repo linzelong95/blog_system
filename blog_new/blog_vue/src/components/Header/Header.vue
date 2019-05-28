@@ -10,7 +10,7 @@
       </router-link>
     </div>
     <div class="menu">
-      <span class="search" @click="toggleShowSearch">
+      <span class="search" @click="toggleShowSearch" v-if="searchIconFlag">
         <a-icon type="search" />
         <a-icon type="caret-down" class="down" v-if="searchBoxFlag" />
         <a-icon type="caret-up" class="up" v-else />
@@ -22,7 +22,7 @@
       <a-drawer
         title="菜单栏"
         placement="right"
-        width=150
+        :width="150"
         @close="toggleMenu"
         :visible="menuFlag"
       >
@@ -72,13 +72,15 @@
       return {
         menuFlag:false,
         backFlag:false,
+        searchIconFlag:true,
         current:["homepage"]
       }
     },
     mounted(){
-      const pathname=this.$route.path.substring(1);
-      this.current=[pathname];
-      this.backFlag=pathname!=="homepage";
+      const pathname=this.$route.path;
+      this.current=[pathname.substring(1)];
+      this.backFlag=pathname!=="/homepage";
+      this.searchIconFlag=!pathname.includes("/read");
       const currentPageUrl=window.location.href;
       const user=store.get("blog_account")||{};
       const {currentUser}=user;
@@ -110,6 +112,7 @@
     watch:{
       "$route.path":function(newVal){
         this.backFlag=newVal!=="/homepage";
+        this.searchIconFlag=!newVal.includes("/read");
         this.current=[newVal.substring(1)];
       }
     },

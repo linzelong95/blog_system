@@ -16,7 +16,7 @@
         v-for="item in list"
         :key="item.id"
         class="card"
-        @click="readArticle(item.id,'user')"
+        @click="readArticle(item.id)"
       >
         <img
           alt="pic"
@@ -99,14 +99,15 @@
       searchInputFocus(){
         this.$nextTick(()=>this.$refs.searchRef.focus());
       },
-      readArticle(id,role){
-        this.$router.push(`/read/${role}/${id}`);
+      readArticle(id){
+        this.$router.push(`/read/${id}`);
       },
     },
     computed:{
       ...mapState(['list','total','index','spinningFlag']),
       ...mapState({
-        searchContent:state=>state.search.searchContent
+        searchContent:state=>state.search.searchContent,
+        currentUser:state=>state.login.currentUser,
       }),
     }
   }

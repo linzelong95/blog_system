@@ -15,9 +15,7 @@ export default function request(url,data={},method="post"){
       // console.log(3333,e.message)
       // console.log(4444,e.config)
       const {status,data:{message,needRedirect}}=e.response;
-      if (status === 401) {
-        $error({title:message});
-        if(needRedirect) $store.dispatch({type:"login/logout"});
-      }
+      $error({title:message});
+      if (status === 401 && needRedirect) $store.dispatch({type:"login/logout"});
     });
 }
