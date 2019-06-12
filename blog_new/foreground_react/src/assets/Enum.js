@@ -1,4 +1,3 @@
-import { generateUrls } from '@/utils/utils';
 
 const CommonEnum = {
   // 性别
@@ -702,86 +701,11 @@ const SystemEnum = {
 };
 
 
-const ViewEnum = {
-  // Code
-  Code: {
-    SUCCESS: { code: 0, desc: '成功' },
-    NOLOGIN: { code: 1, desc: '未登录' },
-    INFO: { code: 2, desc: '信息' },
-    ERROR: { code: 3, desc: '错误' },
-    EXCEPTION: { code: 4, desc: '异常' },
-  },
-};
-
-const ShowEnum = {
-  ShowNavType: {
-    0: { zh_CN: "无数据", en_US: "NOTHING" },
-    1: { zh_CN: "部分商品", en_US: "PRODUCT" },
-    2: { zh_CN: "部分品牌", en_US: "BRAND" },
-    3: { zh_CN: "部分分类", en_US: "CATEGORY" },
-    undefined: { zh_CN: "", en_US: "" },
-  },
-  ShowNavType_POS: {
-    PRODUCT: { code: 1, zh_CN: "部分商品", en_US: "PRODUCT" },
-    BRAND: { code: 2, zh_CN: "部分品牌", en_US: "BRAND" },
-    CATEGORY: { code: 3, zh_CN: "部分分类", en_US: "CATEGORY" },
-  },
-};
 
 const UrlEnum = {
-  ProductAPI: generateUrls({ BASE_URL: "/product", zh_CN: "商品", en_US: "product" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK", "SALEON", "SALEOFF", "CHECKPASS", "CHECKUNPASS", "RECORD", "RE_RECORD", "RECORDPASS", "RECORDUNPASS"]),
-  SeriesAPI: generateUrls({ BASE_URL: "/series", zh_CN: "系列商品", en_US: "series" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK", "CHECKPASS", "CHECKUNPASS"]),
-  CategoryAttributeAPI: generateUrls({ BASE_URL: "/categoryattribute", zh_CN: "分类属性", en_US: "categoryattribute" }, ["LIST", "FORM", "INSERT", "UPDATE", "REMOVE", "LOCK", "UNLOCK"]),
-  ValueAPI: generateUrls({ BASE_URL: "/value", zh_CN: "属性值", en_US: "value" }, ["LIST", "FORM", "INSERT", "UPDATE", "REMOVE", "LOCK", "UNLOCK"]),
-  AttributeAPI: generateUrls({ BASE_URL: "/attribute", zh_CN: "属性", en_US: "attribute" }, ["LIST", "FORM", "INSERT", "UPDATE", "REMOVE", "LOCK", "UNLOCK"]),
-  AttributeValueAPI: generateUrls({ BASE_URL: "/attributevalue", zh_CN: "属性和属性值", en_US: "attributevalue" }, ["LIST"]),
-  BrandAPI: generateUrls({ BASE_URL: "/brand", zh_CN: "品牌", en_US: "brand" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK"]),
-  BrandSupplierAPI: generateUrls({ BASE_URL: "/brandsupplier", zh_CN: "商家品牌", en_US: "brandsupplier" }, ["LIST", "INSERT", "REMOVE", "LOCK", "UNLOCK", "CHECKPASS", "CHECKUNPASS"]),
-  UnitAPI: generateUrls({ BASE_URL: "/unit", zh_CN: "单位", en_US: "unit" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK"]),
-  UnitConvertAPI: generateUrls({ BASE_URL: "/unitconvert", zh_CN: "单位换算", en_US: "unitconvert" }, ["LIST", "FORM", "INSERT", "UPDATE", "REMOVE"]),
-  CategoryAPI: generateUrls({ BASE_URL: "/category", zh_CN: "分类", en_US: "category" }, ["LIST"]),
-
-  OrderAPI: generateUrls({ BASE_URL: "/order", zh_CN: "订单", en_US: "order" }, ["LIST", "DELETE", "REMOVE", "REVERT", "CLOSE", "SEND"]),
-  OrderServiceAPI: generateUrls({ BASE_URL: "/orderservice", zh_CN: "售后", en_US: "orderservice" }, ["LIST", "CLOSE", "CONFIRM", "COMPLETE"]),
-
-  WarehouseAPI: generateUrls({ BASE_URL: "/warehouse", zh_CN: "仓库", en_US: "warehouse" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK", "CHECKPASS", "CHECKUNPASS"]),
-  ShipModeAPI: generateUrls({ BASE_URL: "/shipmode", zh_CN: "配送方式", en_US: "shipmode" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK"]),
-  ShipTemplateAPI: generateUrls({ BASE_URL: "/shiptemplate", zh_CN: "配送模板", en_US: "shiptemplate" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK"]),
-  ExpressAPI: generateUrls({ BASE_URL: "/express", zh_CN: "快递", en_US: "express" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK"]),
-  ExpressSupplierAPI: generateUrls({ BASE_URL: "/expresssupplier", zh_CN: "商家快递", en_US: "expresssupplier" }, ["LIST", "INSERT", "REMOVE", "LOCK", "UNLOCK", "CHECKPASS", "CHECKUNPASS"]),
-
-  LetterAPI: generateUrls({ BASE_URL: "/letter", zh_CN: "站内信", en_US: "letter" }, ["LIST", "DELETE", "REMOVE", "REVERT", "READ", "DETAIL"]),
-  ReviewAPI: generateUrls({ BASE_URL: "/review", zh_CN: "评价", en_US: "review" }, ["LIST", "CHECKPASS", "CHECKUNPASS", "TOP", "UNTOP", "SHOW", "UNSHOW"]),
-
-  CouponAPI: generateUrls({ BASE_URL: "/coupon", zh_CN: "优惠券", en_US: "coupon" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK", "ACT", "UNACT"]),
-  GroupBuyAPI: generateUrls({ BASE_URL: "/groupbuy", zh_CN: "团购", en_US: "groupbuy" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK", "CHECKPASS", "CHECKUNPASS", "ACT", "UNACT"]),
-  PromotionAPI: generateUrls({ BASE_URL: "/promotion", zh_CN: "促销购", en_US: "promotion" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK", "CHECKPASS", "CHECKUNPASS", "ACT", "UNACT"]),
-  CountDownAPI: generateUrls({ BASE_URL: "/countdown", zh_CN: "限时购", en_US: "countdown" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK", "CHECKPASS", "CHECKUNPASS", "ACT", "UNACT"]),
-  GroupAPI: generateUrls({ BASE_URL: "/group", zh_CN: "商品组合", en_US: "group" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK", "CHECKPASS", "CHECKUNPASS", "ACT", "UNACT"]),
-  SpecialAPI: generateUrls({ BASE_URL: "/special", zh_CN: "特价", en_US: "special" }, ["LIST", "FORM", "UPDATE", "ACT", "UNACT"]),
-
-  RoleAPI: generateUrls({ BASE_URL: "/role", zh_CN: "角色", en_US: "role" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK"]),
-  ManagerAPI: generateUrls({ BASE_URL: "/manager", zh_CN: "管理员", en_US: "manager" }, ["LIST", "FORM", "INSERT", "UPDATE", "REMOVE"]),// 目前没有remove api
-  ManagerLogAPI: generateUrls({ BASE_URL: "/managerlog", zh_CN: "管理日志", en_US: "managerlog" }, ["LIST", "REMOVE"]),
-
-  ShowNavAPI: generateUrls({ BASE_URL: "/shownav", zh_CN: "显示分类", en_US: "show nav" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "LOCK", "UNLOCK"]),
-  ShowNavGroupAPI: generateUrls({ BASE_URL: "/shownavgroup", zh_CN: "显示分类组", en_US: "show nav group" }, ["LIST", "FORM", "INSERT", "UPDATE", "REMOVE", "LOCK", "UNLOCK", "ACT", "UNACT"]),
-  ModuleAPI: generateUrls({ BASE_URL: "/module", zh_CN: "模板", en_US: "module" }, ["LIST", "FORM", "INSERT", "UPDATE", "DELETE", "REMOVE", "REVERT", "LOCK", "UNLOCK", "SALEON", "SALEOFF", "CHECKPASS", "CHECKUNPASS"]),
-
-
-  // MAccountAPI: {
-  //   BASE_URL: "/user",
-  //   GET_PUBLICK_KEY: { url: "/user/get_encrypt_with_pwd", desc: { zh_CN: "获取公钥", en_US: "get the public key" } },
-  //   VERIFY_POHNE_CAPTCHA: { url: "/user/verify_code_by_phone", desc: { zh_CN: "验证手机验证码", en_US: "verify captcha of webpage" } },
-  //   VERIFY_WEBPAGE_CAPTCHA: { url: "/user/verify_code_by_page", desc: { zh_CN: "验证网页验证码", en_US: "verify captcha of phone" } },
-  //   GET_POHNE_CAPTCHA: { url: "/user/get_code_by_phone", desc: { zh_CN: "获取手机验证码", en_US: "get captcha of webpage" } },
-  //   GET_WEBPAGE_CAPTCHA: { url: "/user/get_code_by_page", desc: { zh_CN: "获取网页验证码", en_US: "get captcha of phone" } },
-  // },
 
   AccountAPI: {
     BASE_URL: "/account",
-    // LOGIN: { url: "/account/login", desc: { zh_CN: "登录", en_US: "login" } },
-    // LOGOUT: { url: "/account/logout", desc: { zh_CN: "注销", en_US: "logout" } },
     REGISTER: { url: "/api/account/register", desc: { zh_CN: "注册", en_US: "register" } },
     LOGIN: { url: "/api/account/login", desc: { zh_CN: "登录", en_US: "login" } },
     LOGOUT: { url: "/api/account/logout", desc: { zh_CN: "注销", en_US: "logout" } },
@@ -874,4 +798,4 @@ const UrlEnum = {
 
 
 
-export { CommonEnum, MarketEnum, MemberEnum, MessageEnum, OrderEnum, ProductEnum, ShowEnum, SystemEnum, ViewEnum, UrlEnum };
+export { CommonEnum, MarketEnum, MemberEnum, MessageEnum, OrderEnum, ProductEnum, SystemEnum, UrlEnum };

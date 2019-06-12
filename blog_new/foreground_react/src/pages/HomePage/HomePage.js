@@ -264,7 +264,7 @@ class HomePage extends React.Component {
                       <Icon type="star-o" />,
                       <Icon type="like-o" />,
                       <Icon type="message" />,
-                      <span>{item.tags.map(i => (<Tag color="volcano">{i.name}</Tag>))}</span>,
+                      <span>{item.tags.map(i => (<Tag color="volcano" key={i.id}>{i.name}</Tag>))}</span>,
                     ]}
                     extra={
                       <img
@@ -346,6 +346,7 @@ class HomePage extends React.Component {
                       }}
                       color={getRandomColor()}
                       style={{ fontSize: "13px", margin: "3px" }}
+                      key={i.id}
                     >
                       {i.name}
                     </Tag>
@@ -356,7 +357,7 @@ class HomePage extends React.Component {
                 <Divider style={{ margin: "25px 0px 10px 0px" }}><Icon type="clock-circle" style={{ color: "blue" }} /></Divider>
                 <Timeline mode="alternate">
                   {timelines.map(i => (
-                    <Timeline.Item color={getRandomColor()}>
+                    <Timeline.Item color={getRandomColor()} key={i.id}>
                       <b>{timeFormat(Number(new Date(i.updateDate)))}</b>
                       <a
                         href={`${window.location.origin}/article/${i.id}`}
@@ -426,7 +427,6 @@ class HomePage extends React.Component {
                 checkable
                 showLine
                 onCheck={this.conditionTreeSelect}
-                // defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
                 checkedKeys={temporaryCondition.filteredSortArr || []}
               >
                 {categoryOptions.map(item => (

@@ -9,7 +9,7 @@
     <a-comment v-for="item in list" :key="item.id">
       <template slot="actions">
         <a style="padding-right:10px;" @click="handleDealWithReply(item)">回复</a>
-        <a style="padding-right:10px;color:red;" @click="handleDealWithReply(item,getApi.DELETE)" v-if="currentUser.roleName==='admin'||(item.from&&currentUser.nickName===item.from.nickName)">删除</a>
+        <a style="padding-right:10px;color:red;" @click="handleDealWithReply(item,getApi.DELETE)" v-if="currentUser.roleName==='admin'||(item.from&&currentUser.id===item.from.id)">删除</a>
         <a style="padding-right:10px;color:green;" @click="handleDealWithReply(item,getApi.APPROVE)" v-if="currentUser.roleName==='admin'&&item.isApproved===0">展示</a>
         <a style="padding-right:10px;color:#B23AEE;" @click="handleDealWithReply(item,getApi.DISAPPROVE)" v-if="currentUser.roleName==='admin'&&item.isApproved===1">隐藏</a>
         <a style="padding-right:10px;color:orange;" @click="handleDealWithReply(item,getApi.TOP)" v-if="currentUser.roleName==='admin'&&item.isTop===0">置顶</a>
@@ -29,7 +29,7 @@
       <a-comment v-for="i in item.children" :key="i.id">
         <template slot="actions">
           <a style="padding-right:10px;" @click="handleDealWithReply(i)">回复</a>
-          <a style="padding-right:10px;color:red;" @click="handleDealWithReply(i,getApi.DELETE)" v-if="currentUser.roleName==='admin'||(i.from&&currentUser.nickName===i.from.nickName)">删除</a>
+          <a style="padding-right:10px;color:red;" @click="handleDealWithReply(i,getApi.DELETE)" v-if="currentUser.roleName==='admin'||(i.from&&currentUser.id===i.from.id)">删除</a>
           <a style="padding-right:10px;color:green;" @click="handleDealWithReply(i,getApi.APPROVE)" v-if="currentUser.roleName==='admin'&&i.isApproved===0">展示</a>
           <a style="padding-right:10px;color:#B23AEE;" @click="handleDealWithReply(i,getApi.DISAPPROVE)" v-if="currentUser.roleName==='admin'&&i.isApproved===1">隐藏</a>
           <a style="padding-right:10px;color:orange;" @click="handleDealWithReply(i,getApi.TOP)" v-if="currentUser.roleName==='admin'&&i.isTop===0">置顶</a>

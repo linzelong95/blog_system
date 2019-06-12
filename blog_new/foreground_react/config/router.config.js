@@ -32,18 +32,6 @@ export default [
         hideInMenu: true,
         component: './OneArticle/OneArticle',
       },
-      // {
-      //   path: '/frontend',
-      //   icon: 'idcard',
-      //   name: 'FrontEnd',
-      //   component: './Center/Management',
-      // },
-      // {
-      //   path: '/backend',
-      //   icon: 'idcard',
-      //   name: 'BackEnd',
-      //   component: './Center/Management',
-      // },
       {
         path: '/articlemanagement',
         icon: 'idcard',
@@ -77,20 +65,6 @@ export default [
         path: '/center',
         name: 'Center',
         component: './CenterPage/CenterPage',
-      },
-      {
-        name: 'result',
-        icon: 'check-circle-o',
-        path: '/result',
-        hideInMenu: true,
-        routes: [
-          {
-            path: '/result/success',
-            name: 'success',
-            component: './Result/Success',
-          },
-          { path: '/result/fail', name: 'fail', component: './Result/Error' },
-        ],
       },
       {
         name: 'exception',

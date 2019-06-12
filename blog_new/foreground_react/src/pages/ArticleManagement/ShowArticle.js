@@ -6,7 +6,7 @@ import ShowMarkdown from '@/components/CustomShowMarkDown';
 import { UrlEnum } from '@/assets/Enum';
 import { timeFormat } from '@/utils/utils';
 
-const {AdminReplyAPI: { LIST, DELETE, INSERT, SHOW, UNSHOW }} = UrlEnum;
+const {AdminReplyAPI: { LIST, DELETE, INSERT, APPROVE, DISAPPROVE }} = UrlEnum;
 
 @connect(({ global }) => ({
   currentUser: global.currentUser,
@@ -79,7 +79,7 @@ class ShowArticle extends React.Component {
       return;
     }
     const { from: { id: toId, nickName }, id, parentId: pid, reply } = replyItem;
-    if (action && [DELETE.url, SHOW.url, UNSHOW.url].includes(action.url)) {
+    if (action && [DELETE.url, APPROVE.url, DISAPPROVE.url].includes(action.url)) {
       const items = [{ id, parentId: pid, name: reply }];
       request({ netUrl: action.url, items }, () => this.getReplyList());
       return;
@@ -237,8 +237,8 @@ class ShowArticle extends React.Component {
                         <span><a onClick={() => this.handleDealWithReply(listItem)}>回复</a></span>,
                         <span><a onClick={() => this.handleDealWithReply(listItem, DELETE)} style={{ color: 'red' }}>删除</a></span>,
                         listItem.isApproved === 0 
-                          ? <span><a onClick={() => this.handleDealWithReply(listItem, SHOW)} style={{ color: '#66CD00' }}>展示</a></span>
-                          :<span><a onClick={() => this.handleDealWithReply(listItem, UNSHOW)} style={{ color: '#BF3EFF' }}>隐藏</a> </span>
+                          ? <span><a onClick={() => this.handleDealWithReply(listItem, APPROVE)} style={{ color: '#66CD00' }}>展示</a></span>
+                          :<span><a onClick={() => this.handleDealWithReply(listItem, DISAPPROVE)} style={{ color: '#BF3EFF' }}>隐藏</a> </span>
                       ]}
                       author={listItem.from.nickName}
                       avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
@@ -251,8 +251,8 @@ class ShowArticle extends React.Component {
                             <span><a onClick={() => this.handleDealWithReply({ ...i, parentId: listItem.id })}>回复</a></span>,
                             <span><a onClick={() => this.handleDealWithReply(i, DELETE)} style={{ color: 'red' }}>删除</a></span>,
                             i.isApproved === 0
-                              ? <span><a onClick={() => this.handleDealWithReply(i, SHOW)} style={{ color: '#66CD00' }}>展示</a></span>
-                              : <span><a onClick={() => this.handleDealWithReply(i, UNSHOW)} style={{ color: '#BF3EFF' }}>隐藏</a></span>
+                              ? <span><a onClick={() => this.handleDealWithReply(i, APPROVE)} style={{ color: '#66CD00' }}>展示</a></span>
+                              : <span><a onClick={() => this.handleDealWithReply(i, DISAPPROVE)} style={{ color: '#BF3EFF' }}>隐藏</a></span>
                           ]}
                           author={`${i.from.nickName} 回复@ ${i.to.nickName}`}
                           avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"

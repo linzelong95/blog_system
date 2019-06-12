@@ -291,5 +291,6 @@ export default {
   'menu.ReplyManagement': '评论管理',
   'menu.CategoryManagement': '分类管理',
   'menu.TagManagement': '标签管理',
+  'menu.OneArticle':'文章S',
   'menu.Center': '个人信息',
 };

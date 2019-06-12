@@ -21,7 +21,7 @@ import ShowMarkdown from '@/components/CustomShowMarkDown';
 import { UrlEnum } from '@/assets/Enum';
 import { timeFormat } from '@/utils/utils';
 
-const { UserArticleAPI: { LIST, CONTENT }, UserReplyAPI } = UrlEnum;
+const { UserArticleAPI: { LIST, CONTENT }, UserReplyAPI, AdminReplyAPI } = UrlEnum;
 
 @connect(({ articleManagement, loading, global }) => ({
   articleManagement,
@@ -58,10 +58,11 @@ class HomePage extends React.Component {
   };
 
   getReplyList = () => {
-    const { match: { params: { id } } } = this.props;
+    const { match: { params: { id } }, currentUser: { roleName } } = this.props;
     const { conditionQuery: con } = this.state;
     const conditionQuery = { ...con, articleIdsArr: [id] };
-    this.request({ netUrl: UserReplyAPI.LIST.url, conditionQuery, prettyFormat: true },
+    const netUrl = roleName === "admin" ? AdminReplyAPI.LIST.url : UserReplyAPI.LIST.url;
+    this.request({ netUrl, conditionQuery, prettyFormat: true },
       replyObj => this.setState({ replyObj, conditionQuery })
     );
   };
@@ -75,7 +76,7 @@ class HomePage extends React.Component {
   };
 
   handleWriteReply = val => {
-    const { form, currentUser: { id: currentUserId } } = this.props;
+    const { form, currentUser: { id: currentUserId, roleName } } = this.props;
     const { item: { id: articleId, user: { id: authorId } } } = this.state;
     if (val === 'reset') {
       form.resetFields();
@@ -89,7 +90,7 @@ class HomePage extends React.Component {
       if (err) return;
       const { to } = values;
       const fromId = currentUserId;
-      const netUrl = UserReplyAPI.INSERT.url;
+      const netUrl = roleName === "admin" ? AdminReplyAPI.INSERT.url : UserReplyAPI.INSERT.url;
       const toId = to.key;
       const isApproved = authorId === currentUserId ? 1 : 0;
       this.request({ ...values, isApproved, articleId, fromId, toId, netUrl }, () => {
@@ -108,7 +109,7 @@ class HomePage extends React.Component {
       return;
     }
     const { from: { id: toId, nickName }, id, parentId: pid, reply } = replyItem;
-    if (action && [UserReplyAPI.DELETE.url].includes(action.url)) {
+    if (action && [UserReplyAPI.DELETE.url, AdminReplyAPI.DELETE.url, AdminReplyAPI.APPROVE.url, AdminReplyAPI.DISAPPROVE.url].includes(action.url)) {
       const items = [{ id, parentId: pid, name: reply }];
       this.request({ netUrl: action.url, items }, () => this.getReplyList());
       return;
@@ -304,20 +305,22 @@ class HomePage extends React.Component {
                       <span>
                         <a onClick={() => this.handleDealWithReply(listItem)}>回复</a>
                       </span>,
-                      currentUser.id === listItem.from.id && (
+                      (currentUser.roleName === 'admin' || currentUser.id === listItem.from.id) && (
                         <span>
                           <a
-                            onClick={() => this.handleDealWithReply(listItem, UserReplyAPI.DELETE)}
+                            onClick={() => this.handleDealWithReply(listItem, currentUser.roleName === 'admin' ? AdminReplyAPI.DELETE : UserReplyAPI.DELETE)}
                             style={{ color: 'red' }}
                           >
                             删除
                           </a>
                         </span>
                       ),
+                      currentUser.roleName === "admin" && listItem.isApproved === 0 && <span><a onClick={() => this.handleDealWithReply(listItem, AdminReplyAPI.APPROVE)} style={{ color: '#66CD00' }}>展示</a></span>,
+                      currentUser.roleName === "admin" && listItem.isApproved === 1 && <span><a onClick={() => this.handleDealWithReply(listItem, AdminReplyAPI.DISAPPROVE)} style={{ color: '#BF3EFF' }}>隐藏</a> </span>
                     ]}
                     author={listItem.from.nickName}
                     avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                    content={listItem.isApproved ? listItem.reply : '（该评论待审核）'}
+                    content={listItem.isApproved || currentUser.roleName === 'admin' ? <span style={{ color: listItem.isApproved === 0 ? 'lightgray' : '' }}>{listItem.reply}</span> : '（该评论待审核）'}
                   >
                     {listItem.children.map(i => (
                       <Comment
@@ -325,11 +328,14 @@ class HomePage extends React.Component {
                         actions={[
                           <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(i.createDate)))}</span>,
                           <span><a onClick={() => this.handleDealWithReply({ ...i, parentId: listItem.id })}>回复</a></span>,
-                          currentUser.id === i.from.id && <span><a onClick={() => this.handleDealWithReply(i, UserReplyAPI.DELETE)} style={{ color: 'red' }}>删除</a></span>
+                          (currentUser.roleName === 'admin' || currentUser.id === i.from.id) &&
+                          <span><a onClick={() => this.handleDealWithReply(i, currentUser.roleName === 'admin' ? AdminReplyAPI.DELETE : UserReplyAPI.DELETE)} style={{ color: 'red' }}>删除</a></span>,
+                          currentUser.roleName === "admin" && i.isApproved === 0 && <span><a onClick={() => this.handleDealWithReply(i, AdminReplyAPI.APPROVE)} style={{ color: '#66CD00' }}>展示</a></span>,
+                          currentUser.roleName === "admin" && i.isApproved === 1 && <span><a onClick={() => this.handleDealWithReply(i, AdminReplyAPI.DISAPPROVE)} style={{ color: '#BF3EFF' }}>隐藏</a> </span>
                         ]}
                         author={`${i.from.nickName} 回复@ ${i.to.nickName}`}
                         avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                        content={i.isApproved ? i.reply : '（该评论待审核）'}
+                        content={i.isApproved || currentUser.roleName === 'admin' ? <span style={{ color: i.isApproved === 0 ? 'lightgray' : '' }}>{i.reply}</span> : '（该评论待审核）'}
                       />
                     ))}
                   </Comment>

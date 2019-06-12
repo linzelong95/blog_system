@@ -445,7 +445,7 @@ class ArticleManagement extends React.Component {
                       <Fragment>
                         <div style={{ marginBottom: '5px', fontSize: '12px' }}>
                           <Ellipsis lines={1}>
-                            标签：{item.tags && item.tags.length > 0 ? item.tags.map(i => <Tag color="volcano">{i.name}</Tag>) : <Tag color="volcano">无</Tag>}
+                            标签：{item.tags && item.tags.length > 0 ? item.tags.map(i => <Tag color="volcano" key={i.id}>{i.name}</Tag>) : <Tag color="volcano">无</Tag>}
                           </Ellipsis>
                         </div>
                         <Ellipsis lines={2} style={{ height: '40px' }}>
