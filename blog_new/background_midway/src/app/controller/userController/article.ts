@@ -9,8 +9,8 @@ export class UserArticleController {
 
   @post("/list")
   async list(ctx): Promise<void> {
-    const { conditionQuery: { title = "", orderBy = {}, category = {}, tagIdsArr = [], id }, index = 1, size = 10 } = ctx.request.body;
-    const [list, total] = await this.userArticleService.list({ id, title, orderBy, index, size, category, tagIdsArr });
+    const { conditionQuery: { title = "", orderBy = {}, category = {}, tagIdsArr = [], articleId }, index = 1, size = 10 } = ctx.request.body;
+    const [list, total] = await this.userArticleService.list({ articleId, title, orderBy, index, size, category, tagIdsArr });
     ctx.body = { list, total };
   }
 

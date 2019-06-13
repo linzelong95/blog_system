@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import CustomFormTable from '@/components/CustomFormTable';
 import CustomUpload from '@/components/CustomUpload';
-import CustomForm from '@/components/SeftForm';
+import CustomForm from '@/components/CustomForm';
 import CustomIconFont from '@/components/CustomIconFont';
 import LangConfig from '@/assets/LangConfig';
 import { ProductEnum, UrlEnum } from '@/assets/Enum';
@@ -149,7 +149,7 @@ const getCommonSelectedTable = ({ container, itemTable, selectBtnName, actionCol
   return <CustomFormTable {...props} />;
 }
 
-const getModalForm = ({ initialFormData = {}, editorialPanelVisible, toggleEdit, form, modalFormConfig, INSERT, UPDATE, ...otherProps }) =>
+const getModalForm = ({ initialFormData = {}, editorialPanelVisible, toggleEdit, form, formConfig, INSERT, UPDATE, ...otherProps }) =>
   <Modal
     title={initialFormData.id ? UPDATE.desc[lang] : INSERT.desc[lang]}
     visible={editorialPanelVisible}
@@ -159,7 +159,7 @@ const getModalForm = ({ initialFormData = {}, editorialPanelVisible, toggleEdit,
     width={1200}
     {...otherProps}
   >
-    <CustomForm {...{ modalFormConfig, form, initialFormData, lang }} />
+    <CustomForm {...{ formConfig, form, initialFormData, lang }} />
   </Modal>
 
 const EditorialFormConfig = { getUpload, getModalForm, getList, searchItem, getSelectorConfig, onHandleCustomTableChange, getCommonSelectedTable, getIconfont };

@@ -1,12 +1,12 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
 import { Col, Row, Button, Tag, Icon, Drawer, Comment, List, Divider, Form, Modal } from 'antd';
-import CustomForm from '@/components/SeftForm';
+import CustomForm from '@/components/CustomForm';
 import ShowMarkdown from '@/components/CustomShowMarkDown';
 import { UrlEnum } from '@/assets/Enum';
 import { timeFormat } from '@/utils/utils';
 
-const {AdminReplyAPI: { LIST, DELETE, INSERT, APPROVE, DISAPPROVE }} = UrlEnum;
+const { AdminReplyAPI: { LIST, DELETE, INSERT, APPROVE, DISAPPROVE } } = UrlEnum;
 
 @connect(({ global }) => ({
   currentUser: global.currentUser,
@@ -33,7 +33,7 @@ class ShowArticle extends React.Component {
     const { request, item: { id } } = this.props;
     const { conditionQuery: con } = this.state;
     const conditionQuery = { ...con, articleIdsArr: [id] };
-    request({ netUrl: LIST.url, conditionQuery, prettyFormat: true }, replyObj =>
+    request({ netUrl: LIST.url, conditionQuery, prettyFormat: true, size: Number.POSITIVE_INFINITY }, replyObj =>
       this.setState({ replyObj, conditionQuery })
     );
   };
@@ -96,7 +96,7 @@ class ShowArticle extends React.Component {
   render() {
     const { visible, item, onClose, form, loading } = this.props;
     const { clientHeight, replyObj, reviewBoxVisible, conditionQuery } = this.state;
-    const modalFormConfig = [
+    const formConfig = [
       {
         fieldId: 'to',
         label: '对象',
@@ -152,7 +152,7 @@ class ShowArticle extends React.Component {
                 <p style={{ textIndent: '2em' }}>
                   <b>标签：</b>
                   {item.label.map(i => (
-                    <Tag color="volcano" style={{ textIndent: '0em' }}>
+                    <Tag color="volcano" style={{ textIndent: '0em' }} key={i.id}>
                       {i.name}
                     </Tag>
                   ))}
@@ -181,7 +181,7 @@ class ShowArticle extends React.Component {
               {reviewBoxVisible && (
                 <Fragment>
                   <CustomForm
-                    {...{ modalFormConfig, form, formProps: { hideRequiredMark: true } }}
+                    {...{ formConfig, form, formProps: { hideRequiredMark: true } }}
                   />
                   <div style={{ float: 'right', marginTop: '10px' }}>
                     <Button
@@ -236,9 +236,9 @@ class ShowArticle extends React.Component {
                         <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(listItem.createDate)))}</span>,
                         <span><a onClick={() => this.handleDealWithReply(listItem)}>回复</a></span>,
                         <span><a onClick={() => this.handleDealWithReply(listItem, DELETE)} style={{ color: 'red' }}>删除</a></span>,
-                        listItem.isApproved === 0 
+                        listItem.isApproved === 0
                           ? <span><a onClick={() => this.handleDealWithReply(listItem, APPROVE)} style={{ color: '#66CD00' }}>展示</a></span>
-                          :<span><a onClick={() => this.handleDealWithReply(listItem, DISAPPROVE)} style={{ color: '#BF3EFF' }}>隐藏</a> </span>
+                          : <span><a onClick={() => this.handleDealWithReply(listItem, DISAPPROVE)} style={{ color: '#BF3EFF' }}>隐藏</a> </span>
                       ]}
                       author={listItem.from.nickName}
                       avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
@@ -246,6 +246,7 @@ class ShowArticle extends React.Component {
                     >
                       {listItem.children.map(i => (
                         <Comment
+                          key={i.id}
                           actions={[
                             <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(i.createDate)))}</span>,
                             <span><a onClick={() => this.handleDealWithReply({ ...i, parentId: listItem.id })}>回复</a></span>,

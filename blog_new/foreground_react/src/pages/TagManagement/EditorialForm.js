@@ -59,7 +59,7 @@ class EditorialForm extends React.PureComponent {
   render() {
     const { form, editorialPanelVisible } = this.props;
     const { initialFormData, categoryOptions } = this.state;
-    const modalFormConfig = [
+    const formConfig = [
       {
         fieldId: 'name',
         label: '名称',
@@ -97,7 +97,7 @@ class EditorialForm extends React.PureComponent {
       editorialPanelVisible,
       toggleEdit: this.toggleEdit,
       form,
-      modalFormConfig,
+      formConfig,
       INSERT,
       UPDATE,
       width: 600,

@@ -11,7 +11,7 @@ export class UserArticleService {
   repository = getRepository(Article);
 
   async list(options) {
-    const { id, index, size, title, orderBy, tagIdsArr, category: { sortIdsArr = [], cateIdsArr = [] } } = options;
+    const { articleId, index, size, title, orderBy, tagIdsArr, category: { sortIdsArr = [], cateIdsArr = [] } } = options;
     const orderByMap: OrderByCondition = { "article.isTop": "DESC" };
     if (orderBy.name && ["title", "createDate", "updateDate"].includes(orderBy.name)) orderByMap[`article.${orderBy.name}`] = orderBy.by;
     if (!orderBy.name || !["createDate", "updateDate"].includes(orderBy.name)) orderByMap["article.createDate"] = "ASC";
@@ -32,7 +32,7 @@ export class UserArticleService {
           .getQuery()
         return `article.id in ${subQuery}`;
       })
-      .andWhere(id ? `article.id=${id}` : "1=1")
+      .andWhere(articleId ? `article.id=${articleId}` : "1=1")
       .andWhere("article.isEnable=1")
       .andWhere(sortIdsArr.length && !cateIdsArr.length ? `sort.id in (${sortIdsArr.join(",")})` : "1=1")
       .andWhere(!sortIdsArr.length && cateIdsArr.length ? `category.id in (${cateIdsArr.join(",")})` : "1=1")

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Form, Button, Icon } from 'antd';
-import CustomForm from '@/components/SeftForm';
+import CustomForm from '@/components/CustomForm';
 import LangConfig from '@/assets/LangConfig';
 import PropTypes from 'prop-types';
 

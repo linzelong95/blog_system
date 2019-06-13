@@ -209,7 +209,7 @@ class EditorialForm extends React.PureComponent {
             form,
             editorialPanelVisible: tagEditorialModalVisible,
             toggleEdit: this.toggleTagEdit,
-            modalFormConfig: [{
+            formConfig: [{
               fieldId: 'tagName',
               label: '名称',
               fieldProps: { style: { width: '86%' } },
@@ -272,7 +272,7 @@ class EditorialForm extends React.PureComponent {
         }}
       />
     );
-    const modalFormConfig = [
+    const formConfig = [
       {
         fieldId: 'title',
         label: '标题',
@@ -344,7 +344,7 @@ class EditorialForm extends React.PureComponent {
       editorialPanelVisible,
       toggleEdit: this.toggleEdit,
       form,
-      modalFormConfig,
+      formConfig,
       INSERT,
       UPDATE,
       width: 1000,

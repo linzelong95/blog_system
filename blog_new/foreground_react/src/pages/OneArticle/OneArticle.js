@@ -16,12 +16,12 @@ import {
   message,
 } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
-import CustomForm from '@/components/SeftForm';
+import CustomForm from '@/components/CustomForm';
 import ShowMarkdown from '@/components/CustomShowMarkDown';
 import { UrlEnum } from '@/assets/Enum';
 import { timeFormat } from '@/utils/utils';
 
-const { UserArticleAPI: { LIST, CONTENT }, UserReplyAPI, AdminReplyAPI } = UrlEnum;
+const { UserArticleAPI, UserReplyAPI, AdminReplyAPI } = UrlEnum;
 
 @connect(({ articleManagement, loading, global }) => ({
   articleManagement,
@@ -40,20 +40,23 @@ class HomePage extends React.Component {
 
   componentDidMount = () => {
     const { match: { params: { id } } } = this.props;
-    this.request({ id, conditionQuery: {} }, res => {
-      this.request({ netUrl: CONTENT.url, conditionQuery: {}, articleId: id }, response => {
+    const articleId = id * 1;
+    this.request({ conditionQuery: { articleId } }, res => {
+      this.request({ netUrl: UserArticleAPI.CONTENT.url, articleId }, response => {
         this.setState({ item: { ...res.list[0], content: response.list[0].content } });
       });
     });
-  };
+  }
 
-  componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+  componentWillUnmount = () =>{
+    this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
+  } 
 
   request = (params, callback) => {
     const { conditionQuery: con } = this.state;
     const conditionQuery = { ...con };
     delete conditionQuery.filteredSortArr;
-    const payload = { netUrl: LIST.url, conditionQuery, ...params };
+    const payload = { netUrl: UserArticleAPI.LIST.url, conditionQuery, ...params };
     this.props.dispatch({ type: 'articleManagement/handleArticles', payload, callback });
   };
 
@@ -115,9 +118,10 @@ class HomePage extends React.Component {
       return;
     }
     const parentId = pid > 0 ? pid : id;
-    this.setState({ reviewBoxVisible: true }, () =>
-      form.setFieldsValue({ parentId, to: { label: nickName, key: toId } })
-    );
+    this.setState({ reviewBoxVisible: true }, () =>{
+      document.getElementsByClassName("ant-drawer-wrapper-body")[0].scrollTop=0;
+      form.setFieldsValue({ parentId, to: { label: nickName, key: toId } });
+    });
   };
 
   toggleReviewBox = () => this.setState(oldState => ({ reviewBoxVisible: !oldState.reviewBoxVisible }));
@@ -133,7 +137,7 @@ class HomePage extends React.Component {
   render() {
     const { form, currentUser, loading } = this.props;
     const { replyObj, reviewBoxVisible, conditionQuery, item, reviewDrawerVisible } = this.state;
-    const modalFormConfig = [
+    const formConfig = [
       {
         fieldId: 'to',
         label: '对象',
@@ -164,12 +168,14 @@ class HomePage extends React.Component {
               height: '50px',
               width: '50px',
               background: '#1890FF',
-              textAlign: 'center',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
             }}
           >
             <Icon
               type="form"
-              style={{ color: 'white', fontWeight: 'bold', fontSize: '20px', lineHeight: '50px' }}
+              style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}
             />
           </div>
           <Row type="flex" justify={reviewDrawerVisible ? 'start' : 'center'}>
@@ -244,7 +250,9 @@ class HomePage extends React.Component {
                   height: '50px',
                   width: '50px',
                   background: '#1890FF',
-                  textAlign: 'center',
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center"
                 }}
               >
                 <Icon
@@ -253,7 +261,6 @@ class HomePage extends React.Component {
                     color: 'white',
                     fontWeight: 'bold',
                     fontSize: '20px',
-                    lineHeight: '50px',
                   }}
                 />
               </div>
@@ -271,7 +278,7 @@ class HomePage extends React.Component {
               {reviewBoxVisible && (
                 <Fragment>
                   <CustomForm
-                    {...{ modalFormConfig, form, formProps: { hideRequiredMark: true } }}
+                    {...{ formConfig, form, formProps: { hideRequiredMark: true } }}
                   />
                   <div style={{ float: 'right', marginTop: '10px' }}>
                     <Button
