@@ -17,8 +17,8 @@ class CategoryManagement extends React.Component {
   state = {
     conditionQuery: {},
     editorialPanelVisible: false,
-    selectedItems: [], // 勾选的选项集合
-    selectedRowKeys: [], // 被勾选项的key
+    selectedItems: [], 
+    selectedRowKeys: [], 
     tabKey: 'sort',
     formItem: {},
     categoryOptions: [],

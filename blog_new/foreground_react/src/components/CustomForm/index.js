@@ -28,7 +28,7 @@ export default class ModalForm extends PureComponent {
   };
 
   render() {
-    const { gutter = 0, defaultSpan, formConfig, initialFormData, form: { getFieldDecorator }, style: formStyle, formProps } = this.props;
+    const { gutter = 0, defaultSpan, formConfig = [], initialFormData, form: { getFieldDecorator }, style: formStyle, formProps } = this.props;
     // const selectTip = formatMessage({ id: "common.tip.select" });
     // const inputTip = formatMessage({ id: "common.tip.input" });
     const selectTip = "请选择";
@@ -41,13 +41,13 @@ export default class ModalForm extends PureComponent {
               fieldId,
               fieldType,
               label,
-              formItemLayout,
-              formItemProps,
+              formItemLayout = {},
+              formItemProps = {},
               initialValue,
               rules = [],
               fieldProps = {},
               fieldNode,
-              style,
+              style = {},
               colLayout = {}
             } = item;
             const colHeightStyle = colLayout.span === 12 && style.display !== "none" ? { height: "56px" } : {};
@@ -188,7 +188,6 @@ export default class ModalForm extends PureComponent {
                   <Col {...colConfig}>
                     <FormItem {...formItemConfig}>
                       {getFieldDecorator(fieldId, { rules, initialValue: initV })(
-                        // <div {...fieldProps}>{fieldNode || null}</div>
                         fieldNode
                       )}
                     </FormItem>

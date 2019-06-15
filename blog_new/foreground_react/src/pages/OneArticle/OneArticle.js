@@ -119,7 +119,8 @@ class HomePage extends React.Component {
     }
     const parentId = pid > 0 ? pid : id;
     this.setState({ reviewBoxVisible: true }, () =>{
-      document.getElementsByClassName("ant-drawer-wrapper-body")[0].scrollTop=0;
+      // console.log(document.getElementsByClassName("ant-drawer-wrapper-body")[0].scrollTop)
+      // console.log(document.getElementsByClassName("ant-drawer-wrapper-body")[0].style.overflow)
       form.setFieldsValue({ parentId, to: { label: nickName, key: toId } });
     });
   };

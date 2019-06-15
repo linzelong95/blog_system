@@ -52,12 +52,11 @@ class EditorialForm extends React.PureComponent {
         })
       })
     );
-    if (formItem.id) {
-      request({ netUrl: CONTENT.url, articleId: formItem.id }, res => {
-        formItem.content = res.list[0].content;
-        this.formatInitialFormData(formItem);
-      });
-    }
+    if (!formItem.id) return;
+    request({ netUrl: CONTENT.url, articleId: formItem.id }, res => {
+      formItem.content = res.list[0].content;
+      this.formatInitialFormData(formItem);
+    });
   };
 
   formatInitialFormData = (formItem, extraObj) => {
@@ -65,6 +64,7 @@ class EditorialForm extends React.PureComponent {
     const tagSelectedItems = tags.map(i => ({ ...i, sort: category.sort }));
     const fileList = imageUrl ? [{ uid: -1, url: `${imgPrefix}${imageUrl}` }] : [];
     const initialFormData = { ...formItem, category: [category.sort.id, category.id] };
+    this.getList({ netUrl: AdminTagAPI.LIST.url, index: 1, size: 6, conditionQuery: { sortIdsArr: [category.sort.id] } });
     this.setState(oldState => ({
       initialFormData,
       tagContainer: { ...oldState.tagContainer, selectedItems: tagSelectedItems },
@@ -136,7 +136,7 @@ class EditorialForm extends React.PureComponent {
         newItem.disabled = !i.isEnable;
         return newItem;
       })
-      this.setState(oldState => ({ tagContainer: { ...oldState.tagContainer, total, list, index, size, conditionQuery } }))
+      this.setState(oldState => ({ tagContainer: { ...oldState.tagContainer, total, list, index, size, conditionQuery } }));
     });
   }
 
@@ -190,11 +190,11 @@ class EditorialForm extends React.PureComponent {
     const markdownNode = <Editor value={markdownValue} preview expand onChange={this.markDownChange} />;
     const tagTable = {
       COLUMNS: [
-        { title: '名称', dataIndex: 'name', sorter: true, width: '15%' },
-        { title: '所属', dataIndex: 'sort', sorter: true, width: '15%', render: (val) => <span>{val ? val.name : ""}</span> },
-        { title: '创建时间', dataIndex: 'createDate', sorter: true, width: '20%', render: val => <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(val)))}</span> },
-        { title: '修改时间', dataIndex: 'updateDate', sorter: true, width: '20%', render: val => <span><Icon type="edit" />&nbsp;{timeFormat(Number(new Date(val)))}</span> },
-        { title: '状态', dataIndex: 'isEnable', width: '10%', sorter: true, render: val => <Tag color="blue">{val === 1 ? '可用' : '不可用'}</Tag> }
+        { title: '名称', dataIndex: 'name', key: 'name', sorter: true, width: '15%' },
+        { title: '所属', dataIndex: 'sort', key: 'sort', sorter: true, width: '15%', render: (val) => <span>{val ? val.name : ""}</span> },
+        { title: '创建时间', dataIndex: 'createDate', key: 'createDate', sorter: true, width: '20%', render: val => <span><Icon type="clock-circle" />&nbsp;{timeFormat(Number(new Date(val)))}</span> },
+        { title: '修改时间', dataIndex: 'updateDate', key: 'updateDate', sorter: true, width: '20%', render: val => <span><Icon type="edit" />&nbsp;{timeFormat(Number(new Date(val)))}</span> },
+        { title: '状态', dataIndex: 'isEnable', key: 'isEnable', width: '10%', sorter: true, render: val => <Tag color="blue">{val === 1 ? '可用' : '不可用'}</Tag> }
       ],
       CONDITION: [{ fieldId: 'name', label: "标签名", fieldType: 'input', colLayout: { span: 8 } }],
     };
@@ -226,7 +226,7 @@ class EditorialForm extends React.PureComponent {
                 style: { width: '86%' },
                 disabled: true
               },
-              initialValue: { key: categoryIds[0], label: categoryOptions.filter(i => i.id === categoryIds[0])[0].name },
+              initialValue: { key: sortIdsArr[0], label: sortIdsArr[0] && categoryOptions.length ? categoryOptions.filter(i => i.id === sortIdsArr[0])[0].name : "" },
               formItemLayout: { labelCol: { span: 6 } },
             }],
             INSERT: AdminTagAPI.INSERT,
@@ -251,7 +251,7 @@ class EditorialForm extends React.PureComponent {
         selectedItems={tagContainer.selectedItems}
         tableWidth={{ width: "100%" }}
         type="checkbox"
-        customValue={{conditionQuery:{sortIdsArr}}}
+        customValue={{ conditionQuery: { sortIdsArr } }}
         additionalComponent={additionalComponent}
         doVerifyFunc={this.doVerifyFunc}
       />

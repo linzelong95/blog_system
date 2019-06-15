@@ -82,7 +82,8 @@ class CustomFormTable extends React.PureComponent {
     const selectedRowKeys = selectedItems.map(i => i.id);
     const customActionColumn = actionColumn || {
       title: ACTION[lang],
-      dataIndex: 'x',
+      dataIndex: 'action',
+      key: 'action',
       align: 'center',
       render: (_, item) => selectedItems.some(i => i.id === item.id) &&
         <Button size="small" style={{ color: "white", background: "red" }} onClick={() => onHandleCustomTableChange({ keys: selectedItems.filter(i => i.id !== item.id).map(i => i.id), items: [], formVerify, notAllowChange })}>{DROP[lang]}</Button>,
@@ -129,10 +130,10 @@ class CustomFormTable extends React.PureComponent {
             columns={baseTableColumns}
             rowKey={record => record.id}
             pagination={{ showQuickJumper: true, showSizeChanger: true, total, current: index, pageSize: size, defaultPageSize: size === 100 ? 100 : 6, pageSizeOptions: ["6", "12", "24", "36", "100"] }}
-            onChange={this.dataChange}
             scroll={this.getTableScroll(baseTableColumns)}
             lang={lang}
-            {...restProps}
+            {...restProps}// 这里为何会包含一个默认的onChange
+            onChange={this.dataChange}
           />
         </Modal>
       </Fragment>

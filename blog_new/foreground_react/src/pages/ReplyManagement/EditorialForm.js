@@ -111,9 +111,9 @@ class EditorialForm extends React.PureComponent {
         fieldType: 'select',
         fieldProps: {
           ...this.getSelectorConfig({ container: articlecontainer, disabled: initialFormData.id !== undefined }),
-          style: { width: '86%' },
+          style: { width: '94%' },
         },
-        formItemLayout: { labelCol: { span: 6 } },
+        formItemLayout: { labelCol: { span: 4 } },
       },
       initialFormData.id !== undefined && {
         fieldId: 'to',
@@ -124,9 +124,9 @@ class EditorialForm extends React.PureComponent {
           options: [],
           labelInValue: true,
           disabled: true,
-          style: { width: '86%' },
+          style: { width: '94%' },
         },
-        formItemLayout: { labelCol: { span: 6 } },
+        formItemLayout: { labelCol: { span: 4 } },
       },
       initialFormData.id !== undefined && {
         fieldId: 'preReply',
@@ -134,9 +134,9 @@ class EditorialForm extends React.PureComponent {
         fieldType: "node",
         fieldNode: <span>{initialFormData.preReply}</span>,
         fieldProps: {
-          style: { width: '86%' },
+          style: { width: '94%' },
         },
-        formItemLayout: { labelCol: { span: 6 } },
+        formItemLayout: { labelCol: { span: 4 } },
       },
       {
         fieldId: 'isTop',
@@ -145,18 +145,18 @@ class EditorialForm extends React.PureComponent {
         fieldType: 'select',
         fieldProps: {
           options: [{ value: 1, label: '是' }, { value: 0, label: '否' }],
-          style: { width: '86%' },
+          style: { width: '94%' },
         },
         initialValue: 1,
-        formItemLayout: { labelCol: { span: 6 } },
+        formItemLayout: { labelCol: { span: 4 } },
       },
       {
         fieldId: 'reply',
         label: '回复',
         rules: [{ required: true, message: '评论内容是必须的' }],
-        fieldProps: { style: { width: '86%' }, autosize: true, rows: 2 },
+        fieldProps: { style: { width: '94%' }, autosize: true, rows: 2 },
         fieldType: 'textArea',
-        formItemLayout: { labelCol: { span: 6 } },
+        formItemLayout: { labelCol: { span: 4 } },
       },
     ];
     return getModalForm({
