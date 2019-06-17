@@ -10,9 +10,15 @@ class CustomUpload extends React.Component {
 
   handleCancel = () => this.setState({ previewVisible: false });
 
-  handlePreview = (file) => this.setState({ previewImage: file.url || file.thumbUrl, previewVisible: true });
+  onPreview = (file) => {
+    this.setState({ previewImage: file.url || file.thumbUrl, previewVisible: true });
+  }
 
-  handleChange = ({ fileList }) => this.props.handleUpload(fileList);
+  onChange = (info) => {
+    const { fileList }=info;
+    const { handleUpload } = this.props;
+    handleUpload(fileList);
+  }
 
   render() {
     const { previewVisible, previewImage } = this.state;
@@ -25,9 +31,9 @@ class CustomUpload extends React.Component {
           withCredentials={withCredentials}
           listType={listType}
           fileList={fileList}
-          onPreview={this.handlePreview}
-          onChange={this.handleChange}
           {...otherProps}
+          onPreview={this.onPreview}
+          onChange={this.onChange}
         >
           {
             fileList.length < maxNum &&

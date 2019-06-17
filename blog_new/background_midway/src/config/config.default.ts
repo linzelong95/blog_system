@@ -8,7 +8,7 @@ export = (appInfo: any) => {
   config.middleware = ["passport"];
 
   config.security = {
-    domainWhiteList: ["http://127.0.0.1:8000", "http://127.0.0.1:8080","http://127.0.0.1:80","http://120.78.139.146:80"],
+    domainWhiteList: ["http://localhost:8000","http://localhost:8080","http://localhost:80", "http://127.0.0.1:8000", "http://127.0.0.1:8080","http://127.0.0.1:80","http://120.78.139.146:80","http://120.78.139.146"],
     csrf: {
       enable: false,
     },

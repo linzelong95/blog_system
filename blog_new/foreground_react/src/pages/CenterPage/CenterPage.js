@@ -23,12 +23,6 @@ class DistributionMode extends React.Component {
     value: '',
   };
 
-  componentDidMount = () => {};
-
-  handleOnclick = () => {
-    console.log(this.smde.value);
-  };
-
   handleCancel = () => this.setState({ previewVisible: false });
 
   handlePreview = file => {

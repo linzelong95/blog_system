@@ -6,7 +6,7 @@ import { timeFormat } from '@/utils/utils';
 import Editor from 'for-editor';
 import { UrlEnum } from '@/assets/Enum';
 import EditorialFormConfig from '@/pages/EditorialFormConfig';
-import { imgPrefix } from '@/defaultSettings';
+import { imgPrefix, uploadPrefix } from '@/defaultSettings';
 
 const { getModalForm } = EditorialFormConfig;
 const {
@@ -259,9 +259,9 @@ class EditorialForm extends React.PureComponent {
     const imgUpload = (
       <CustomUpload
         fileList={fileList}
-        action="http://127.0.0.1:7001/upload/file?type=1&folder=1"
+        action={`${uploadPrefix}/upload/file`}
         handleUpload={list => {
-          this.setState({ fileList: list });
+          this.setState({ fileList: [...list] });// 克隆数组，让组件能感知数组的变化
           if (list.length > 0 && list[list.length - 1].status !== 'uploading') {
             const arr = list.filter(i => i.url || (i.response && i.response.url));
             if (arr.length < list.length) {
