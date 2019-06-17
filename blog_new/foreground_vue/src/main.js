@@ -4,13 +4,13 @@ import store from './vuex';
 import router from './router';
 
 import request from './api/request';
-Vue.prototype.$request=request;
+Vue.prototype.$request = request;
 
 import mavonEditor from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
 Vue.use(mavonEditor);
 
-import { Button,Drawer,Icon,Card ,Tag,message,Modal,Spin,Input,Comment,Avatar,Divider,Menu,Form,Checkbox,Table,Badge,Select,Breadcrumb,Tree,Row,Col,Radio,Alert,List,Tabs,Pagination} from 'ant-design-vue';
+import { Button, Drawer, Icon, Card, Tag, message, Modal, Spin, Input, Comment, Avatar, Divider, Menu, Form, Checkbox, Table, Badge, Select, Breadcrumb, Tree, Row, Col, Radio, Alert, List, Tabs, Pagination } from 'ant-design-vue';
 Vue.use(Button);
 Vue.use(Drawer);
 Vue.use(Icon);
@@ -37,28 +37,29 @@ Vue.use(Alert);
 Vue.use(List);
 Vue.use(Tabs);
 Vue.use(Pagination);
-Vue.prototype.$message=message;
-Vue.prototype.$error=Modal.error;
-Vue.prototype.$confirm=Modal.confirm;
+Vue.prototype.$message = message;
+Vue.prototype.$error = Modal.error;
+Vue.prototype.$confirm = Modal.confirm;
 
-router.beforeEach((to,from,next)=>{
-  const {meta={},path}=to;
-  const {currentUser={}}=store.state.login;
-  if(!meta.auth) return next(); 
-  if(!currentUser.account) return store.dispatch({type:"login/logout",payload:{path}});
-  if(meta.role==="user" || currentUser.roleName==="admin") return next();
+router.beforeEach((to, from, next) => {
+  const { meta = {}, path } = to;
+  const { currentUser = {} } = store.state.login;
+  if (meta.title) document.title = meta.title;
+  if (!meta.auth) return next();
+  if (!currentUser.account) return store.dispatch({ type: "login/logout", payload: { path } });
+  if (meta.role === "user" || currentUser.roleName === "admin") return next();
   message.error("无权限！");
   next("/homepage");
 });
 
 import moment from 'moment';
-Vue.filter("dateFormat",function(dataStr,pattern="YYYY-MM-DD HH:mm:ss"){
+Vue.filter("dateFormat", function (dataStr, pattern = "YYYY-MM-DD HH:mm:ss") {
   return moment(dataStr).format(pattern);
 });
 
 
 
-const vm=new Vue({
+const vm = new Vue({
   el: '#app',
   router,
   store,

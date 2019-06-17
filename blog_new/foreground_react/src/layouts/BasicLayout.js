@@ -20,7 +20,7 @@ import Footer from './Footer';
 import Header from './Header';
 import Context from './MenuContext';
 import Exception403 from '../pages/Exception/403';
-import { adminName,adminType } from '@/defaultSettings';
+import { adminName,adminType,mobileUrl } from '@/defaultSettings';
 
 const { Content } = Layout;
 const lang = getLocale() === "zh-CN" ? "zh_CN" : "en_US";
@@ -112,22 +112,23 @@ class BasicLayout extends React.PureComponent {
       // 当重置语言时，state会重置，故需要重新获取
       dispatch({type: 'login/login',payload:admin,autoLoginMark:true});
     }
-    // dispatch({
-    //   type: 'setting/getSetting',
-    // });
-    // this.renderRef = requestAnimationFrame(() => {
-    //   this.setState({
-    //     rendering: false,
-    //   });
-    // });
-    // this.enquireHandler = enquireScreen(mobile => {
-    //   const { isMobile } = this.state;
-    //   if (isMobile !== mobile) {
-    //     this.setState({
-    //       isMobile: mobile,
-    //     });
-    //   }
-    // });
+    dispatch({
+      type: 'setting/getSetting',
+    });
+    this.renderRef = requestAnimationFrame(() => {
+      this.setState({
+        rendering: false,
+      });
+    });
+    this.enquireHandler = enquireScreen(mobile => {
+      if(mobile) window.location.href=mobileUrl;
+      const { isMobile } = this.state;
+      if (isMobile !== mobile) {
+        this.setState({
+          isMobile: mobile,
+        });
+      }
+    });
   }
 
 

@@ -20,4 +20,5 @@ module.exports = {
   adminName: { zh_CN: '向上的博客', en_US: 'blog', code: 1 },
   // imgPrefix: 'http://127.0.0.1:7001',
   imgPrefix: 'http://120.78.139.146:7001',
+  mobileUrl:'http://120.78.139.146:8089'
 };

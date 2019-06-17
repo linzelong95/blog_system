@@ -28,7 +28,7 @@
         {{article.createDate|dateFormat}}
       </div>
       <div class="clearfix" />
-      <v-reply :articleId="$route.params.articleId" :authorId="article.user?article.user.id:undefined" />
+      <v-reply :articleId="$route.params.articleId*1" :authorId="article.user?article.user.id:undefined" />
     </a-spin>
   </div>
 </template>
@@ -48,8 +48,9 @@
     },
     mounted(){
       const {currentUser:{roleName="user"}}=this;
-      const {articleId}=this.$route.params;
-      this.request({conditionQuery:{id:articleId}},res=>{
+      const {articleId:preArticleId}=this.$route.params;
+      const articleId=preArticleId*1;
+      this.request({conditionQuery:{articleId}},res=>{
         const article=res.list[0];
         this.request({netUrl:roleName==="user"?UserArticleAPI.CONTENT.url:AdminArticleAPI.CONTENT.url,articleId},response=>{
           article.content=response.list[0].content;

@@ -108,6 +108,7 @@ export default {
   },
 
   chainWebpack: webpackPlugin,
+  hash:true
   // base: defaultSettings.adminType,
   // publicPath: `/${defaultSettings.adminType}/`,
 };

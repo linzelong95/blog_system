@@ -19,12 +19,11 @@
     </a-divider>
     <div class="operation">
       <span>
-        <a-button type="primary" size="small" @click="toggleEditorialPanel" v-if="selectedItems.length===0">新增</a-button>
-        <a-button type="primary" size="small" @click="toggleEditorialPanel" icon="plus" v-else />
+        <a-button type="primary" size="small" @click="tip" v-if="selectedItems.length===0">新增</a-button>
+        <a-button type="primary" size="small" @click="tip" icon="plus" v-else />
         <span v-show="selectedItems.length>0">
           <a-badge :count="selectedItems.length">
-            <!-- <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button> -->
-            <a-button type="primary" size="small" @click="cleanSelectedItem" icon="redo" />
+            <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button>
           </a-badge>
           <a-button icon="delete" shape="circle" size="small" style="color:red;margin-left:10px;" @click="handleItems(AdminArticleAPI.DELETE)" />
           <a-button icon="unlock" shape="circle" size="small" style="color:green;" @click="handleItems(AdminArticleAPI.UNLOCK)" />
@@ -51,7 +50,7 @@
         <a-list-item-meta>
           <a-avatar size="large" slot="avatar" :src="`${baseImgUrl}${item.imageUrl}`||'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png'" />
           <template slot="title">
-            <a @click="readArticle(item.id,'admin')">
+            <a @click="readArticle(item.id)">
               {{item.title}}&nbsp;&nbsp;
               <a-tag color="purple" class="category" v-if="item.category && item.category.sort">
                 <!-- <a-icon type="tag" />&nbsp; -->
@@ -128,8 +127,8 @@
       searchInputFocus(){
         this.$nextTick(()=>this.$refs.searchRef.focus());
       },
-      readArticle(id,role){
-        this.$router.push(`/read/${role}/${id}`);
+      readArticle(id){
+        this.$router.push(`/read/${id}`);
       },
       handlePageChange(index,size){
         this.request({index,size});
@@ -200,6 +199,9 @@
           this.request({ netUrl, items });
         };
         this.$confirm({ title, content, okText, cancelText, onCancel, onOk });
+      },
+      tip(){
+        this.$error({title:"暂未实现"});
       },
     },
     computed:{

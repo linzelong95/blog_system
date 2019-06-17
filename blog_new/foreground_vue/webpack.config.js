@@ -56,7 +56,7 @@ module.exports = {
               'css-loader',
               'sass-loader?indentedSyntax'
             ],
-            'less':[
+            'less': [
               'vue-style-loader',
               'css-loader',
               'less-loader'
@@ -93,7 +93,7 @@ module.exports = {
     historyApiFallback: true,
     noInfo: true,
     overlay: true,
-    proxy:{
+    proxy: {
       '/api/': {
         target: 'http://127.0.0.1:7001/',
         changeOrigin: true,

@@ -10,8 +10,8 @@ export class AdminArticleController {
   @post("/list")
   async list(ctx): Promise<void> {
     const user = ctx.state.user;
-    const { conditionQuery: { title = "", orderBy = {}, category = {}, tagIdsArr = [] }, index = 1, size = 10 } = ctx.request.body;
-    const [list, total] = await this.adminArticleService.list({ title, orderBy, index, size, category, tagIdsArr, user });
+    const { conditionQuery: { title = "", orderBy = {}, category = {}, tagIdsArr = [], articleId }, index = 1, size = 10 } = ctx.request.body;
+    const [list, total] = await this.adminArticleService.list({ title, orderBy, index, size, category, tagIdsArr, user, articleId });
     ctx.body = { list, total };
   }
 
