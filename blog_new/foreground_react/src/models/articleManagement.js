@@ -1,10 +1,6 @@
-import React from 'react';
 import { handleArticles } from '@/services/api';
-import { message, Modal } from 'antd';
-import { SystemEnum, UrlEnum } from '@/assets/Enum';
-import LangConfig from '@/assets/LangConfig';
+import { message } from 'antd';
 
-const { CommonLang: { ACTION } } = LangConfig;
 
 export default {
   namespace: 'articleManagement',
@@ -18,41 +14,16 @@ export default {
   },
   effects: {
     *handleArticles({ payload, callback }, { call, put, select }) {
-      const { index: pageIndex, size: pageSize, lang } = yield select(models => models.articleManagement);
+      const { index: pageIndex, size: pageSize } = yield select(models => models.articleManagement);
       const { netUrl, index = pageIndex, size = pageSize, conditionQuery } = payload;
       const position = netUrl.lastIndexOf("/") + 1;
-      let action = netUrl.substring(position);
+      const action = netUrl.substring(position);
       let response = yield call(handleArticles, { ...payload, size, index, t: Date.now() });
       if (!response) return;
       if (callback) { callback(response); return; }
       if (!action.includes("list")) {
-        // const specialUrl = [LetterAPI.BASE_URL, ReviewAPI.BASE_URL, OrderAPI.BASE_URL];
+        message.success("操作成功");
         const baseUrl = netUrl.substring(0, position - 1);
-
-        // if (specialUrl.includes(baseUrl)){
-        //   yield put({ type: 'global/fetchNotices' });
-        //   const specialPathname=["letter","commodityevaluation","orderlist"];
-        //   const pathnameArr=window.location.pathname.split("/");
-        //   if(!specialPathname.includes(pathnameArr[pathnameArr.length-1])) return;
-        // } 
-        // const { Action_POS } = SystemEnum;
-        // action = Action_POS[action.toUpperCase()][lang] || ACTION[lang];
-        // const { success, error } = response;
-        // if (success.length && !error.length) {
-        //   const tip = success.pop().message;
-        //   message.success(success.length > 1 ? `批量${tip}` : tip, 1);
-        // }
-        // if (!success.length && error.length) {
-        //   const content = error.map(i => <p>{`【${i.name}】：`}<b style={{ color: "red" }}>{i.message}</b></p>);
-        //   const title = `${error.length > 1 ? `【批量${action}】失败` : `【${action}】失败`}！`
-        //   Modal.error({ title, content });
-        // }
-        // if (success.length && error.length) {
-        //   const content = error.map(i => <p>{`【${i.name}】：`}<b style={{ color: "red" }}>{i.message}</b></p>);
-        //   const title = `${success.length}项成功${action}，${error.length}项失败！原因：`;
-        //   Modal.warning({ title, content });
-        // }
-
         // 如果删除的那一页刚好没有list，那么要将页数往前移动
         let tempIndex = index;
         do {

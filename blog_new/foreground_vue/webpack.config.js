@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
-    filename: 'build.js'
+    filename: 'build.[hash:8].js'
   },
   module: {
     rules: [
@@ -68,7 +68,10 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
+        options: {
+          plugins: ['syntax-dynamic-import']
+        }
       },
       {
         test: /\.(png|jpg|gif|svg)$/,

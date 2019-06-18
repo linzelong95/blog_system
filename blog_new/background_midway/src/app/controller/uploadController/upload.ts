@@ -10,15 +10,15 @@ export class UploadController {
 
   @post("/file")
   async upload(ctx): Promise<void> {
-    const stream=await ctx.getFileStream();
-    const filename=`${Date.now()}${stream.filename}`;
-    const target=`${ctx.app.baseDir}/app/public/img/article/${filename}`;
+    const stream = await ctx.getFileStream();
+    const filename = `${Date.now()}${stream.filename}`;
+    const target = `${ctx.app.baseDir}/app/public/img/article/${filename}`;
     const writeStream = fs.createWriteStream(target);
-    try{
+    try {
       await awaitWriteStream(stream.pipe(writeStream));
-    }finally{
+    } finally {
       await sendToWormhole(stream);
     }
-    ctx.body = { url: `/public/img/article/${filename}`};
+    ctx.body = { url: `/public/img/article/${filename}` };
   }
 }

@@ -1,16 +1,13 @@
 import React from 'react';
-import router from 'umi/router';
-import { stringify } from 'querystring';
 import { Layout } from 'antd';
 import DocumentTitle from 'react-document-title';
 import isEqual from 'lodash/isEqual';
 import memoizeOne from 'memoize-one';
 import { connect } from 'dva';
 import { ContainerQuery } from 'react-container-query';
-import classNames from 'classnames';
 import pathToRegexp from 'path-to-regexp';
 import { enquireScreen, unenquireScreen } from 'enquire-js';
-import { formatMessage,getLocale } from 'umi/locale';
+import { formatMessage, getLocale } from 'umi/locale';
 import SiderMenu from '@/components/SiderMenu';
 import Authorized from '@/utils/Authorized';
 import SettingDrawer from '@/components/SettingDrawer';
@@ -20,7 +17,7 @@ import Footer from './Footer';
 import Header from './Header';
 import Context from './MenuContext';
 import Exception403 from '../pages/Exception/403';
-import { adminName,adminType,mobileUrl } from '@/defaultSettings';
+import { adminName, mobileUrl } from '@/defaultSettings';
 
 const { Content } = Layout;
 const lang = getLocale() === "zh-CN" ? "zh_CN" : "en_US";
@@ -97,20 +94,20 @@ class BasicLayout extends React.PureComponent {
     rendering: true,
     isMobile: false,
     menuData: this.getMenuData(),
-    adminNameLocale:adminName[lang],
+    adminNameLocale: adminName[lang],
   };
 
-  
+
 
   componentDidMount() {
-    const { dispatch,loginStatus } = this.props; 
-    const admin = store.get("account")||{};
-    const {language=lang,currentUser}=admin;
-    dispatch({type: 'common/saveLang',payload:{language}});
-    const currentPageUrl=window.location.href;
-    if(!loginStatus&&currentUser&&!currentPageUrl.includes("/user/login")){
+    const { dispatch, loginStatus } = this.props;
+    const admin = store.get("account") || {};
+    const { language = lang, currentUser } = admin;
+    dispatch({ type: 'common/saveLang', payload: { language } });
+    const currentPageUrl = window.location.href;
+    if (!loginStatus && currentUser && !currentPageUrl.includes("/user/login")) {
       // 当重置语言时，state会重置，故需要重新获取
-      dispatch({type: 'login/login',payload:admin,autoLoginMark:true});
+      dispatch({ type: 'login/login', payload: admin, autoLoginMark: true });
     }
     dispatch({
       type: 'setting/getSetting',
@@ -121,7 +118,7 @@ class BasicLayout extends React.PureComponent {
       });
     });
     this.enquireHandler = enquireScreen(mobile => {
-      if(mobile) window.location.href=mobileUrl;
+      if (mobile) window.location.href = mobileUrl;
       const { isMobile } = this.state;
       if (isMobile !== mobile) {
         this.setState({
@@ -190,7 +187,7 @@ class BasicLayout extends React.PureComponent {
   };
 
   getPageTitle = pathname => {
-    const {adminNameLocale}=this.state;
+    const { adminNameLocale } = this.state;
     const currRouterData = this.matchParamsPath(pathname);
 
     if (!currRouterData) {
@@ -226,7 +223,7 @@ class BasicLayout extends React.PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'global/save',
-      payload: {collapsed},
+      payload: { collapsed },
     });
   };
 
@@ -247,7 +244,7 @@ class BasicLayout extends React.PureComponent {
       children,
       location: { pathname },
     } = this.props;
-    const {adminNameLocale}=this.state;
+    const { adminNameLocale } = this.state;
     const { isMobile, menuData } = this.state;
     const isTop = PropsLayout === 'topmenu';
     const routerConfig = this.matchParamsPath(pathname);
@@ -309,9 +306,9 @@ class BasicLayout extends React.PureComponent {
   }
 }
 
-export default connect(({ global, setting,login }) => ({
+export default connect(({ global, setting, login }) => ({
   collapsed: global.collapsed,
   layout: setting.layout,
-  loginStatus:login.loginStatus,
+  loginStatus: login.loginStatus,
   ...setting,
 }))(BasicLayout);
