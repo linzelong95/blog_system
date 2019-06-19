@@ -87,7 +87,7 @@
     methods:{
       async request(paramsObj={},callback,isConcat){
         const conditionQuery={...this.conditionQuery,title:this.searchContent};
-        const payload={netUrl:UserArticleAPI.LIST.url,conditionQuery,...paramsObj}
+        const payload={netUrl:UserArticleAPI.LIST.url,conditionQuery,...paramsObj};
         this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
       },
       changeConditionQuery(obj){

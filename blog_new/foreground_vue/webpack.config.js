@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
-    filename: 'build.[hash:8].js'
+    filename: process.env.NODE_ENV === "production" ? 'build.[hash:8].js' : 'build.js'
   },
   module: {
     rules: [

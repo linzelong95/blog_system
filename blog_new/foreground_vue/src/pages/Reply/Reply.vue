@@ -9,6 +9,7 @@
     <v-search 
       @request="request"
       ref="searchRef"
+      placeholder="回复内容搜索"
     />
     <a-divider class="breadcrumb">
       <a-breadcrumb>
@@ -22,8 +23,7 @@
         <a-button type="primary" size="small" @click="toggleEditorialPanel" icon="plus" v-else />
         <span v-show="selectedItems.length>0">
           <a-badge :count="selectedItems.length">
-            <!-- <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button> -->
-            <a-button type="primary" size="small" @click="cleanSelectedItem" icon="redo" />
+            <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button>
           </a-badge>
           <a-button icon="delete" shape="circle" size="small" style="color:red;margin-left:10px;" @click="handleItems(AdminReplyAPI.DELETE)" />
           <a-button icon="check" shape="circle" size="small" style="color:green;" @click="handleItems(AdminReplyAPI.APPROVE)" />
@@ -107,7 +107,7 @@
     data () {
       return {
         baseImgUrl,
-        conditionQuery: { title: '', category: {}, orderBy: {} },
+        conditionQuery: { reply: '', category: {}, orderBy: {} },
         AdminReplyAPI,
         selectedItems:[],
         formItem:{},
@@ -132,7 +132,7 @@
     },
     methods:{
       async request(paramsObj={},callback,isConcat){
-        const conditionQuery={...this.conditionQuery,title:this.searchContent};
+        const conditionQuery={...this.conditionQuery,reply:this.searchContent};
         const payload={netUrl:AdminReplyAPI.LIST.url,conditionQuery,...paramsObj}
         this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
         if (payload.netUrl !== AdminReplyAPI.LIST.url) this.cleanSelectedItem();

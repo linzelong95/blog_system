@@ -19,7 +19,7 @@
         </a-tag>
       </div>
     </div>
-    <div class="clear"  v-show="expandFlag" @click="clearCondition">
+    <div class="clear" v-show="expandFlag" @click="clearCondition">
       <a-icon type="home" theme="outlined" style="font-size:20px;"/>
     </div>
     <a-modal
@@ -230,6 +230,9 @@
       bottom:0px;
       left:25px;
       background:#AB82FF;
+      display:flex;
+      justify-content: center;
+      align-items: center;
     }
     .sort{
       left:50px;

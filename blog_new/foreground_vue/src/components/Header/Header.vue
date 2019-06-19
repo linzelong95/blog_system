@@ -3,11 +3,9 @@
     <div class="back"  v-show="backFlag">
       <a-icon type="left-circle" @click="goBack" />
     </div>
-    <div class="logo" :class="{f_left:!backFlag}">
-      <router-link to="/homepage">
-        <img src="../../assets/logo.png">
-        <span>向上的博客</span>
-      </router-link>
+    <div class="logo" :class="{f_left:!backFlag}" @click="goHome">
+      <img src="../../assets/logo.png">
+      <span>向上的博客</span>
     </div>
     <div class="menu">
       <span class="search" @click="toggleShowSearch" v-if="searchIconFlag">
@@ -66,7 +64,7 @@
   import {mapState} from 'vuex';
   import store from 'store';
   import urls from '../../api/urls';
-  const {AccountAPI}=urls;
+  const {AccountAPI,UserArticleAPI}=urls;
   export default {
     data () {
       return {
@@ -94,6 +92,25 @@
       },
       goBack(){
         this.$router.go(-1);
+      },
+      goHome(){
+        const {pathname}=window.location;
+        if(pathname==="/homepage") {
+          this.$store.dispatch({
+            type: "search/setSearchContent",
+            payload: { searchContent: "" }
+          });
+          this.$store.dispatch({ 
+            type: "search/toggleSearchBox" ,
+            payload:{searchBoxFlag:false}
+          });
+          this.$store.dispatch({
+            type:"commonHandle",
+            payload:{netUrl:UserArticleAPI.LIST.url,conditionQuery:{}}
+          });
+          return;
+        }
+        this.$router.push("/homepage");
       },
       toggleShowSearch(){
         this.$store.dispatch({type:"search/toggleSearchBox"});

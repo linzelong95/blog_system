@@ -60,7 +60,6 @@ const login = {
       const { autoLogin = false } = user;
       store.set('blog_account', { autoLogin });
       commit("save", { loginStatus: false, currentUser: {} });
-      // $router.push(`/homepage`);
       const { path } = payload;
       let currentPageUrl = window.location.href;
       if (path) {
