@@ -1,15 +1,15 @@
 import React from 'react';
-import { Layout } from 'antd';
+import { Layout, message } from 'antd';
 import DocumentTitle from 'react-document-title';
 import isEqual from 'lodash/isEqual';
 import memoizeOne from 'memoize-one';
 import { connect } from 'dva';
 import { ContainerQuery } from 'react-container-query';
 import pathToRegexp from 'path-to-regexp';
+import classNames from 'classnames';// 不能删
 import { enquireScreen, unenquireScreen } from 'enquire-js';
 import { formatMessage, getLocale } from 'umi/locale';
 import SiderMenu from '@/components/SiderMenu';
-import Authorized from '@/utils/Authorized';
 import SettingDrawer from '@/components/SettingDrawer';
 import store from 'store';
 import logo from '../assets/logo.png';
@@ -18,6 +18,9 @@ import Header from './Header';
 import Context from './MenuContext';
 import Exception403 from '../pages/Exception/403';
 import { adminName, mobileUrl } from '@/defaultSettings';
+import { setAuthority } from '@/utils/authority';
+import Authorized, { reloadAuthorized } from '@/utils/Authorized';
+import { getMap } from '@/services/api';
 
 const { Content } = Layout;
 const lang = getLocale() === "zh-CN" ? "zh_CN" : "en_US";
@@ -95,9 +98,8 @@ class BasicLayout extends React.PureComponent {
     isMobile: false,
     menuData: this.getMenuData(),
     adminNameLocale: adminName[lang],
+    localCity: "定位中"
   };
-
-
 
   componentDidMount() {
     const { dispatch, loginStatus } = this.props;
@@ -109,6 +111,20 @@ class BasicLayout extends React.PureComponent {
       // 当重置语言时，state会重置，故需要重新获取
       dispatch({ type: 'login/login', payload: admin, autoLoginMark: true });
     }
+    if (!loginStatus && !currentUser) {
+      setAuthority('user');
+      reloadAuthorized();
+    }
+    getMap()
+      .then(data => {
+        if (data) {
+          const { city = "定位中" } = data;
+          this.setState({ localCity: city });
+        }
+      })
+      .catch(() => {
+        message.error("获取地理位置失败");
+      });
     dispatch({
       type: 'setting/getSetting',
     });
@@ -127,7 +143,6 @@ class BasicLayout extends React.PureComponent {
       }
     });
   }
-
 
   componentDidUpdate(preProps) {
     // After changing to phone mode,
@@ -244,8 +259,7 @@ class BasicLayout extends React.PureComponent {
       children,
       location: { pathname },
     } = this.props;
-    const { adminNameLocale } = this.state;
-    const { isMobile, menuData } = this.state;
+    const { isMobile, menuData, adminNameLocale, localCity } = this.state;
     const isTop = PropsLayout === 'topmenu';
     const routerConfig = this.matchParamsPath(pathname);
     const layout = (
@@ -273,6 +287,7 @@ class BasicLayout extends React.PureComponent {
             handleMenuCollapse={this.handleMenuCollapse}
             setLanguage={this.setLanguage}
             logo={logo}
+            localCity={localCity}
             isMobile={isMobile}
             {...this.props}
             adminName={adminNameLocale}

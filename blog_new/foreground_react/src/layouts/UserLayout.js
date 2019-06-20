@@ -30,7 +30,7 @@ const links = [
 
 const copyright = (
   <Fragment>
-    Copyright <Icon type="copyright" /> 2018 广东新安怀电子商务有限公司技术部出品
+    Copyright <Icon type="copyright" /> 2019 个人出品
   </Fragment>
 );
 
@@ -51,7 +51,13 @@ class UserLayout extends React.PureComponent {
     return (
       // @TODO <DocumentTitle title={this.getPageTitle()}>
       <div className={styles.container}>
-        <div className={styles.lang}>
+        {/* <div className={styles.lang}>
+          <SelectLang />
+        </div> */}
+        <div style={{display:'flex',justifyContent:"space-between",padding:"20px"}}>
+          <Link to="/">
+            <Icon type="home" />
+          </Link>
           <SelectLang />
         </div>
         <div className={styles.content}>
@@ -62,7 +68,7 @@ class UserLayout extends React.PureComponent {
                 <span className={styles.title}>{adminName[lang]}</span>
               </Link>
             </div>
-            <div className={styles.desc}>{adminName[lang]}{{zh_CN:"是致力于处理电商相关流程的后台管理系统",en_US:" is the system aimed to handle the process about online shop"}[lang]}</div>
+            <div className={styles.desc}>欢迎来到博客，让我们共同学习，一起进步吧</div>
           </div>
           {children}
         </div>

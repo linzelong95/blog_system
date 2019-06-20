@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Modal, Card, Col, Row, Button, Radio, Alert, Badge, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider, Timeline } from 'antd';
+import { Modal, Card, Col, Row, Button, Radio, Alert, Badge, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider, Timeline,Drawer } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import Ellipsis from '@/components/Ellipsis';
 import { imgPrefix } from '@/defaultSettings';
@@ -23,7 +23,9 @@ class HomePage extends React.Component {
     tagOptions: [],
     temporaryCondition: {},
     filterSort: 'selectedByCate',
-    timelines: []
+    timelines: [],
+    courseDrawerVisible:false,
+    messageDrawerVisible:false
   };
 
   componentDidMount = () => {
@@ -121,6 +123,22 @@ class HomePage extends React.Component {
 
   filterSort = e => this.setState({ filterSort: e.target.value });
 
+  toggleCourseDrawer = () => {
+    const { courseDrawerVisible } = this.state;
+    if (!courseDrawerVisible) {
+      console.log(111)
+    }
+    this.setState({ courseDrawerVisible: !courseDrawerVisible });
+  }
+
+  toggleMessageDrawer = () => {
+    const { messageDrawerVisible } = this.state;
+    if (!messageDrawerVisible) {
+      console.log(111)
+    }
+    this.setState({ messageDrawerVisible: !messageDrawerVisible });
+  }
+
   render() {
     const {
       articleManagement: { total = 6, list = [], size = 6, index = 1 },
@@ -134,11 +152,53 @@ class HomePage extends React.Component {
       tagOptions,
       conditionQuery,
       temporaryCondition,
-      timelines
+      timelines,
+      courseDrawerVisible,
+      messageDrawerVisible
     } = this.state;
     return (
       <GridContent>
-        <Card>
+        <Card style={{ position: 'relative' }}>
+          <div
+            onClick={this.toggleCourseDrawer}
+            style={{
+              position: 'fixed',
+              right: '0px',
+              top: '300px',
+              height: '50px',
+              width: '75px',
+              background: '#1890FF',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: "white",
+              cursor: "pointer",
+              borderRadius: "5px 0px 0px 5px"
+            }}
+          >
+            <Icon type="ordered-list" style={{ fontWeight: 'bold', fontSize: '20px' }} />
+            <b style={{ fontSize: 18, marginLeft: 5 }}>归档</b>
+          </div>
+          <div
+            onClick={this.toggleMessageDrawer}
+            style={{
+              position: 'fixed',
+              right: '0px',
+              top: '370px',
+              height: '50px',
+              width: '75px',
+              background: '#1890FF',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: "white",
+              cursor: "pointer",
+              borderRadius: "5px 0px 0px 5px"
+            }}
+          >
+            <Icon type="form" style={{ fontWeight: 'bold', fontSize: '20px' }} />
+            <b style={{ fontSize: 18, marginLeft: 5 }}>留言</b>
+          </div>
           <Row type="flex" align="middle" style={{ marginBottom: '15px' }}>
             <Col xs={12} sm={13} md={15} lg={16} xl={17}>
               <Button
@@ -466,6 +526,64 @@ class HomePage extends React.Component {
               </Row>
             )}
           </Modal>
+          <Drawer
+            visible={courseDrawerVisible}
+            title="归档"
+            onClose={this.toggleCourseDrawer}
+            width={500}
+          >
+            {courseDrawerVisible && (
+              <div
+                onClick={this.toggleCourseDrawer}
+                style={{
+                  position: 'absolute',
+                  left: '-50px',
+                  top: '300px',
+                  height: '50px',
+                  width: '50px',
+                  background: '#1890FF',
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: 'white',
+                  cursor:"pointer",
+                  borderRadius:"5px 0px 0px 5px"
+                }}
+              >
+                <Icon type="close" style={{fontWeight: 'bold',fontSize: '20px'}} />
+              </div>
+            )}
+            时间线
+          </Drawer>
+          <Drawer
+            visible={messageDrawerVisible}
+            title="留言"
+            onClose={this.toggleMessageDrawer}
+            width={500}
+          >
+            {messageDrawerVisible && (
+              <div
+                onClick={this.toggleMessageDrawer}
+                style={{
+                  position: 'absolute',
+                  left: '-50px',
+                  top: '300px',
+                  height: '50px',
+                  width: '50px',
+                  background: '#1890FF',
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: 'white',
+                  cursor:"pointer",
+                  borderRadius:"5px 0px 0px 5px"
+                }}
+              >
+                <Icon type="close" style={{fontWeight: 'bold',fontSize: '20px'}} />
+              </div>
+            )}
+            留言
+          </Drawer>
         </Card>
       </GridContent>
     );

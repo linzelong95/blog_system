@@ -133,7 +133,7 @@ class HomePage extends React.Component {
     const { reviewDrawerVisible } = this.state;
     if (!reviewDrawerVisible) this.getReplyList();
     this.setState({ reviewDrawerVisible: !reviewDrawerVisible });
-  };
+  }
 
   render() {
     const { form, currentUser, loading } = this.props;
@@ -167,17 +167,18 @@ class HomePage extends React.Component {
               right: '0px',
               top: '300px',
               height: '50px',
-              width: '50px',
+              width: '75px',
               background: '#1890FF',
               display: "flex",
               justifyContent: "center",
-              alignItems: "center"
+              alignItems: "center",
+              color:"white",
+              cursor:"pointer",
+              borderRadius:"5px 0px 0px 5px"
             }}
           >
-            <Icon
-              type="form"
-              style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}
-            />
+            <Icon type="form" style={{ fontWeight: 'bold', fontSize: '20px' }} />
+            <b style={{fontSize:18,marginLeft:5}}>评论</b>
           </div>
           <Row type="flex" justify={reviewDrawerVisible ? 'start' : 'center'}>
             <Col span={reviewDrawerVisible ? 16 : 22}>
@@ -253,17 +254,13 @@ class HomePage extends React.Component {
                   background: '#1890FF',
                   display: "flex",
                   justifyContent: "center",
-                  alignItems: "center"
+                  alignItems: "center",
+                  color: 'white',
+                  cursor:"pointer",
+                  borderRadius:"5px 0px 0px 5px"
                 }}
               >
-                <Icon
-                  type="close"
-                  style={{
-                    color: 'white',
-                    fontWeight: 'bold',
-                    fontSize: '20px',
-                  }}
-                />
+                <Icon type="close" style={{fontWeight: 'bold',fontSize: '20px'}} />
               </div>
             )}
             <div style={{ marginBottom: '30px' }}>

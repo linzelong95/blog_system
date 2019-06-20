@@ -222,6 +222,7 @@ export default class GlobalHeaderRight extends PureComponent {
       onMenuClick,
       onNoticeClear,
       theme,
+      localCity
     } = this.props;
     const { noticeModalConfig } = this.state;
     const menu = (
@@ -248,7 +249,7 @@ export default class GlobalHeaderRight extends PureComponent {
     }
     return (
       <div className={className}>
-        <HeaderSearch
+        {/* <HeaderSearch
           className={`${styles.action} ${styles.search}`}
           placeholder={formatMessage({ id: 'component.globalHeader.search' })}
           dataSource={[
@@ -308,7 +309,11 @@ export default class GlobalHeaderRight extends PureComponent {
             emptyText={formatMessage({ id: 'component.globalHeader.event.empty' })}
             emptyImage="https://gw.alipayobjects.com/zos/rmsportal/HsIsxMZiWKrNUavQUXqx.svg"
           />
-        </NoticeIcon>
+        </NoticeIcon> */}
+        <span>
+          <Icon type="environment" />
+          <span style={{margin:"0px 15px 0px 3px"}}>{localCity}</span>
+        </span>
         {currentUser.account ? (
           <Dropdown overlay={menu}>
             <span className={`${styles.action} ${styles.account}`}>

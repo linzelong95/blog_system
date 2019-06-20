@@ -22,6 +22,7 @@ export default [
         path: '/index',
         icon: 'idcard',
         name: 'HomePage',
+        hideInMenu: true,
         component: './HomePage/HomePage',
       },
       {
@@ -64,6 +65,7 @@ export default [
         icon: 'idcard',
         path: '/center',
         name: 'Center',
+        hideInMenu: true,
         component: './CenterPage/CenterPage',
       },
       {
