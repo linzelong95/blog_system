@@ -1,14 +1,15 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
-import { Modal, Card, Col, Row, Button, Radio, Alert, Badge, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider, Timeline,Drawer } from 'antd';
+import { Modal, Card, Col, Row, Button, Radio, Alert, Badge, Tooltip, Input, Tag, Icon, List, Tree, Avatar, Divider } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
+import CourseDrawer from '@/components/CustomCourse';
+import MessageDrawer from '@/components/CustomMessage';
 import Ellipsis from '@/components/Ellipsis';
 import { imgPrefix } from '@/defaultSettings';
 import { timeFormat, getRandomColor } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 
 const { UserArticleAPI: { LIST }, UserSortAPI, UserTagAPI } = UrlEnum;
-
 
 @connect(({ articleManagement, loading }) => ({
   articleManagement,
@@ -23,14 +24,12 @@ class HomePage extends React.Component {
     tagOptions: [],
     temporaryCondition: {},
     filterSort: 'selectedByCate',
-    timelines: [],
-    courseDrawerVisible:false,
-    messageDrawerVisible:false
+    courseDrawerVisible: false,
+    messageDrawerVisible: false
   };
 
   componentDidMount = () => {
     this.request({ index: 1, size: 6 });
-    this.request({ size: 5, conditionQuery: { orderBy: { name: "createDate", by: "DESC" } } }, (res) => this.setState({ timelines: res.list }));
     this.request({ netUrl: UserTagAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, (res) => this.setState({ tagOptions: res.list }));
     this.request({ netUrl: UserSortAPI.LIST.url, conditionQuery: { isEnable: 1 }, index: 1, size: 999 }, (res) =>
       this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
@@ -39,30 +38,30 @@ class HomePage extends React.Component {
 
   componentWillUnmount = () => this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
 
-  request = (params, callback) => {
+  request = (params, callback, needExtraParamFlag = true) => {
     const { conditionQuery: con } = this.state;
     const conditionQuery = { ...con };
     delete conditionQuery.filteredSortArr;
-    const payload = { netUrl: LIST.url, conditionQuery, ...params };
+    const payload = needExtraParamFlag ? { netUrl: LIST.url, conditionQuery, ...params } : params;
     this.props.dispatch({ type: 'articleManagement/handleArticles', payload, callback });
   };
 
   handleShowALL = () => this.setState({ conditionQuery: {}, temporaryCondition: {} }, () => {
     this.request({ index: 1 });
     this.inputSearch.input.state.value = '';
-  });
+  })
 
   handlePageChange = (index, size) => this.request({ index, size });
 
   handleOnSearch = val => this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, title: val.replace(/(^\s*)|(\s*$)/g, '') } }), () =>
     this.request({ index: 1 })
-  );
+  )
 
   toggleShowSorter = () => {
     const { articleManagement: { list = [] } } = this.props;
     if (!list.length) return;
     this.setState(oldState => ({ showSorterFlag: !oldState.showSorterFlag }));
-  };
+  }
 
   sort = e => {
     if (e === 'default') {
@@ -77,7 +76,7 @@ class HomePage extends React.Component {
     this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, orderBy: { name, by: orderBy.by === 'ASC' ? 'DESC' : 'ASC' } } }), () =>
       this.request({ index: 1 })
     );
-  };
+  }
 
   toggleFilterModal = () =>
     this.setState(oldState => ({ filterModalVisible: !oldState.filterModalVisible }));
@@ -125,17 +124,11 @@ class HomePage extends React.Component {
 
   toggleCourseDrawer = () => {
     const { courseDrawerVisible } = this.state;
-    if (!courseDrawerVisible) {
-      console.log(111)
-    }
     this.setState({ courseDrawerVisible: !courseDrawerVisible });
   }
 
   toggleMessageDrawer = () => {
     const { messageDrawerVisible } = this.state;
-    if (!messageDrawerVisible) {
-      console.log(111)
-    }
     this.setState({ messageDrawerVisible: !messageDrawerVisible });
   }
 
@@ -152,7 +145,6 @@ class HomePage extends React.Component {
       tagOptions,
       conditionQuery,
       temporaryCondition,
-      timelines,
       courseDrawerVisible,
       messageDrawerVisible
     } = this.state;
@@ -415,23 +407,35 @@ class HomePage extends React.Component {
               </div>
               <div>
                 <Divider style={{ margin: "25px 0px 10px 0px" }}><Icon type="clock-circle" style={{ color: "blue" }} /></Divider>
-                <Timeline mode="alternate">
-                  {timelines.map(i => (
-                    <Timeline.Item color={getRandomColor()} key={i.id}>
-                      <b>{timeFormat(Number(new Date(i.updateDate)))}</b>
-                      <a
-                        href={`${window.location.origin}/article/${i.id}`}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        style={{ display: "block" }}
-                      >
-                        {i.title}
-                      </a>
-                    </Timeline.Item>
-                  )
-                  )}
-                  <Timeline.Item><a>more...</a></Timeline.Item>
-                </Timeline>
+                <Tree
+                  checkable
+                  showLine
+                  onCheck={(filteredSortArr) => {
+                    this.setState(oldState => ({
+                      temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr },
+                    }), () => this.filterRequest("noModal"))
+                  }}
+                  checkedKeys={temporaryCondition.filteredSortArr || []}
+                  style={{ marginLeft: "30%" }}
+                >
+                  {categoryOptions.map(item => (
+                    <Tree.TreeNode
+                      title={item.name}
+                      key={`${item.id}`}
+                      selectable={false}
+                      disabled={item.isEnable === 0}
+                    >
+                      {item.categories.map(i => (
+                        <Tree.TreeNode
+                          title={i.name}
+                          key={`${item.id}-${i.id}`}
+                          selectable={false}
+                          disabled={item.isEnable === 1 ? i.isEnable === 0 : true}
+                        />
+                      ))}
+                    </Tree.TreeNode>
+                  ))}
+                </Tree>
               </div>
             </Col>
           </Row>
@@ -526,64 +530,24 @@ class HomePage extends React.Component {
               </Row>
             )}
           </Modal>
-          <Drawer
-            visible={courseDrawerVisible}
-            title="归档"
-            onClose={this.toggleCourseDrawer}
-            width={500}
-          >
-            {courseDrawerVisible && (
-              <div
-                onClick={this.toggleCourseDrawer}
-                style={{
-                  position: 'absolute',
-                  left: '-50px',
-                  top: '300px',
-                  height: '50px',
-                  width: '50px',
-                  background: '#1890FF',
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  color: 'white',
-                  cursor:"pointer",
-                  borderRadius:"5px 0px 0px 5px"
-                }}
-              >
-                <Icon type="close" style={{fontWeight: 'bold',fontSize: '20px'}} />
-              </div>
-            )}
-            时间线
-          </Drawer>
-          <Drawer
-            visible={messageDrawerVisible}
-            title="留言"
-            onClose={this.toggleMessageDrawer}
-            width={500}
-          >
-            {messageDrawerVisible && (
-              <div
-                onClick={this.toggleMessageDrawer}
-                style={{
-                  position: 'absolute',
-                  left: '-50px',
-                  top: '300px',
-                  height: '50px',
-                  width: '50px',
-                  background: '#1890FF',
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  color: 'white',
-                  cursor:"pointer",
-                  borderRadius:"5px 0px 0px 5px"
-                }}
-              >
-                <Icon type="close" style={{fontWeight: 'bold',fontSize: '20px'}} />
-              </div>
-            )}
-            留言
-          </Drawer>
+          {courseDrawerVisible &&
+            <CourseDrawer
+              visible={courseDrawerVisible}
+              onClose={this.toggleCourseDrawer}
+              request={this.request}
+              title="归档"
+              width={500}
+            />
+          }
+          {messageDrawerVisible &&
+            <MessageDrawer
+              visible={messageDrawerVisible}
+              onClose={this.toggleMessageDrawer}
+              request={this.request}
+              title="留言板"
+              width={500}
+            />
+          }
         </Card>
       </GridContent>
     );

@@ -1,15 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 import { User } from "./User";
-import { Article } from "./Article";
 
 @Entity()
-export class Reply {
+export class Message {
 
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    reply: string;
+    message: string;
 
     @Column({ default: 0 })
     isApproved: number;
@@ -31,7 +30,10 @@ export class Reply {
     @JoinColumn({ name: "toId" })
     to: User;
 
-    @ManyToOne(type => Article, article => article.replies, { onDelete: "CASCADE", onUpdate: "CASCADE" })
-    article: Article;
+    @Column()
+    fromMail: string;
+
+    @Column()
+    toMail: string;
 
 }

@@ -10,7 +10,7 @@ const CheckboxGroup = Checkbox.Group;
 const RadioGroup = Radio.Group;
 const { TextArea } = Input;
 
-export default class ModalForm extends PureComponent {
+export default class CustomForm extends PureComponent {
   static propTypes = {
     form: PropTypes.object.isRequired,
     formProps: PropTypes.object,

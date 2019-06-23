@@ -712,13 +712,22 @@ const UrlEnum = {
     GET_PUBLICK_KEY: { url: "/api/account/getpublickey", desc: { zh_CN: "获取公钥", en_US: "get the public key" } },
     GET_WEBPAGE_CAPTCHA: { url: "/api/account/getcaptcha", desc: { zh_CN: "获取网页验证码", en_US: "get captcha of phone" } },
     VERIFY_WEBPAGE_CAPTCHA: { url: "/api/account/verifycaptcha", desc: { zh_CN: "验证网页验证码", en_US: "verify captcha of phone" } },
-
   },
 
   UserArticleAPI: {
     BASE_URL: "/user/article",
     LIST: { url: "/api/user/article/list", desc: { zh_CN: "获取文章列表", en_US: "getList" } },
     CONTENT: { url: "/api/user/article/content", desc: { zh_CN: "获取内容", en_US: "getContent" } },
+  },
+  UserCourseAPI: {
+    BASE_URL: "/user/course",
+    LIST: { url: "/api/user/course/list", desc: { zh_CN: "获取时间线", en_US: "getList" } },
+  },
+  UserMessageAPI: {
+    BASE_URL: "/user/message",
+    LIST: { url: "/api/user/message/list", desc: { zh_CN: "获取留言列表", en_US: "getList" } },
+    DELETE: { url: "/api/user/message/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    INSERT: { url: "/api/user/message/insert", desc: { zh_CN: "添加", en_US: "insert" } },
   },
   UserCateAPI: {
     BASE_URL: "/user/cate",
@@ -762,6 +771,11 @@ const UrlEnum = {
     UNTOP: { url: `/api/admin/reply/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
     APPROVE: { url: "/api/admin/reply/approve", desc: { zh_CN: "过审", en_US: "approve" }, actionTip: { zh_CN: "将被审核通过！", en_US: "will be shown,and then can be hidden after being shown!" } },
     DISAPPROVE: { url: "/api/admin/reply/disapprove", desc: { zh_CN: "拒审", en_US: "disapprove" }, actionTip: { zh_CN: "将被拒审！", en_US: "will be hidden,and then can be shown after being hidden!" } },
+  },
+  AdminMessageAPI: {
+    BASE_URL: "/admin/message",
+    DELETE: { url: "/api/admin/message/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    INSERT: { url: "/api/admin/message/insert", desc: { zh_CN: "添加", en_US: "insert" } },
   },
   AdminCateAPI: {
     BASE_URL: "/admin/cate",
