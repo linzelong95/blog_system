@@ -1,4 +1,5 @@
 import { provide, controller, post, inject } from "midway";
+import { getClientIP } from "../../../utils/utils"
 
 @provide()
 @controller("/user/message")
@@ -35,11 +36,11 @@ export class UserMessageController {
 
   @post("/insert")
   async save(ctx): Promise<void> {
-    console.log(111111,ctx.origin)
-    const { id, message, blog, fromMail, toMail, parentId = 0, fromId, toId, isApproved = 0 } = ctx.request.body;
-    const params:any={id, message, parentId, isApproved, blog, fromMail, toMail};
-    if(fromId) params.from={ id: fromId };
-    if(toId) params.to={ id: toId };
+    console.log(111111, getClientIP(ctx.req))
+    const { id, message, blog = "", fromMail = "无", toMail = "无", parentId = 0, fromId, toId, isApproved = 0 } = ctx.request.body;
+    const params: any = { id, message, parentId, isApproved, blog, fromMail, toMail };
+    if (fromId) params.from = { id: fromId };
+    if (toId) params.to = { id: toId };
     const flag = await this.userMessageService.save(params);
     const action = id ? "更新" : "添加";
     if (!flag) {

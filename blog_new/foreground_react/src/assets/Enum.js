@@ -774,8 +774,14 @@ const UrlEnum = {
   },
   AdminMessageAPI: {
     BASE_URL: "/admin/message",
+    LIST: { url: "/api/admin/message/list", desc: { zh_CN: "获取留言列表", en_US: "getList" } },
     DELETE: { url: "/api/admin/message/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    FORM: { url: `/api/admin/message/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
     INSERT: { url: "/api/admin/message/insert", desc: { zh_CN: "添加", en_US: "insert" } },
+    TOP: { url: `/api/admin/message/top`, desc: { zh_CN: "置顶", en_US: "up" }, actionTip: { zh_CN: "将被置顶，置顶后，在评论显示的状态下可取消置顶！", en_US: "will be stuck,and then can be downed when being shown!" } },
+    UNTOP: { url: `/api/admin/message/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
+    APPROVE: { url: "/api/admin/message/approve", desc: { zh_CN: "过审", en_US: "approve" }, actionTip: { zh_CN: "将被审核通过！", en_US: "will be shown,and then can be hidden after being shown!" } },
+    DISAPPROVE: { url: "/api/admin/message/disapprove", desc: { zh_CN: "拒审", en_US: "disapprove" }, actionTip: { zh_CN: "将被拒审！", en_US: "will be hidden,and then can be shown after being hidden!" } },
   },
   AdminCateAPI: {
     BASE_URL: "/admin/cate",

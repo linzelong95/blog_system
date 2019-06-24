@@ -48,6 +48,13 @@ export default [
         component: './ReplyManagement/ReplyManagement',
       },
       {
+        path: '/messagemanagement',
+        icon: 'idcard',
+        name: 'MessageManagement',
+        authority: ['admin'],
+        component: './MessageManagement/MessageManagement',
+      },
+      {
         path: '/categorymanagement',
         icon: 'idcard',
         name: 'CategoryManagement',

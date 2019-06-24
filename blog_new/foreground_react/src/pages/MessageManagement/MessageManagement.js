@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'dva';
 import {
-  Select,
   Modal,
   Card,
   Checkbox,
@@ -14,12 +13,7 @@ import {
   Tag,
   Icon,
   List,
-  Pagination,
-  Tree,
   Avatar,
-  Radio,
-  Alert,
-  Divider,
 } from 'antd';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
 import EditorialForm from './EditorialForm';
@@ -27,27 +21,13 @@ import { timeFormat } from '@/utils/utils';
 import { UrlEnum } from '@/assets/Enum';
 import styles from './index.less';
 
-const {
-  AdminReplyAPI: { LIST, DELETE, APPROVE, DISAPPROVE, TOP, UNTOP, FORM },
-  AdminSortAPI,
-  AdminArticleAPI,
-} = UrlEnum;
-
-const initArticleContainer = {
-  netUrl: AdminArticleAPI.LIST.url,
-  list: [],
-  total: 0,
-  index: 1,
-  size: 6,
-  query: '',
-  selectedItems: [],
-};
+const { AdminMessageAPI: { LIST, DELETE, APPROVE, DISAPPROVE, TOP, UNTOP, FORM } } = UrlEnum;
 
 @connect(({ articleManagement, loading }) => ({
   articleManagement,
   loading: loading.models.articleManagement,
 }))
-class ReplyManagement extends React.Component {
+class MessageManagement extends React.Component {
   state = {
     conditionQuery: { title: '', category: {}, orderBy: {} },
     showSorterFlag: false,
@@ -56,9 +36,6 @@ class ReplyManagement extends React.Component {
     editorialPanelVisible: false,
     formItem: {},
     filterModalVisible: false,
-    categoryOptions: [],
-    articlecontainer: initArticleContainer,
-    filterSort: 'selectedByCate',
     temporaryCondition: {},
   };
 
@@ -80,39 +57,39 @@ class ReplyManagement extends React.Component {
   request = (params, callback) => {
     const { conditionQuery: con } = this.state;
     const conditionQuery = { ...con };
-    delete conditionQuery.filteredSortArr;
-    delete conditionQuery.articleArr;
     delete conditionQuery.commonFilterArr;
     const payload = { netUrl: LIST.url, conditionQuery, ...params };
     this.props.dispatch({ type: 'articleManagement/handleArticles', payload, callback });
     if (payload.netUrl !== LIST.url) this.cleanSelectedItem();
-  };
+  }
 
-  handleShowALL = () =>
+  handleShowALL = () => {
     this.setState({ conditionQuery: {}, temporaryCondition: {} }, () => {
       this.request({ index: 1 });
       this.inputSearch.input.state.value = '';
     });
+  }
 
   handlePageChange = (index, size) => this.request({ index, size });
 
   handleOnSearch = val =>
     this.setState(
       oldState => ({
-        conditionQuery: { ...oldState.conditionQuery, reply: val.replace(/(^\s*)|(\s*$)/g, '') },
+        conditionQuery: { ...oldState.conditionQuery, message: val.replace(/(^\s*)|(\s*$)/g, '') },
       }),
       () => this.request({ index: 1 })
     );
 
-  toggleEditorialPanel = () =>
+  toggleEditorialPanel = () => {
     this.setState(oldState => ({ editorialPanelVisible: !oldState.editorialPanelVisible }));
+  }
 
   cleanSelectedItem = () => this.setState({ selectedItems: [], allSelectedFlag: false });
 
   cleanFormItem = () => {
     this.cleanSelectedItem();
     this.setState({ formItem: {} });
-  };
+  }
 
   handleItems = (action, item) => {
     const { selectedItems } = this.state;
@@ -123,11 +100,11 @@ class ReplyManagement extends React.Component {
     let content = '';
     let items = [];
     if (item) {
-      const { id, reply, parentId } = item;
-      items = [{ id, name: reply, parentId }];
+      const { id, message, parentId } = item;
+      items = [{ id, name: message, parentId }];
       content = `【${items[0].name}】${actionTip[lang]}`;
     } else {
-      items = selectedItems.map(v => ({ id: v.id, name: v.reply, parentId: v.parentId }));
+      items = selectedItems.map(v => ({ id: v.id, name: v.message, parentId: v.parentId }));
       content =
         lang === 'zh_CN'
           ? `注意：【${items[0].name}......】等多个所选项${actionTip[lang]}`
@@ -200,9 +177,9 @@ class ReplyManagement extends React.Component {
   };
 
   toggleSelectAll = () => {
-    const {articleManagement: { list = [] }} = this.props;
+    const { articleManagement: { list = [] } } = this.props;
     if (!list.length) return;
-    const { allSelectedFlag,selectedItems } = this.state;
+    const { allSelectedFlag, selectedItems } = this.state;
     const uniqueSeletedItems = list.filter(i => !selectedItems.some(v => v.id === i.id));
     const newSelectedItems = allSelectedFlag
       ? selectedItems.filter(i => !list.some(v => v.id === i.id))
@@ -210,15 +187,9 @@ class ReplyManagement extends React.Component {
     this.setState({ allSelectedFlag: !allSelectedFlag, selectedItems: newSelectedItems });
   };
 
-  toggleFilterModal = () =>
+  toggleFilterModal = () => {
     this.setState(oldState => ({ filterModalVisible: !oldState.filterModalVisible }));
-
-  showFilterModal = () => {
-    this.request({ netUrl: AdminSortAPI.LIST.url, index: 1, size: 999 }, (res) =>
-      this.setState({ categoryOptions: res.list.filter(i => i.categories && i.categories.length > 0) })
-    );
-    this.toggleFilterModal();
-  };
+  }
 
   filterRequest = method => {
     if (method === 'clear') {
@@ -226,27 +197,12 @@ class ReplyManagement extends React.Component {
       return;
     }
     this.toggleFilterModal();
-    let filterflag = false;
     if (method === 'exit') {
-      const {conditionQuery: { filteredSortArr = [], articleArr = [], commonFilterArr = [] }} = this.state;
-      filterflag = filteredSortArr.length || articleArr.length || commonFilterArr.length;
-      this.setState({
-        temporaryCondition: { filteredSortArr, articleArr, commonFilterArr, filterflag },
-      });
+      const { conditionQuery: { commonFilterArr = [] } } = this.state;
+      this.setState({ temporaryCondition: { filterflag: commonFilterArr.length > 0 } });
       return;
     }
-    const {temporaryCondition: { filteredSortArr = [], articleArr = [], commonFilterArr = [] }} = this.state;
-    filterflag = filteredSortArr.length || articleArr.length || commonFilterArr.length;
-    const category = { sortIdsArr: [], cateIdsArr: [] };
-    filteredSortArr.forEach(item => {
-      const arr = item.split('-');
-      if (arr.length === 1) {
-        category.sortIdsArr.push(parseInt(arr.pop(), 10));
-      } else if (!category.sortIdsArr.includes(parseInt(arr[0], 10))) {
-        category.cateIdsArr.push(parseInt(arr.pop(), 10));
-      }
-    });
-    const articleIdsArr = articleArr.map(i => i.key);
+    const { temporaryCondition: { commonFilterArr = [] } } = this.state;
     const isApproved = commonFilterArr.includes('isApproved') ? 0 : undefined;
     const isTop = commonFilterArr.includes('isTop') ? 1 : undefined;
     const isRoot = (() => {
@@ -258,48 +214,23 @@ class ReplyManagement extends React.Component {
       oldState => ({
         conditionQuery: {
           ...oldState.conditionQuery,
-          category,
-          articleIdsArr,
           isApproved,
           isTop,
           isRoot,
-          filteredSortArr,
-          articleArr,
           commonFilterArr,
         },
-        temporaryCondition: { ...oldState.temporaryCondition, filterflag },
+        temporaryCondition: { ...oldState.temporaryCondition, filterflag: commonFilterArr.length > 0 },
       }),
       () => this.request({ index: 1 })
     );
   };
 
-  conditionTreeSelect = filteredSortArr =>
-    this.setState(oldState => ({
-      temporaryCondition: { ...oldState.temporaryCondition, filteredSortArr },
-    }));
 
-  commonFilterConditionSelect = commonFilterArr =>
+  commonFilterConditionSelect = commonFilterArr => {
     this.setState(oldState => ({
       temporaryCondition: { ...oldState.temporaryCondition, commonFilterArr },
     }));
-
-  articleSelet = articleArr =>
-    this.setState(oldState => ({
-      temporaryCondition: { ...oldState.temporaryCondition, articleArr },
-    }));
-
-  filterSort = e => this.setState({ filterSort: e.target.value });
-
-  searchItem = ({ query, container, pageIndex, pageSize }) => {
-    const { index: preIndex, size: preSize, netUrl } = container;
-    const index = pageIndex || preIndex;
-    const size = pageSize || preSize;
-    this.request({ netUrl, index, size, conditionQuery: { title: query } }, res =>
-      this.setState(oldState => ({
-        articlecontainer: { ...oldState.articlecontainer, ...res, index, size, query },
-      }))
-    );
-  };
+  }
 
   render() {
     const {
@@ -307,15 +238,12 @@ class ReplyManagement extends React.Component {
       loading,
     } = this.props;
     const {
-      filterSort,
-      articlecontainer,
       allSelectedFlag,
       selectedItems,
       editorialPanelVisible,
       formItem,
       showSorterFlag,
       filterModalVisible,
-      categoryOptions,
       conditionQuery,
       temporaryCondition,
     } = this.state;
@@ -331,7 +259,7 @@ class ReplyManagement extends React.Component {
                 icon="filter"
                 type={temporaryCondition.filterflag ? 'danger' : 'primary'}
                 size="small"
-                onClick={this.showFilterModal}
+                onClick={this.toggleFilterModal}
                 style={{ marginLeft: '20px' }}
               >
                 筛选&nbsp;
@@ -545,23 +473,26 @@ class ReplyManagement extends React.Component {
                   }
                   title={
                     <span>
-                      《{item.article.title}》{item.parentId === 0 && <Tag color="cyan">父</Tag>}
+                      <span style={{ color: 'green', fontWeight: 'bold' }}>
+                        <i>{item.from ? item.from.nickName : `${item.fromMail} [游客]`}&nbsp;</i>
+                      </span>
+                      的留言
+                      {item.parentId > 0 &&
+                        <span>
+                          (
+                          回复&nbsp;
+                          <i style={{ color: '#A0522D', fontWeight: 'bold' }}>{item.to ? item.to.nickName : `${item.toMail} [游客]`}</i>
+                          &nbsp;
+                          )
+                        </span>
+                      }
+                      &nbsp;:&nbsp;
+                      {item.parentId === 0 && <Tag color="cyan">父</Tag>}
                       {item.isTop === 1 && <Tag color="magenta">已置顶</Tag>}
                       {item.isApproved === 0 && <Tag color="orange">待审核</Tag>}
                     </span>
                   }
-                  description={
-                    <span>
-                      <span style={{ color: 'green', fontWeight: 'bold' }}>
-                        <i>{item.from.nickName}&nbsp;</i>
-                      </span>
-                      回复&nbsp;
-                      <span style={{ color: '#A0522D', fontWeight: 'bold' }}>
-                        <i>{item.parentId === 0 ? '该文' : item.to.nickName}&nbsp;</i>:
-                      </span>
-                      &nbsp;<b style={{ color: "black" }}>{`“${item.reply}”`}</b>
-                    </span>
-                  }
+                  description={item.message}
                 />
               </List.Item>
             )}
@@ -586,118 +517,13 @@ class ReplyManagement extends React.Component {
                 options={[
                   { label: '置顶', value: 'isTop' },
                   { label: '待审', value: 'isApproved' },
-                  { label: '父评论', value: 'isParent' },
-                  { label: '子评论', value: 'isSon' },
+                  { label: '父留言', value: 'isParent' },
+                  { label: '子留言', value: 'isSon' },
                 ]}
                 value={temporaryCondition.commonFilterArr}
                 onChange={this.commonFilterConditionSelect}
               />
             </div>
-            <Divider />
-            <div style={{ textAlign: 'center' }}>
-              <Radio.Group
-                size="small"
-                value={filterSort}
-                buttonStyle="solid"
-                onChange={this.filterSort}
-              >
-                <Radio.Button value="selectedByCate">
-                  <Badge
-                    dot={
-                      temporaryCondition.filteredSortArr &&
-                      temporaryCondition.filteredSortArr.length > 0
-                    }
-                  >
-                    &nbsp;按分类&nbsp;&nbsp;
-                  </Badge>
-                </Radio.Button>
-                <Radio.Button value="selectedByArticle">
-                  <Badge
-                    dot={temporaryCondition.articleArr && temporaryCondition.articleArr.length > 0}
-                  >
-                    &nbsp;按文章&nbsp;&nbsp;
-                  </Badge>
-                </Radio.Button>
-              </Radio.Group>
-            </div>
-            <Alert
-              message="筛选分两种类别，请注意您是否需要同时进行两种类别的筛选！"
-              type="warning"
-              showIcon
-              style={{ margin: '15px 0px' }}
-            />
-            {filterSort === 'selectedByCate' && (
-              <Tree
-                checkable
-                showLine
-                onCheck={this.conditionTreeSelect}
-                defaultExpandedKeys={temporaryCondition.filteredSortArr || []}
-                checkedKeys={temporaryCondition.filteredSortArr || []}
-              >
-                {categoryOptions.map(item => (
-                  <Tree.TreeNode
-                    title={item.name}
-                    key={`${item.id}`}
-                    selectable={false}
-                    disabled={item.isEnable === 0}
-                  >
-                    {item.categories.map(i => (
-                      <Tree.TreeNode
-                        title={i.name}
-                        key={`${item.id}-${i.id}`}
-                        selectable={false}
-                        disabled={item.isEnable === 1 ? i.isEnable === 0 : true}
-                      />
-                    ))}
-                  </Tree.TreeNode>
-                ))}
-              </Tree>
-            )}
-            {filterSort === 'selectedByArticle' && (
-              <div style={{ textAlign: 'center' }}>
-                <span>文章：</span>
-                <Select
-                  labelInValue
-                  showSearch
-                  mode="multiple"
-                  filterOption={false}
-                  onChange={this.articleSelet}
-                  onSearch={query => this.searchItem({ query, container: articlecontainer })}
-                  onMouseEnter={() => this.searchItem({ query: '', container: articlecontainer })}
-                  style={{ width: '70%' }}
-                  value={temporaryCondition.articleArr}
-                >
-                  {articlecontainer.list.map(i => (
-                    <Select.Option value={i.id} key={i.id}>
-                      {i.title}
-                    </Select.Option>
-                  ))}
-                  {articlecontainer.total > 6 && (
-                    <Select.Option key={-1} disabled>
-                      <Pagination
-                        {...{
-                          size: 'small',
-                          style: { textAlign: 'center' },
-                          ...{
-                            total: articlecontainer.total,
-                            current: articlecontainer.index,
-                            pageSize: articlecontainer.size,
-                            defaultPageSize: 6,
-                            onChange: (i, s) =>
-                              this.searchItem({
-                                query: articlecontainer.query,
-                                container: articlecontainer,
-                                pageIndex: i,
-                                pageSize: s,
-                              }),
-                          },
-                        }}
-                      />
-                    </Select.Option>
-                  )}
-                </Select>
-              </div>
-            )}
           </Modal>
           {editorialPanelVisible && (
             <EditorialForm
@@ -713,4 +539,4 @@ class ReplyManagement extends React.Component {
     );
   }
 }
-export default ReplyManagement;
+export default MessageManagement;

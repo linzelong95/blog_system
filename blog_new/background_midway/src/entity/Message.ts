@@ -22,6 +22,15 @@ export class Message {
     @CreateDateColumn()
     createDate: string;
 
+    @Column()
+    blog: string;
+
+    @Column()
+    fromMail: string;
+
+    @Column()
+    toMail: string;
+
     @ManyToOne(type => User, user => user.froms)
     @JoinColumn({ name: "fromId" })
     from: User;
@@ -29,11 +38,5 @@ export class Message {
     @ManyToOne(type => User, user => user.tos)
     @JoinColumn({ name: "toId" })
     to: User;
-
-    @Column()
-    fromMail: string;
-
-    @Column()
-    toMail: string;
 
 }
