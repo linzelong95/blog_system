@@ -16,6 +16,16 @@ const urls = {
     LIST: { url: "/api/user/article/list", desc: { zh_CN: "获取文章列表", en_US: "getList" } },
     CONTENT: { url: "/api/user/article/content", desc: { zh_CN: "获取内容", en_US: "getContent" } },
   },
+  UserCourseAPI: {
+    BASE_URL: "/user/course",
+    LIST: { url: "/api/user/course/list", desc: { zh_CN: "获取时间线", en_US: "getList" } },
+  },
+  UserMessageAPI: {
+    BASE_URL: "/user/message",
+    LIST: { url: "/api/user/message/list", desc: { zh_CN: "获取留言列表", en_US: "getList" } },
+    DELETE: { url: "/api/user/message/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    INSERT: { url: "/api/user/message/insert", desc: { zh_CN: "添加", en_US: "insert" } },
+  },
   UserCateAPI: {
     BASE_URL: "/user/cate",
     LIST: { url: "/api/user/cate/list", desc: { zh_CN: "获取分类列表", en_US: "getList" } },
@@ -47,6 +57,17 @@ const urls = {
     UNTOP: { url: `/api/admin/article/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
     LOCK: { url: `/api/admin/article/lock`, desc: { zh_CN: "锁定", en_US: "lock" }, actionTip: { zh_CN: "将被锁定，锁定后可以解锁和删除，但不可编辑！", en_US: "will be lock,and then  can be released  or deleted, but can not be edited!" } },
     UNLOCK: { url: `/api/admin/article/unlock`, desc: { zh_CN: "解锁", en_US: "unlock" }, actionTip: { zh_CN: "将被解锁，解锁后可编辑和锁定,但不可删除！", en_US: "will be released,and then can be edited or locked,but can not be deleted!" } },
+  },
+  AdminMessageAPI: {
+    BASE_URL: "/admin/message",
+    LIST: { url: "/api/admin/message/list", desc: { zh_CN: "获取留言列表", en_US: "getList" } },
+    DELETE: { url: "/api/admin/message/delete", desc: { zh_CN: "删除", en_US: "delete" }, actionTip: { zh_CN: "将被删除", en_US: "will be deleted!" } },
+    FORM: { url: `/api/admin/message/form`, desc: { zh_CN: "编辑", en_US: "edit" }, actionTip: { zh_CN: "将处于可编辑状态，编辑时请注意核对！", en_US: "will be under editing. Please pay attention for information!" } },
+    INSERT: { url: "/api/admin/message/insert", desc: { zh_CN: "添加", en_US: "insert" } },
+    TOP: { url: `/api/admin/message/top`, desc: { zh_CN: "置顶", en_US: "up" }, actionTip: { zh_CN: "将被置顶，置顶后，在评论显示的状态下可取消置顶！", en_US: "will be stuck,and then can be downed when being shown!" } },
+    UNTOP: { url: `/api/admin/message/untop`, desc: { zh_CN: "取置", en_US: "down" }, actionTip: { zh_CN: "将被取消置顶，取消置顶后，在评论显示的状态下可重新置顶！", en_US: "will be downed,and then can be stuck when being shown!" } },
+    APPROVE: { url: "/api/admin/message/approve", desc: { zh_CN: "过审", en_US: "approve" }, actionTip: { zh_CN: "将被审核通过！", en_US: "will be shown,and then can be hidden after being shown!" } },
+    DISAPPROVE: { url: "/api/admin/message/disapprove", desc: { zh_CN: "拒审", en_US: "disapprove" }, actionTip: { zh_CN: "将被拒审！", en_US: "will be hidden,and then can be shown after being hidden!" } },
   },
   AdminReplyAPI: {
     BASE_URL: "/admin/reply",

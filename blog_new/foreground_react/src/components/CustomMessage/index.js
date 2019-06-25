@@ -65,7 +65,7 @@ class Message extends React.Component {
 
   handleDealWithMessage = (messageItem, action) => {
     const { form, request } = this.props;
-    const { from = {}, id, parentId: pid, fromMail: toMail } = messageItem;
+    const { from , id, parentId: pid, fromMail: toMail } = messageItem;
     if (action && [UserMessageAPI.DELETE.url, AdminMessageAPI.DELETE.url, AdminMessageAPI.APPROVE.url, AdminMessageAPI.DISAPPROVE.url].includes(action.url)) {
       const items = [{ id, parentId: pid, name: message }];
       request({ netUrl: action.url, items }, () => this.getMessageList());

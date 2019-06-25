@@ -4,7 +4,7 @@
     <a-divider orientation="right">
         <span class="total">{{total}}</span>
         &nbsp;条评论&nbsp;
-        <a-icon type="sync" class="getReplyList" @click="getReplyList" />
+        <a-icon type="sync" class="sync" @click="getReplyList" />
     </a-divider>
     <a-comment v-for="item in list" :key="item.id">
       <template slot="actions">
@@ -168,7 +168,7 @@
           this.$error({title:'内容不能为空！'});
           return;
         }
-        this.request({isApproved, articleId:articleId, fromId, toId, netUrl,reply,parentId},()=>{
+        this.request({isApproved, articleId, fromId, toId, netUrl,reply,parentId},()=>{
           this.getReplyList();
           this.toggleReplyBox();
         },false);
@@ -198,7 +198,7 @@
         font-size: 25px;
         font-weight: bold;
       }
-      .getReplyList{
+      .sync{
         color:#1890FF;
       }
     }

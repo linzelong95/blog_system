@@ -13,6 +13,20 @@ const router = new VueRouter({
             }
         },
         {
+            path: '/message',
+            component: () => import("../pages/Message/Message.vue"),
+            meta: {
+                title: '留言板'
+            }
+        },
+        {
+            path: '/timeline',
+            component: () => import("../pages/Timeline/Timeline.vue"),
+            meta: {
+                title: '时间线'
+            }
+        },
+        {
             path: '/read/:articleId',
             component: () => import("../pages/OneArticle.vue"),
             meta: {
@@ -24,6 +38,15 @@ const router = new VueRouter({
             component: () => import("../pages/Article/Article.vue"),
             meta: {
                 title: '文章管理',
+                auth: true,
+                role: "admin"
+            }
+        },
+        {
+            path: '/msgManagement',
+            component: () => import("../pages/Article/Article.vue"),
+            meta: {
+                title: '留言管理',
                 auth: true,
                 role: "admin"
             }

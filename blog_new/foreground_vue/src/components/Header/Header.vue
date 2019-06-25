@@ -33,8 +33,17 @@
           <a-menu-item key="homepage">
             <a-icon type="mail" />首页
           </a-menu-item>
+          <a-menu-item key="message">
+            <a-icon type="mail" />留言板
+          </a-menu-item>
+          <a-menu-item key="timeline">
+            <a-icon type="mail" />时间轴
+          </a-menu-item>
           <a-menu-item key="article">
             <a-icon type="calendar" />文章管理
+          </a-menu-item>
+          <a-menu-item key="msgManagement">
+            <a-icon type="calendar" />留言管理
           </a-menu-item>
           <a-menu-item key="tag">
             <a-icon type="calendar" />标签管理
@@ -78,7 +87,7 @@
       const pathname=this.$route.path;
       this.current=[pathname.substring(1)];
       this.backFlag=pathname!=="/homepage";
-      this.searchIconFlag=!pathname.includes("/read");
+      this.searchIconFlag=["/read","timeline","/message"].every(i=>!pathname.includes(i));
       const currentPageUrl=window.location.href;
       const user=store.get("blog_account")||{};
       const {currentUser}=user;
@@ -129,7 +138,7 @@
     watch:{
       "$route.path":function(newVal){
         this.backFlag=newVal!=="/homepage";
-        this.searchIconFlag=!newVal.includes("/read");
+        this.searchIconFlag=["/read","timeline","/message"].every(i=>!newVal.includes(i));
         this.current=[newVal.substring(1)];
       }
     },
