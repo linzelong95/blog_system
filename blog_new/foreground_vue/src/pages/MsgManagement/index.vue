@@ -1,5 +1,5 @@
 <template>
-  <div id="reply">
+  <div id="message">
     <v-action 
       class="action" 
       @request="request" 
@@ -9,12 +9,12 @@
     <v-search 
       @request="request"
       ref="searchRef"
-      placeholder="回复内容搜索"
+      placeholder="留言内容搜索"
     />
     <a-divider class="breadcrumb">
       <a-breadcrumb>
         <a-breadcrumb-item><router-link to="/homepage"><a>首页</a></router-link></a-breadcrumb-item>
-        <a-breadcrumb-item><router-link to="/reply"><a>回复管理</a></router-link></a-breadcrumb-item>
+        <a-breadcrumb-item><router-link to="/msgmanagement"><a>留言管理</a></router-link></a-breadcrumb-item>
       </a-breadcrumb>
     </a-divider>
     <div class="operation">
@@ -25,11 +25,11 @@
           <a-badge :count="selectedItems.length">
             <a-button type="primary" size="small" @click="cleanSelectedItem">清空</a-button>
           </a-badge>
-          <a-button icon="delete" shape="circle" size="small" style="color:red;margin-left:10px;" @click="handleItems(AdminReplyAPI.DELETE)" />
-          <a-button icon="check" shape="circle" size="small" style="color:green;" @click="handleItems(AdminReplyAPI.APPROVE)" />
-          <a-button icon="close" shape="circle" size="small" style="color:#A020F0;" @click="handleItems(AdminReplyAPI.DISAPPROVE)" />
-          <a-button icon="arrow-down" shape="circle" size="small" style="color:black;" @click="handleItems(AdminReplyAPI.UNTOP)" />
-          <a-button icon="arrow-up" shape="circle" size="small" style="color:#A52A2A;" @click="handleItems(AdminReplyAPI.TOP)" />
+          <a-button icon="delete" shape="circle" size="small" style="color:red;margin-left:10px;" @click="handleItems(AdminMessageAPI.DELETE)" />
+          <a-button icon="check" shape="circle" size="small" style="color:green;" @click="handleItems(AdminMessageAPI.APPROVE)" />
+          <a-button icon="close" shape="circle" size="small" style="color:#A020F0;" @click="handleItems(AdminMessageAPI.DISAPPROVE)" />
+          <a-button icon="arrow-down" shape="circle" size="small" style="color:black;" @click="handleItems(AdminMessageAPI.UNTOP)" />
+          <a-button icon="arrow-up" shape="circle" size="small" style="color:#A52A2A;" @click="handleItems(AdminMessageAPI.TOP)" />
         </span>
       </span>
       <a-button :type="allSelectedFlag?'danger':'primary'" size="small" @click="toggleSelectAll">{{allSelectedFlag ? '反选' : '全选'}}</a-button>
@@ -49,36 +49,37 @@
         <a-icon type="pushpin" class="top" v-if="item.isTop===1" />
         <a-list-item-meta>
           <a-avatar slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png" />
-          <template slot="title">
-            <span style="font-size:12px;color:gray;">
-              <span>《{{item.article&&item.article.title}}》</span>
-              <a-tag color="cyan" v-if="item.parentId === 0" style="margin:0px;">父</a-tag>
-              <a-tag color="magenta" v-if="item.isApproved === 0" style="margin:0px;">待审</a-tag>
+          <span slot="title" class="title">
+            <span style="color:green;fontWeight:bold">
+              <i>{{item.from ? item.from.nickName : `${item.fromMail} [游客]`}}&nbsp;</i>
             </span>
-          </template>
-        </a-list-item-meta>
-        <p class="content">
-          <i style="color:green; fontWeight: bold;">{{item.from&&item.from.nickName}}</i>
-          &nbsp;回复&nbsp;
-          <span style="color: #A0522D;fontWeight: bold;">
-            <i v-if="item.parentId === 0">该文</i>
-            <i v-else>{{item.to&&item.to.nickName}}</i>
+            的留言
+            <span v-if="item.parentId > 0">
+              (
+              回复&nbsp;
+              <i style="color:#A0522D;fontWeight:bold">{{item.to ? item.to.nickName : `${item.toMail} [游客]`}}</i>
+              &nbsp;
+              )
+            </span>
             &nbsp;:&nbsp;
+            <a-tag color="cyan" v-if="item.parentId === 0">父</a-tag>
+            <a-tag color="magenta" v-if="item.isTop === 1">已置顶</a-tag>
+            <a-tag color="orange" v-if="item.isApproved === 0">待审核</a-tag>
           </span>
-          <b style="color: black;">{{`“${item.reply}”`}}</b>
-        </p>
+        </a-list-item-meta>
+        <p class="content">{{item.message}}</p>
         <div class="clearfix">
           <span class="f_right">
             <a-icon type="clock-circle" />
             {{item.createDate|dateFormat("YYYY-MM-DD")}}
           </span>
         </div>
-        <a-icon type="delete" slot="actions" style="color:red;" @click="handleItems(AdminReplyAPI.DELETE, item)" />
-        <a-icon type="form" slot="actions" style="color:green;" @click="handleItems(AdminReplyAPI.FORM, item)" />
-        <a-icon type="arrow-down" v-if="item.isTop===1" slot="actions" style="color:black;" @click="handleItems(AdminReplyAPI.UNTOP, item)" />
-        <a-icon type="arrow-up" v-else slot="actions" style="color:#A52A2A;" @click="handleItems(AdminReplyAPI.TOP, item)" />
-        <a-icon type="close" v-if="item.isApproved===1" slot="actions" style="color:#4169E1;" @click="handleItems(AdminReplyAPI.DISAPPROVE, item)" />
-        <a-icon type="check" slot="actions" v-else style="color:#4169E1;" @click="handleItems(AdminReplyAPI.APPROVE, item)" />
+        <a-icon type="delete" slot="actions" style="color:red;" @click="handleItems(AdminMessageAPI.DELETE, item)" />
+        <a-icon type="form" slot="actions" style="color:green;" @click="handleItems(AdminMessageAPI.FORM, item)" />
+        <a-icon type="arrow-down" v-if="item.isTop===1" slot="actions" style="color:black;" @click="handleItems(AdminMessageAPI.UNTOP, item)" />
+        <a-icon type="arrow-up" v-else slot="actions" style="color:#A52A2A;" @click="handleItems(AdminMessageAPI.TOP, item)" />
+        <a-icon type="close" v-if="item.isApproved===1" slot="actions" style="color:#4169E1;" @click="handleItems(AdminMessageAPI.DISAPPROVE, item)" />
+        <a-icon type="check" slot="actions" v-else style="color:#4169E1;" @click="handleItems(AdminMessageAPI.APPROVE, item)" />
         <a-button :type="selectedItems.some(i => i.id === item.id)?'danger':'primary'" size="small" slot="actions" @click="toggleSelectOne(item)">
           {{selectedItems.some(i => i.id === item.id)?"退选":"选中"}}
         </a-button>
@@ -101,12 +102,12 @@
   import Action from './Action.vue';
   import EditorialForm from './EditorialForm.vue';
   import urls from '../../api/urls';
-  const {AdminReplyAPI}=urls;
+  const {AdminMessageAPI}=urls;
   export default {
     data () {
       return {
-        conditionQuery: { reply: '', category: {}, orderBy: {} },
-        AdminReplyAPI,
+        conditionQuery: { message: '', category: {}, orderBy: {} },
+        AdminMessageAPI,
         selectedItems:[],
         formItem:{},
         allSelectedFlag :false,
@@ -130,10 +131,10 @@
     },
     methods:{
       async request(paramsObj={},callback,isConcat){
-        const conditionQuery={...this.conditionQuery,reply:this.searchContent};
-        const payload={netUrl:AdminReplyAPI.LIST.url,conditionQuery,...paramsObj}
+        const conditionQuery={...this.conditionQuery,message:this.searchContent};
+        const payload={netUrl:AdminMessageAPI.LIST.url,conditionQuery,...paramsObj}
         this.$store.dispatch({type:"commonHandle",payload,callback,isConcat});
-        if (payload.netUrl !== AdminReplyAPI.LIST.url) this.cleanSelectedItem();
+        if (payload.netUrl !== AdminMessageAPI.LIST.url) this.cleanSelectedItem();
       },
       changeConditionQuery(obj){
         this.conditionQuery={...this.conditionQuery,...obj};
@@ -182,15 +183,15 @@
         let content = '';
         let items = [];
         if (item) {
-          const { id, name,title,reply } = item;
+          const { id, name,title,message } = item;
           items = [{ id, name }];
           if (netUrl.includes('/article')) items = [{ id, name: title }];
-          if (netUrl.includes('/reply')) items = [{ id, name: reply }];
+          if (netUrl.includes('/message')) items = [{ id, name: message }];
           content = `【${items[0].name}】${actionTip[lang]}`;
         } else {
           items = selectedItems.map(v => ({ id: v.id, name: v.name }));
           if (netUrl.includes('/article')) items = selectedItems.map(v => ({ id: v.id, name: v.title }));
-          if (netUrl.includes('/reply')) items = selectedItems.map(v => ({ id: v.id, name: v.reply }));
+          if (netUrl.includes('/message')) items = selectedItems.map(v => ({ id: v.id, name: v.message }));
           content =
             lang === 'zh_CN'
               ? `注意：【${items[0].name}......】等多个所选项${actionTip[lang]}`
@@ -223,7 +224,7 @@
 </script>
 
 <style lang="scss" scoped>
-  #reply{
+  #message{
     width:100%;
     background: white;
     padding:10px;
@@ -252,6 +253,9 @@
         top: 0px;
         right: 0px;
         color:red;
+      }
+      .title{
+        font-size: 12px;
       }
       .content{
         text-indent: 2em;

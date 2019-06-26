@@ -9,7 +9,8 @@ export class UserReplyController {
 
   @post("/list")
   async list(ctx): Promise<void> {
-    const { conditionQuery: { reply = "", orderBy = {}, category = {}, articleIdsArr = [], isTop, isApproved, isRoot }, index = 1, size = 10, prettyFormat } = ctx.request.body;
+    const { conditionQuery = {}, index = 1, size = 10 } = ctx.request.body;
+    const { reply = "", orderBy = {}, category = {}, articleIdsArr = [], isTop, isApproved, isRoot, prettyFormat } = conditionQuery;
     const [list, total] = await this.userReplyService.list({ reply, orderBy, index, size, category, articleIdsArr, isTop, isApproved, isRoot });
     let newList = [...list];
     if (prettyFormat) {
@@ -52,9 +53,9 @@ export class UserReplyController {
     const idsArr = items.map(i => i.id);
     const parentIdsArr = [];
     items.forEach(i => {
-        if (i.parentId === 0) parentIdsArr.push(i.id);
+      if (i.parentId === 0) parentIdsArr.push(i.id);
     });
-    const flag = await this.userReplyService.delete({idsArr,parentIdsArr});
+    const flag = await this.userReplyService.delete({ idsArr, parentIdsArr });
     if (!flag) {
       ctx.status = 400;
       ctx.body = { message: `删除失败`, flag };

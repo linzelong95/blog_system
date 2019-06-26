@@ -9,7 +9,8 @@ export class AdminReplyController {
 
   @post("/list")
   async list(ctx): Promise<void> {
-    const { conditionQuery: { reply = "", orderBy = {}, category = {}, articleIdsArr = [], isTop, isApproved, isRoot }, index = 1, size = 10, prettyFormat } = ctx.request.body;
+    const { conditionQuery = {}, index = 1, size = 10 } = ctx.request.body;
+    const { reply = "", orderBy = {}, category = {}, articleIdsArr = [], isTop, isApproved, isRoot, prettyFormat } = conditionQuery;
     const [list, total] = await this.adminReplyService.list({ reply, orderBy, index, size, category, articleIdsArr, isTop, isApproved, isRoot });
     let newList = [...list];
     if (prettyFormat) {

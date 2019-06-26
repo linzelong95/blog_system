@@ -45,9 +45,10 @@ Vue.prototype.$confirm = Modal.confirm;
 router.beforeEach((to, from, next) => {
   const { meta = {}, path } = to;
   const { currentUser = {} } = store.state.login;
+  const userAccount=!JSON.parse(localStorage.getItem("blog_account"));
   if (meta.title) document.title = meta.title;
   if (!meta.auth) return next();
-  if (!currentUser.account) return store.dispatch({ type: "login/logout", payload: { path } });
+  if (!currentUser.account &&!userAccount && !userAccount.currentUser) return store.dispatch({ type: "login/logout", payload: { path } });
   if (meta.role === "user" || currentUser.roleName === "admin") return next();
   message.error("无权限！");
   next("/homepage");

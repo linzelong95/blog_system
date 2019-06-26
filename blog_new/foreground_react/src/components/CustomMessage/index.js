@@ -19,26 +19,19 @@ class Message extends React.Component {
     size: 10,
     total: 0,
     list: [],
-    conditionQuery: {}
+    conditionQuery: { prettyFormat: true }
   };
 
   componentDidMount = () => {
     this.getMessageList();
   }
 
-  paginationChange = (index, size) => {
-    const { request } = this.props;
-    request({ index, size, conditionQuery: {}, netUrl: UserMessageAPI.LIST.url }, (res) => {
-      this.setState({ ...res, index, size });
-    }, false);
-  }
-
   getMessageList = () => {
     const { conditionQuery } = this.state;
     const { request, currentUser: { roleName } } = this.props;
     const netUrl = roleName === "admin" ? AdminMessageAPI.LIST.url : UserMessageAPI.LIST.url;
-    request({ netUrl, conditionQuery, size: 9999, prettyFormat: true }, res => {
-      this.setState({ ...res, conditionQuery });
+    request({ netUrl, conditionQuery, size: 9999 }, res => {
+      this.setState({ ...res });
     }, false);
   }
 
@@ -65,7 +58,7 @@ class Message extends React.Component {
 
   handleDealWithMessage = (messageItem, action) => {
     const { form, request } = this.props;
-    const { from , id, parentId: pid, fromMail: toMail } = messageItem;
+    const { from, id, parentId: pid, fromMail: toMail } = messageItem;
     if (action && [UserMessageAPI.DELETE.url, AdminMessageAPI.DELETE.url, AdminMessageAPI.APPROVE.url, AdminMessageAPI.DISAPPROVE.url].includes(action.url)) {
       const items = [{ id, parentId: pid, name: message }];
       request({ netUrl: action.url, items }, () => this.getMessageList());

@@ -1,73 +1,77 @@
 <template>
   <div id="message">
+    <a-divider class="breadcrumb">
+      <a-breadcrumb>
+        <a-breadcrumb-item><router-link to="/homepage"><a>首页</a></router-link></a-breadcrumb-item>
+        <a-breadcrumb-item><router-link to="/message"><a>留言区</a></router-link></a-breadcrumb-item>
+      </a-breadcrumb>
+    </a-divider>
     <a-button type="primary" @click="toggleMessageBox">留言</a-button>
-    <a-spin :spinning="spinningFlag">
-      <a-divider orientation="right">
-          <span class="total">{{total}}</span>
-          &nbsp;条留言&nbsp;
-          <a-icon type="sync" class="sync" @click="request" />
-      </a-divider>
-      <a-list
-        :loading="spinningFlag"
-        itemLayout="vertical"
-        :dataSource="list"
-        :pagination="null"
-      >
-        <a-list-item slot="renderItem" slot-scope="item" key="item.id">
-          <a-comment>
+    <a-divider orientation="right">
+        <span class="total">{{total}}</span>
+        &nbsp;条留言&nbsp;
+        <a-icon type="sync" class="sync" @click="request" />
+    </a-divider>
+    <a-list
+      :loading="spinningFlag"
+      itemLayout="vertical"
+      :dataSource="list"
+      :pagination="null"
+      size="small"
+    >
+      <a-list-item slot="renderItem" slot-scope="item" key="item.id">
+        <a-comment>
+          <template slot="actions">
+            <a style="padding-right:10px;" @click="handleDealWithMessage(item)">回复</a>
+            <a style="padding-right:10px;color:red;" @click="handleDealWithMessage(item,getApi.DELETE)" v-if="currentUser.roleName==='admin'||(item.from&&currentUser.id===item.from.id)">删除</a>
+            <a style="padding-right:10px;color:green;" @click="handleDealWithMessage(item,getApi.APPROVE)" v-if="currentUser.roleName==='admin'&&item.isApproved===0">展示</a>
+            <a style="padding-right:10px;color:#B23AEE;" @click="handleDealWithMessage(item,getApi.DISAPPROVE)" v-if="currentUser.roleName==='admin'&&item.isApproved===1">隐藏</a>
+            <a style="padding-right:10px;color:orange;" @click="handleDealWithMessage(item,getApi.TOP)" v-if="currentUser.roleName==='admin'&&item.isTop===0">置顶</a>
+            <a style="color:#A0522D;" @click="handleDealWithMessage(item,getApi.UNTOP)" v-if="currentUser.roleName==='admin'&&item.isTop===1">取置</a>
+          </template>
+          <span slot="datetime">{{item.createDate|dateFormat("YYYY-MM-DD")}}</span>
+          <span slot="author">
+            {{item.from ? item.from.roleName === "admin" ? "博主" : item.from.nickName : `${item.fromMail} [游客]`}}&nbsp;
+            <a v-if="item.blog" :href="item.blog" target="_blank" rel="noopener noreferrer" style="color:#1890ff"><a-icon type="paper-clip" /></a>
+          </span>
+          <a-avatar
+            slot="avatar"
+            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+            alt="Han Solo"
+          />
+          <span slot="content">
+            <span :style="{'text-decoration':currentUser.roleName==='admin'&&item.isApproved===0?'line-through':'none'}">{{currentUser.roleName==='admin'|| item.isApproved===1?item.message:'（该内容待审核）'}}</span>
+            <a-tag v-if="currentUser.roleName==='admin'&&item.isApproved===0" color="purple">待展示</a-tag>
+          </span>
+          <a-comment v-for="i in item.children" :key="i.id">
             <template slot="actions">
-              <a style="padding-right:10px;" @click="handleDealWithMessage(item)">回复</a>
-              <a style="padding-right:10px;color:red;" @click="handleDealWithMessage(item,getApi.DELETE)" v-if="currentUser.roleName==='admin'||(item.from&&currentUser.id===item.from.id)">删除</a>
-              <a style="padding-right:10px;color:green;" @click="handleDealWithMessage(item,getApi.APPROVE)" v-if="currentUser.roleName==='admin'&&item.isApproved===0">展示</a>
-              <a style="padding-right:10px;color:#B23AEE;" @click="handleDealWithMessage(item,getApi.DISAPPROVE)" v-if="currentUser.roleName==='admin'&&item.isApproved===1">隐藏</a>
-              <a style="padding-right:10px;color:orange;" @click="handleDealWithMessage(item,getApi.TOP)" v-if="currentUser.roleName==='admin'&&item.isTop===0">置顶</a>
-              <a style="color:#A0522D;" @click="handleDealWithMessage(item,getApi.UNTOP)" v-if="currentUser.roleName==='admin'&&item.isTop===1">取置</a>
+              <a style="padding-right:10px;" @click="handleDealWithMessage(i)">回复</a>
+              <a style="padding-right:10px;color:red;" @click="handleDealWithMessage(i,getApi.DELETE)" v-if="currentUser.roleName==='admin'||(i.from&&currentUser.id===i.from.id)">删除</a>
+              <a style="padding-right:10px;color:green;" @click="handleDealWithMessage(i,getApi.APPROVE)" v-if="currentUser.roleName==='admin'&&i.isApproved===0">展示</a>
+              <a style="padding-right:10px;color:#B23AEE;" @click="handleDealWithMessage(i,getApi.DISAPPROVE)" v-if="currentUser.roleName==='admin'&&i.isApproved===1">隐藏</a>
+              <a style="padding-right:10px;color:orange;" @click="handleDealWithMessage(i,getApi.TOP)" v-if="currentUser.roleName==='admin'&&i.isTop===0">置顶</a>
+              <a style="color:#A0522D;" @click="handleDealWithMessage(i,getApi.UNTOP)" v-if="currentUser.roleName==='admin'&&i.isTop===1">取置</a>
             </template>
-            <span slot="datetime">{{item.createDate|dateFormat("YYYY-MM-DD")}}</span>
-            <a slot="author">{{item.from&&item.from.nickName}}</a>
             <span slot="author">
-              {{item.from ? item.from.roleName === "admin" ? "博主" : item.from.nickName : `${item.fromMail} [游客]`}}&nbsp;
-              <a v-if="item.blog" :href="item.blog" target="_blank" rel="noopener noreferrer"><a-icon type="paper-clip" /></a>
+              {{i.from ? i.from.roleName === "admin" ? "博主" : i.from.nickName : `${i.fromMail} [游客]`}}&nbsp;
+              <a v-if="i.blog" :href="i.blog" target="_blank" rel="noopener noreferrer" style="color:#1890ff"><a-icon type="paper-clip" /></a>
+              &nbsp;回复&nbsp;
+              {{i.to ? i.to.roleName === "admin" ? "博主" : i.to.nickName : `${i.toMail}[游客]`}}
             </span>
+            <span slot="datetime">{{i.createDate|dateFormat("YYYY-MM-DD")}}</span>
             <a-avatar
               slot="avatar"
               src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
               alt="Han Solo"
             />
             <span slot="content">
-              <span :style="{'text-decoration':currentUser.roleName==='admin'&&item.isApproved===0?'line-through':'none'}">{{currentUser.roleName==='admin'|| item.isApproved===1?item.message:'（该内容待审核）'}}</span>
-              <a-tag v-if="currentUser.roleName==='admin'&&item.isApproved===0" color="purple">待展示</a-tag>
+            <span :style="{'text-decoration':i.isApproved===0?'line-through':'none'}">{{currentUser.roleName==='admin'|| i.isApproved===1?i.message:'（该内容待审核）'}}</span>
+              <a-tag v-if="currentUser.roleName==='admin'&&i.isApproved===0" color="purple">待展示</a-tag>
             </span>
-            <a-comment v-for="i in item.children" :key="i.id">
-              <template slot="actions">
-                <a style="padding-right:10px;" @click="handleDealWithMessage(i)">回复</a>
-                <a style="padding-right:10px;color:red;" @click="handleDealWithMessage(i,getApi.DELETE)" v-if="currentUser.roleName==='admin'||(i.from&&currentUser.id===i.from.id)">删除</a>
-                <a style="padding-right:10px;color:green;" @click="handleDealWithMessage(i,getApi.APPROVE)" v-if="currentUser.roleName==='admin'&&i.isApproved===0">展示</a>
-                <a style="padding-right:10px;color:#B23AEE;" @click="handleDealWithMessage(i,getApi.DISAPPROVE)" v-if="currentUser.roleName==='admin'&&i.isApproved===1">隐藏</a>
-                <a style="padding-right:10px;color:orange;" @click="handleDealWithMessage(i,getApi.TOP)" v-if="currentUser.roleName==='admin'&&i.isTop===0">置顶</a>
-                <a style="color:#A0522D;" @click="handleDealWithMessage(i,getApi.UNTOP)" v-if="currentUser.roleName==='admin'&&i.isTop===1">取置</a>
-              </template>
-              <span slot="author">
-                {{i.from ? i.from.roleName === "admin" ? "博主" : i.from.nickName : `${i.fromMail} [游客]`}}&nbsp;
-                <a v-if="i.blog" :href="i.blog" target="_blank" rel="noopener noreferrer"><a-icon type="paper-clip" /></a>
-                &nbsp;回复&nbsp;
-                {{i.to ? i.to.roleName === "admin" ? "博主" : i.to.nickName : `${i.toMail}[游客]`}}
-              </span>
-              <span slot="datetime">{{i.createDate|dateFormat("YYYY-MM-DD")}}</span>
-              <a-avatar
-                slot="avatar"
-                src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                alt="Han Solo"
-              />
-              <span slot="content">
-              <span :style="{'text-decoration':i.isApproved===0?'line-through':'none'}">{{currentUser.roleName==='admin'|| i.isApproved===1?i.message:'（该内容待审核）'}}</span>
-                <a-tag v-if="currentUser.roleName==='admin'&&i.isApproved===0" color="purple">待展示</a-tag>
-              </span>
-            </a-comment>
           </a-comment>
-        </a-list-item>
-      </a-list>
-    </a-spin>
+        </a-comment>
+      </a-list-item>
+    </a-list>
     <a-drawer
       placement="bottom"
       :height="250"
@@ -85,6 +89,7 @@
         <a-button size="small" type="primary" @click="toggleWriteMessage">确定</a-button>
       </div>
     </a-drawer>
+    <a-icon type="up-circle" theme="twoTone" class="back-top" @click="backTop" v-show="showBackTopIconFlag" />
   </div>
 </template>
 
@@ -96,17 +101,19 @@
   export default {
     data () {
       return {
-        conditionQuery: {  category: {}, orderBy: {} },
+        conditionQuery: {  category: {}, orderBy: {},prettyFormat: true  },
         reviewBoxVisible:false,
         reviewedMan:{},
         messageParentId:0,
         messageContent:"",
         blog:"",
-        fromMail:""
+        fromMail:"",
+        showBackTopIconFlag:false
       }
     },
     mounted(){
-      this.request()
+      this.request();
+      window.addEventListener('scroll', this.toggleBackTopIcon);
     },
     destroyed(){
       this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
@@ -115,7 +122,6 @@
       request(paramsObj={},callback,hasExtraParamsFlag=true){
         const payload=hasExtraParamsFlag?{
           conditionQuery:this.conditionQuery,
-          prettyFormat: true ,
           netUrl:this.getApi.LIST.url,
           size:9999,
           ...paramsObj
@@ -189,13 +195,25 @@
           this.$error({title:'请输入正确的地址，以http开头！'});
           return;
         }
-        this.request({fromId, toId, netUrl,message,parentId});
+        this.request({fromId, toId, netUrl,message,parentId,fromMail,toMail,blog});
         this.toggleMessageBox();
       },
       messageContentChange(e){
         const {reviewedMan:{name}}=this;
         const {value}=e.target;
         if(!/^@.*：/.test(value)) this.messageContent=`@${name}：`;
+      },
+      backTop(){
+        const currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
+        if (currentScroll > 0) {
+          window.requestAnimationFrame(this.backTop);
+          window.scrollTo (0,currentScroll - (currentScroll/5));
+        }
+      },
+      toggleBackTopIcon(){
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        const clientHeight=document.documentElement.clientHeight||document.body.clientHeight;
+        this.showBackTopIconFlag=scrollTop>clientHeight/2;
       }
     },
     computed:{
@@ -215,6 +233,9 @@
     #message{
       background: white;
       padding: 10px;
+      .breadcrumb{
+        margin: 0px;
+      }
       .total{
         color:#1890FF;
         font-size: 25px;
@@ -222,6 +243,13 @@
       }
       .sync{
         color:#1890FF;
+      }
+      .back-top{
+        position: fixed;
+        bottom: 40px;
+        right:30px;
+        font-size: 30px;
+        cursor: pointer;
       }
     }
 </style>

@@ -83,7 +83,7 @@ export class AccountController {
       ctx.body = { message: "验证成功", flag: true };
     } else {
       ctx.status = 400;
-      ctx.body = { message: "验证失败", flag: false };
+      ctx.body = { message: "验证码错误", flag: false };
     }
   }
 

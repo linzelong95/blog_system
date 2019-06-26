@@ -42,17 +42,17 @@
           <a-menu-item key="article">
             <a-icon type="calendar" />文章管理
           </a-menu-item>
+          <a-menu-item key="reply">
+            <a-icon type="calendar" />回复管理
+          </a-menu-item>
           <a-menu-item key="msgManagement">
             <a-icon type="calendar" />留言管理
-          </a-menu-item>
-          <a-menu-item key="tag">
-            <a-icon type="calendar" />标签管理
           </a-menu-item>
           <a-menu-item key="category">
             <a-icon type="calendar" />分类管理
           </a-menu-item>
-          <a-menu-item key="reply">
-            <a-icon type="calendar" />回复管理
+          <a-menu-item key="tag">
+            <a-icon type="calendar" />标签管理
           </a-menu-item>
           <a-menu-item key="logout" v-show="loginStatus">
             <a-icon type="calendar" />退出账号
@@ -71,7 +71,6 @@
 
 <script>
   import {mapState} from 'vuex';
-  import store from 'store';
   import urls from '../../api/urls';
   const {AccountAPI,UserArticleAPI}=urls;
   export default {
@@ -88,12 +87,6 @@
       this.current=[pathname.substring(1)];
       this.backFlag=pathname!=="/homepage";
       this.searchIconFlag=["/read","timeline","/message"].every(i=>!pathname.includes(i));
-      const currentPageUrl=window.location.href;
-      const user=store.get("blog_account")||{};
-      const {currentUser}=user;
-      if(!this.loginStatus&&currentUser&&!currentPageUrl.includes("/login")){
-        this.$store.dispatch({type:"login/login",payload:{...user,autoLoginMark:true}});
-      }
     },
     methods:{
       toggleMenu(){

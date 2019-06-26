@@ -73,7 +73,7 @@
   export default {
     data () {
       return {
-        conditionQuery: {  category: {}, orderBy: {} },
+        conditionQuery: {  category: {}, orderBy: {},prettyFormat: true  },
         index:1,
         size:999,
         total:0,
@@ -97,7 +97,6 @@
           size,
           index,
           conditionQuery:this.conditionQuery,
-          prettyFormat: true ,
           netUrl:this.getApi.LIST.url,
           ...paramsObj
         }:paramsObj;

@@ -56,6 +56,7 @@
       <div class="more" v-if="list.length!== total && !spinningFlag">
         <a-button @click="loadMore">加载更多>></a-button>
       </div>
+      <a-icon type="up-circle" theme="twoTone" class="back-top" @click="backTop" v-show="showBackTopIconFlag" />
     </a-spin>
   </div>
 </template>
@@ -72,6 +73,7 @@
       return {
         baseImgUrl,
         conditionQuery: { title: '', category: {}, orderBy: {} },
+        showBackTopIconFlag:false
       }
     },
     components:{
@@ -80,6 +82,7 @@
     },
     mounted(){
       this.request({},null,true);
+      window.addEventListener('scroll', this.toggleBackTopIcon);
     },
     destroyed(){
       this.$store.commit("save",{spinningFlag:false,list:[],index:1,size:10,total:0,formItem:{}});
@@ -102,6 +105,18 @@
       readArticle(id){
         this.$router.push(`/read/${id}`);
       },
+      backTop(){
+        const currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
+        if (currentScroll > 0) {
+          window.requestAnimationFrame(this.backTop);
+          window.scrollTo (0,currentScroll - (currentScroll/5));
+        }
+      },
+      toggleBackTopIcon(){
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        const clientHeight=document.documentElement.clientHeight||document.body.clientHeight;
+        this.showBackTopIconFlag=scrollTop>clientHeight/2;
+      }
     },
     computed:{
       ...mapState(['list','total','index','spinningFlag']),
@@ -159,6 +174,13 @@
     .more{
       margin-top:10px;
       text-align: center;
+    }
+    .back-top{
+      position: fixed;
+      bottom: 40px;
+      right:30px;
+      font-size: 30px;
+      cursor: pointer;
     }
   }
 </style>

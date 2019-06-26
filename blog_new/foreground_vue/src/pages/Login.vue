@@ -106,7 +106,7 @@
         captcha:"",
       }
     },
-    created(){
+    mounted(){
       const user = store.get('blog_account') || {};
       const { account, password, lastTime = 0, autoLogin = false } = user;
       this.autoLogin=autoLogin;
@@ -117,11 +117,9 @@
         return;
       }
       this.$store.dispatch({type:"login/login",payload:{account, password, autoLogin ,autoLoginMark: true}});
-    },
-    mounted(){
-      this.$nextTick(()=>{
-        this.form.validateFields();
-      });
+      // this.$nextTick(()=>{
+      //   this.form.validateFields();
+      // });
     },
     methods:{
       changeAutoLogin(e){

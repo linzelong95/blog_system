@@ -10,8 +10,8 @@ export class UserMessageController {
 
   @post("/list")
   async list(ctx): Promise<void> {
-    const { conditionQuery = {}, index = 1, size = 10, prettyFormat } = ctx.request.body;
-    const { message = "", orderBy = {}, isTop, isApproved } = conditionQuery;
+    const { conditionQuery = {}, index = 1, size = 10 } = ctx.request.body;
+    const { message = "", orderBy = {}, isTop, isApproved, prettyFormat } = conditionQuery;
     const [list, total] = await this.userMessageService.list({ message, orderBy, index, size, isTop, isApproved });
     let newList = [...list];
     if (prettyFormat) {

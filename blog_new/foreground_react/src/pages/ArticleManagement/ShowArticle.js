@@ -17,7 +17,7 @@ class ShowArticle extends React.Component {
     reviewBoxVisible: false,
     clientHeight: document.documentElement.clientHeight,
     replyObj: { total: 0, list: [] },
-    conditionQuery: {},
+    conditionQuery: { prettyFormat: true },
   };
 
   componentDidMount = () => {
@@ -33,7 +33,7 @@ class ShowArticle extends React.Component {
     const { request, item: { id } } = this.props;
     const { conditionQuery: con } = this.state;
     const conditionQuery = { ...con, articleIdsArr: [id] };
-    request({ netUrl: LIST.url, conditionQuery, prettyFormat: true, size: Number.POSITIVE_INFINITY }, replyObj =>
+    request({ netUrl: LIST.url, conditionQuery, size: 99999 }, replyObj =>
       this.setState({ replyObj, conditionQuery })
     );
   };

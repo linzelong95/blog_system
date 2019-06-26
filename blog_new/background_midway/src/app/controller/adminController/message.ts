@@ -9,8 +9,8 @@ export class AdminMessageController {
 
   @post("/list")
   async list(ctx): Promise<void> {
-    const { conditionQuery = {}, index = 1, size = 10, prettyFormat } = ctx.request.body;
-    const { message = "", orderBy = {}, isTop, isApproved, isRoot } = conditionQuery;
+    const { conditionQuery = {}, index = 1, size = 10 } = ctx.request.body;
+    const { message = "", orderBy = {}, isTop, isApproved, isRoot, prettyFormat } = conditionQuery;
     const [list, total] = await this.adminMessageService.list({ message, orderBy, index, size, isTop, isApproved, isRoot });
     let newList = [...list];
     if (prettyFormat) {

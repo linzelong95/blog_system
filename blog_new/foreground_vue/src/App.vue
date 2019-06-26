@@ -19,11 +19,12 @@
 import Header from "./components/Header/Header.vue";
 import { isMobile } from "./utils/utils.js";
 import { pcUrl } from "./utils/defaultSetting.js";
+import store from 'store';
 export default {
   name: "app",
   data() {
     return {
-      showHeaderFlag: true
+      showHeaderFlag: true,
     };
   },
   created() {
@@ -39,6 +40,15 @@ export default {
   mounted() {
     if (!isMobile()) window.location.href = pcUrl;
     this.showHeaderFlag = !["/login", "/register"].includes(this.$route.path);
+    const currentPageUrl=window.location.href;
+    const user=store.get("blog_account")||{};
+    const {currentUser}=user;
+    if(!this.loginStatus&&currentUser&&!currentPageUrl.includes("/login")){
+      this.$store.dispatch({
+        type:"login/login",
+        payload:{...user,autoLoginMark:true},
+      });
+    }
   },
   methods: {
     executeSonSearchInputFocus() {

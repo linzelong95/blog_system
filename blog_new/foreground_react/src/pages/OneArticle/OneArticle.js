@@ -34,13 +34,14 @@ class HomePage extends React.Component {
     reviewBoxVisible: false,
     reviewDrawerVisible: false,
     replyObj: { total: 0, list: [] },
-    conditionQuery: {},
+    conditionQuery: { prettyFormat: true },
     item: {},
   };
 
   componentDidMount = () => {
     const { match: { params: { id } } } = this.props;
     const articleId = id * 1;
+    this.setState(oldState => ({ conditionQuery: { ...oldState.conditionQuery, articleIdsArr: [articleId] } }));
     this.request({ conditionQuery: { articleId } }, res => {
       this.request({ netUrl: UserArticleAPI.CONTENT.url, articleId }, response => {
         this.setState({ item: { ...res.list[0], content: response.list[0].content } });
@@ -48,26 +49,23 @@ class HomePage extends React.Component {
     });
   }
 
-  componentWillUnmount = () =>{
+  componentWillUnmount = () => {
     this.props.dispatch({ type: 'articleManagement/save', payload: { list: [] } });
-  } 
+  }
 
   request = (params, callback) => {
-    const { conditionQuery: con } = this.state;
-    const conditionQuery = { ...con };
-    delete conditionQuery.filteredSortArr;
+    const { conditionQuery } = this.state;
     const payload = { netUrl: UserArticleAPI.LIST.url, conditionQuery, ...params };
     this.props.dispatch({ type: 'articleManagement/handleArticles', payload, callback });
   };
 
   getReplyList = () => {
-    const { match: { params: { id } }, currentUser: { roleName } } = this.props;
-    const { conditionQuery: con } = this.state;
-    const conditionQuery = { ...con, articleIdsArr: [id] };
+    const { currentUser: { roleName } } = this.props;
+    const { conditionQuery } = this.state;
     const netUrl = roleName === "admin" ? AdminReplyAPI.LIST.url : UserReplyAPI.LIST.url;
-    this.request({ netUrl, conditionQuery, prettyFormat: true },
-      replyObj => this.setState({ replyObj, conditionQuery })
-    );
+    this.request({ netUrl, conditionQuery }, replyObj => {
+      this.setState({ replyObj });
+    });
   };
 
   replySort = e => {
@@ -118,7 +116,7 @@ class HomePage extends React.Component {
       return;
     }
     const parentId = pid > 0 ? pid : id;
-    this.setState({ reviewBoxVisible: true }, () =>{
+    this.setState({ reviewBoxVisible: true }, () => {
       // console.log(document.getElementsByClassName("ant-drawer-wrapper-body")[0].scrollTop)
       // console.log(document.getElementsByClassName("ant-drawer-wrapper-body")[0].style.overflow)
       form.setFieldsValue({ parentId, to: { label: nickName, key: toId } });
@@ -172,13 +170,13 @@ class HomePage extends React.Component {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              color:"white",
-              cursor:"pointer",
-              borderRadius:"5px 0px 0px 5px"
+              color: "white",
+              cursor: "pointer",
+              borderRadius: "5px 0px 0px 5px"
             }}
           >
             <Icon type="form" style={{ fontWeight: 'bold', fontSize: '20px' }} />
-            <b style={{fontSize:18,marginLeft:5}}>评论</b>
+            <b style={{ fontSize: 18, marginLeft: 5 }}>评论</b>
           </div>
           <Row type="flex" justify={reviewDrawerVisible ? 'start' : 'center'}>
             <Col span={reviewDrawerVisible ? 16 : 22}>
@@ -256,11 +254,11 @@ class HomePage extends React.Component {
                   justifyContent: "center",
                   alignItems: "center",
                   color: 'white',
-                  cursor:"pointer",
-                  borderRadius:"5px 0px 0px 5px"
+                  cursor: "pointer",
+                  borderRadius: "5px 0px 0px 5px"
                 }}
               >
-                <Icon type="close" style={{fontWeight: 'bold',fontSize: '20px'}} />
+                <Icon type="close" style={{ fontWeight: 'bold', fontSize: '20px' }} />
               </div>
             )}
             <div style={{ marginBottom: '30px' }}>

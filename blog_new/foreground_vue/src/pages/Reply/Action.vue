@@ -44,7 +44,7 @@
         <a-checkbox-group
           :options="[
             { label: '置顶', value: 'isTop' },
-            { label: '显示', value: 'isApproved' },
+            { label: '待审', value: 'isApproved' },
             { label: '父', value: 'isParent' },
             { label: '子', value: 'isSon' },
           ]"
@@ -213,7 +213,7 @@
         let filterflag = false;
         if (method === 'exit') {
           const { conditionQuery: { filteredSortArr = [], tagIdsArr = [],articleArr = [], commonFilterArr = [] } } = this;
-          filterflag = filteredSortArr.length > 0 || tagIdsArr.length||articleArr.length || commonFilterArr.length;
+          filterflag = filteredSortArr.length > 0 || tagIdsArr.length>0||articleArr.length>0 || commonFilterArr.length>0;
           this.temporaryCondition={...this.temporaryCondition,filteredSortArr, tagIdsArr, articleArr, commonFilterArr, filterflag};
           return;
         }
@@ -229,7 +229,7 @@
           }
         });
         const articleIdsArr = articleArr.map(i => i.key);
-        const isApproved = commonFilterArr.includes('isApproved') ? 1 : undefined;
+        const isApproved = commonFilterArr.includes('isApproved') ? 0 : undefined;
         const isTop = commonFilterArr.includes('isTop') ? 1 : undefined;
         const isRoot = (() => {
           if (commonFilterArr.includes('isParent') && !commonFilterArr.includes('isSon')) return 1;
