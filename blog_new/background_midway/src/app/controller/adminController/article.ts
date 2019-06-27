@@ -9,6 +9,7 @@ export class AdminArticleController {
 
   @post("/list")
   async list(ctx): Promise<void> {
+    console.log(111111,ctx.cookies.get("EGG_SESS",{encrypt:false,signed:false}))
     const user = ctx.state.user;
     const { conditionQuery: { title = "", orderBy = {}, category = {}, tagIdsArr = [], articleId }, index = 1, size = 10 } = ctx.request.body;
     const [list, total] = await this.adminArticleService.list({ title, orderBy, index, size, category, tagIdsArr, user, articleId });

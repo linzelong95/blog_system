@@ -1,8 +1,20 @@
+// import {rsaPublicKey,rsaPrivateKey} from '../utils/utils';
+
 export = (appInfo: any) => {
   const config: any = exports = {};
 
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_1552632441524_9669';
+  // config.keys = `${rsaPublicKey},${rsaPrivateKey}`;
+
+  // config.session = {
+  //   key: 'EGG_SESS',
+  //   maxAge: 24 * 3600 * 1000, // 1 天
+  //   httpOnly: true,
+  //   // encrypt: true,
+  //   encrypt: false,
+  //   signed:false
+  // };
 
   // add your config here
   config.middleware = ["passport"];
@@ -12,23 +24,23 @@ export = (appInfo: any) => {
     csrf: {
       enable: false,
     },
-  }
+  };
 
   config.cors = {
     credentials: true
-  }
+  };
 
   config.multipart = {
     mode: "stream",
     fileSize: "10mb",
     whitelist: [".png", ".jpg", ".jpeg", ".gif"]
-  }
+  };
 
   config.cluster = {
     listen: {
       port: 7001
     }
-  }
+  };
 
   return config;
 };

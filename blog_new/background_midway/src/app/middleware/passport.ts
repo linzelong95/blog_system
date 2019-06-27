@@ -74,7 +74,7 @@ module.exports = (options, app) => {
         return;
       } else if (ctx.state.user.roleName !== "admin") {
         ctx.status = 401;
-        ctx.body = { message: '无权限操作！', needRedirect: true };
+        ctx.body = { message: '无权限操作！', needRedirect: false };
         return;
       }
     }

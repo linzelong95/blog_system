@@ -41,9 +41,7 @@ const store = new Vuex.Store({
       const { netUrl, index = pageIndex, size = pageSize, conditionQuery } = payload;
       const position = netUrl.lastIndexOf("/") + 1;
       let action = netUrl.substring(position);
-      console.log(222222)
       let response = await $request(netUrl, { ...payload, size, index, t: Date.now() });
-      
       if (!response) {
         commit("toggleSpinning", false);
         return;

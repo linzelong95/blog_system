@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { stringify } from 'qs';
 import $store from '../vuex';
+import $router from '../router';
 import { Modal } from 'ant-design-vue';
 const $error = Modal.error;
 
@@ -16,6 +17,12 @@ export default function request(url, data = {}, method = "post") {
       // console.log(4444,e.config)
       const { status, data: { message, needRedirect } } = e.response;
       $error({ title: message });
-      if (status === 401 && needRedirect) $store.dispatch({ type: "login/logout" });
+      if (status === 401 ){
+        if(needRedirect) {
+          $store.dispatch({ type: "login/logout" });
+        }else{
+          $router.push("/homepage");
+        }
+      } 
     });
 }

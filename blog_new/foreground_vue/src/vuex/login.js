@@ -32,7 +32,6 @@ const login = {
       const response = await $request(AccountAPI.LOGIN.url, { account, password: rsa(md5Pwd, publicKey.item) });
       if (!response) return;
       store.set('blog_account', { ...accountObj, currentUser: response });
-      console.log(1111111)
       commit("save", { loginStatus: true, currentUser: response });
       // if(callback) callback();
       const currentPageUrl = window.location.href;
