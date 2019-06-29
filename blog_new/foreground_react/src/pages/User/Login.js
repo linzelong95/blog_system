@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import Link from 'umi/link';
-import { Checkbox, Alert,Icon } from 'antd';
+import { Checkbox, Alert, Icon } from 'antd';
 import Login from '@/components/Login';
 import store from 'store';
 import styles from './Login.less';
@@ -19,19 +19,16 @@ class LoginPage extends Component {
   };
 
   componentDidMount() {
-    const admin = store.get('account') || {};
-    const { account, password, lastTime = 0, autoLogin = false } = admin;
+    const { autoLogin = false, autoLoginMark } = store.get('account') || {};
     this.setState({ autoLogin });
-    const d7 = 7 * 24 * 60 * 60 * 1000;
-    const validTimeFlag = Date.now() - lastTime < d7;
-    if (!autoLogin || !validTimeFlag || !account || !password) {
+    if (!autoLogin||!autoLoginMark) {
       this.onGetCaptcha();
       return;
     }
     this.props.dispatch({
       type: 'login/login',
-      payload: { account, password, autoLogin },
-      autoLoginMark: true
+      payload: { autoLogin },
+      autoLoginMark:autoLoginMark!==false
     });
   }
 

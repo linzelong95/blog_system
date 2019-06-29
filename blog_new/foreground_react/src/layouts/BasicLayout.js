@@ -103,15 +103,12 @@ class BasicLayout extends React.PureComponent {
 
   componentDidMount() {
     const { dispatch, loginStatus } = this.props;
-    const admin = store.get("account") || {};
-    const { language = lang, currentUser } = admin;
+    const { language = lang, autoLogin } = store.get("account") || {};
     dispatch({ type: 'common/saveLang', payload: { language } });
-    const currentPageUrl = window.location.href;
-    if (!loginStatus && currentUser && !currentPageUrl.includes("/user/login")) {
-      // 当重置语言时，state会重置，故需要重新获取
-      dispatch({ type: 'login/login', payload: admin, autoLoginMark: true });
+    if (!loginStatus && !["/user/login"].includes(window.location.pathname)) {
+      dispatch({ type: 'login/login', payload: { autoLogin }, autoLoginMark: true });
     }
-    if (!loginStatus && !currentUser) {
+    if (!loginStatus && !autoLogin) {
       setAuthority('user');
       reloadAuthorized();
     }

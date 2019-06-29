@@ -10,14 +10,13 @@ const LocalStrategy = passportLocal.Strategy;
 
 module.exports = (options, app) => {
 
-  // 序列化ctx.login()触发
-  passport.serializeUser((user, done) => {
+
+  passport.serializeUser((user, done) => {// 序列化ctx.login()触发
     delete user.password;
     done(null, user)
   });
 
-  // 反序列化（请求时，session中存在"passport":{"user":"1"}触发）
-  passport.deserializeUser(async (user, done) => {
+  passport.deserializeUser(async (user, done) => {// 反序列化（请求时，session中存在"passport":{"user":"1"}触发）
     done(null, user)// 在其他路由使用ctx.state.user可以取得该信息
   });
 
@@ -43,8 +42,7 @@ module.exports = (options, app) => {
 
     // 私钥解密
     const rsaPwd = Buffer.from(password, "base64");
-    // 旧版本
-    // const decrypted = crypto.privateDecrypt({ key: privateKey, padding: crypto.constants.RSA_PKCS1_PADDING }, rsaPwd);
+    // const decrypted = crypto.privateDecrypt({ key: privateKey, padding: crypto.constants.RSA_PKCS1_PADDING }, rsaPwd);// 旧版本
     const decrypted = crypto.privateDecrypt({ key: rsaPrivateKey, padding: constants.RSA_PKCS1_PADDING }, rsaPwd);
     const md5Pwd = decrypted.toString("utf8");// 解密完成
     const user = await getRepository(User)
@@ -59,7 +57,10 @@ module.exports = (options, app) => {
   app.use(passport.initialize());
   app.use(passport.session());
   app.passport = passport;
-  app.use(async (ctx, next) => {
+  return async (ctx: any, next: any) => {
+
+
+
     const adminUrls = ['/admin/'];
     const userUrls = ['/user/comment/delete', '/user/comment/insert'];
     if (userUrls.some(i => ctx.originalUrl.includes(i)) && !ctx.isAuthenticated()) {
@@ -78,9 +79,6 @@ module.exports = (options, app) => {
         return;
       }
     }
-    await next();
-  });
-  return async (ctx: any, next: any) => {
     await next();
   }
 }

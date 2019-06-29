@@ -33,6 +33,7 @@ const checkStatus = response => {
   // if ((response.status >= 200 && response.status < 300) || response.status === 400) {
   //   return response;
   // }
+  console.log(response)
   response.json().then(data => {
     Modal.error({ title: data.message || codeMessage[response.status] });
   })

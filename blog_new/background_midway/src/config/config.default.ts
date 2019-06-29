@@ -1,20 +1,21 @@
-// import {rsaPublicKey,rsaPrivateKey} from '../utils/utils';
+import {rsaPublicKey,rsaPrivateKey} from '../utils/utils';
 
 export = (appInfo: any) => {
   const config: any = exports = {};
 
   // use for cookie sign key, should change to your own and keep security
-  config.keys = appInfo.name + '_1552632441524_9669';
-  // config.keys = `${rsaPublicKey},${rsaPrivateKey}`;
+  // config.keys = appInfo.name + '_1552632441524_9669';
+  config.keys = `${rsaPublicKey},${rsaPrivateKey}`;
 
-  // config.session = {
-  //   key: 'EGG_SESS',
-  //   maxAge: 24 * 3600 * 1000, // 1 天
-  //   httpOnly: true,
-  //   // encrypt: true,
-  //   encrypt: false,
-  //   signed:false
-  // };
+  config.session = {
+    key: 'EGG_SESS',
+    maxAge: 24 * 3600 * 1000, // 1 天
+    httpOnly: true,
+    encrypt: true,
+    signed:true,
+    overwrite:true,
+    renew: true,
+  };
 
   // add your config here
   config.middleware = ["passport"];
