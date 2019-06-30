@@ -19,7 +19,7 @@ class LoginPage extends Component {
   };
 
   componentDidMount() {
-    const { autoLogin = false, autoLoginMark } = store.get('account') || {};
+    const { autoLogin = false, autoLoginMark } = store.get('blog_account') || {};
     this.setState({ autoLogin });
     if (!autoLogin||!autoLoginMark) {
       this.onGetCaptcha();

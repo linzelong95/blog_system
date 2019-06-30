@@ -8,8 +8,8 @@ import styles from './index.less';
 
 export default class SelectLang extends PureComponent {
   changLang = ({ key }) => {
-    const account = store.get("account");
-    store.set('account', { ...account,language:key });
+    const account = store.get("blog_account");
+    store.set('blog_account', { ...account,language:key });
     setLocale(key);
   };
 

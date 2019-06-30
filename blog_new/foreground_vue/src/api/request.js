@@ -6,7 +6,7 @@ import { Modal } from 'ant-design-vue';
 const $error = Modal.error;
 
 export default function request(url, data = {}, method = "post") {
-  let paramObj = { method, data, url };
+  let paramObj = { method, data: { ...data, t: Date.now() }, url };
   if (method === "get") paramObj = { method, url: `${url}?${stringify(data)}` };
   return axios(paramObj)
     .then(res => res.data)
@@ -17,12 +17,12 @@ export default function request(url, data = {}, method = "post") {
       // console.log(4444,e.config)
       const { status, data: { message, needRedirect } } = e.response;
       $error({ title: message });
-      if (status === 401 ){
-        if(needRedirect) {
+      if (status === 401) {
+        if (needRedirect) {
           $store.dispatch({ type: "login/logout" });
-        }else{
+        } else {
           $router.push("/homepage");
         }
-      } 
+      }
     });
 }

@@ -103,7 +103,7 @@ class BasicLayout extends React.PureComponent {
 
   componentDidMount() {
     const { dispatch, loginStatus } = this.props;
-    const { language = lang, autoLogin } = store.get("account") || {};
+    const { language = lang, autoLogin } = store.get("blog_account") || {};
     dispatch({ type: 'common/saveLang', payload: { language } });
     if (!loginStatus && !["/user/login"].includes(window.location.pathname)) {
       dispatch({ type: 'login/login', payload: { autoLogin }, autoLoginMark: true });

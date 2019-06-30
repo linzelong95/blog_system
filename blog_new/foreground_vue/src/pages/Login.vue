@@ -107,19 +107,16 @@
       }
     },
     mounted(){
-      const user = store.get('blog_account') || {};
-      const { account, password, lastTime = 0, autoLogin = false } = user;
+      const { autoLogin = false, autoLoginMark } = store.get('blog_account') || {};
       this.autoLogin=autoLogin;
-      const d7 = 7 * 24 * 60 * 60 * 1000;
-      const validTimeFlag = Date.now() - lastTime < d7;
-      if (!autoLogin || !validTimeFlag || !account || !password) {
+      if (!autoLogin || !autoLoginMark) {
         this.onGetCaptcha();
         return;
       }
-      this.$store.dispatch({type:"login/login",payload:{account, password, autoLogin ,autoLoginMark: true}});
-      // this.$nextTick(()=>{
-      //   this.form.validateFields();
-      // });
+      this.$store.dispatch({
+        type:"login/login",
+        payload:{autoLogin ,autoLoginMark: autoLoginMark!==false}
+      });
     },
     methods:{
       changeAutoLogin(e){

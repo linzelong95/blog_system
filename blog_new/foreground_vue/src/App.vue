@@ -40,13 +40,11 @@ export default {
   mounted() {
     if (!isMobile()) window.location.href = pcUrl;
     this.showHeaderFlag = !["/login", "/register"].includes(this.$route.path);
-    const currentPageUrl=window.location.href;
-    const user=store.get("blog_account")||{};
-    const {currentUser}=user;
-    if(!this.loginStatus&&currentUser&&!currentPageUrl.includes("/login")){
+    const { autoLogin = false }=store.get("blog_account")||{};
+    if (!this.loginStatus && !["/login"].includes(window.location.pathname)) {
       this.$store.dispatch({
         type:"login/login",
-        payload:{...user,autoLoginMark:true},
+        payload:{...autoLogin,autoLoginMark:true},
       });
     }
   },
