@@ -44,7 +44,7 @@ export default {
     if (!this.loginStatus && !["/login"].includes(window.location.pathname)) {
       this.$store.dispatch({
         type:"login/login",
-        payload:{...autoLogin,autoLoginMark:true},
+        payload:{autoLogin,autoLoginMark:true},
       });
     }
   },

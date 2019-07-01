@@ -132,13 +132,8 @@
         successFlag:false
       }
     },
-    created(){
-      this.onGetCaptcha();
-    },
     mounted(){
-      this.$nextTick(()=>{
-        this.form.validateFields();
-      });
+      this.onGetCaptcha();
     },
     methods:{
       userNameError () {

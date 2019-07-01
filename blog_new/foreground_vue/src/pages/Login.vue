@@ -108,6 +108,7 @@
     },
     mounted(){
       const { autoLogin = false, autoLoginMark } = store.get('blog_account') || {};
+      console.log(1111,autoLogin)
       this.autoLogin=autoLogin;
       if (!autoLogin || !autoLoginMark) {
         this.onGetCaptcha();
@@ -139,8 +140,7 @@
         this.form.validateFields((err,values)=>{
           if(err) return;
           this.$store.dispatch({type:"login/login",payload:{...values,autoLogin:this.autoLogin}});
-
-        })
+        });
       },
       onGetCaptcha(){
         this.$request(AccountAPI.GET_WEBPAGE_CAPTCHA.url,{t:Date.now()})
